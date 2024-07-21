@@ -4,6 +4,7 @@ import { defaultColors } from "../../utils";
 import api from "../../utils/api";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
@@ -13,13 +14,11 @@ export const AuthContext = createContext({})
 export default function AuthProvider({children}){
     const navigation = useNavigation()
     const [ isLoadingCheckAuth, setLoadingCheckAuth] = useState(true)
-    const [ usuario, setUsuario] = useState(null)
-    const isAuthenticated = !!usuario
 
     const handleCheckAuth = async () => {
         setLoadingCheckAuth(true)
         try{
-            await api.get('usuarios/me')
+            const response = await api.get('usuarios/me')
             // navigation.navigate('tabs')
             navigation.dispatch(
                 CommonActions.reset({
@@ -29,6 +28,8 @@ export default function AuthProvider({children}){
                 ],
                 })
             );
+
+            setUsuario(response.data)
         }catch(error){
         } finally {
             setLoadingCheckAuth(false)
@@ -39,11 +40,23 @@ export default function AuthProvider({children}){
         handleCheckAuth()
     },[])
 
+    const handleLogout = async () => {
+        await AsyncStorage.removeItem('token')
+        navigation.dispatch(
+            CommonActions.reset({
+            index: 1,
+            routes: [
+                { name: 'login' },
+            ],
+            })
+        );
+    }
+
     return(
         <AuthContext.Provider 
             value={{
                 handleCheckAuth,
-                isAuthenticated,
+                handleLogout,
                 isLoadingCheckAuth
             }}
         >

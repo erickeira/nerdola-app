@@ -75,7 +75,7 @@ const TabNavigation = ({ navigation }) =>{
               <Image
                 source={IconPerfilOutlined}
               />
-            )
+            ),
           }}  
         />
       </Tab.Navigator>  

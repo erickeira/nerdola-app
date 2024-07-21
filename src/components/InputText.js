@@ -39,7 +39,7 @@ const InputText = ({
   useEffect(() => {
     const timeOut = setTimeout(() => {
       handleStopType()
-    }, 500);
+    }, 1000);
     return () => clearTimeout(timeOut);
   }, [text]);
 
@@ -109,7 +109,7 @@ const InputText = ({
                 value={text.semMascara}
                 placeholderTextColor='#666'
                 style={{...styles.campoTexto,...style, ...{
-                    height
+                    height,
                 }}}
                 secureTextEntry={mostrarSenha}
                 // autoCorrect={false}
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
         marginBottom: 5
     },
     campoTexto: {
-
+      width: '100%'
     },
     errorText: {
       position: 'absolute',

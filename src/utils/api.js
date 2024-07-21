@@ -28,16 +28,21 @@ api?.interceptors?.response.use(function (response) {
 }, async function (error) {
     let data  = error?.response?.data
     let status = error?.response?.status
-    if(status == 401){
-        navigationRef?.current.dispatch(
-            CommonActions.reset({
-            index: 1,
-            routes: [
-                { name: 'login' },
-            ],
-            })
-        );
-        await AsyncStorage.removeItem('token')
+    if (status == 401) {
+        const currentRoute = navigationRef?.current?.getCurrentRoute();
+        const currentRouteName = currentRoute?.name;
+    
+        if (currentRouteName !== 'login' && currentRouteName !== 'cadastro') {
+            navigationRef?.current.dispatch(
+                CommonActions.reset({
+                    index: 1,
+                    routes: [
+                        { name: 'login' },
+                    ],
+                })
+            );
+            await AsyncStorage.removeItem('token');
+        }
     }
     if(status != 401){
         Snackbar.show({

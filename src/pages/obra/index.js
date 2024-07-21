@@ -84,6 +84,7 @@ export default function ObraPage({ route }){
         }
     }
 
+   
     const handleUpdateLeitura = async (status) => {
         if(isLoadingLeitura) return
         setIsLoadingLeitura(true)
@@ -98,8 +99,26 @@ export default function ObraPage({ route }){
         }
     }
 
-    const handlePressCapitulo = () => {
-
+    const [isLoadingCapitulo, setIsLoadingCapitulo] = useState(null)
+    const handlePressCapitulo = async (capitulo, marcarLido = true) => {
+        if(isLoadingCapitulo) return
+        setIsLoadingCapitulo(capitulo)
+        try{
+            let response = null
+            if(marcarLido){
+                response = await api.post(`usuarios-capitulos-lidos`, {
+                    leitura: leitura.id,
+                    capitulo
+                })
+            }else{
+                response = await api.delete(`usuarios-capitulos-lidos/${leitura.id}/${capitulo}`)
+            }
+            console.log(response)
+            getObra()
+        }catch(error){
+        } finally{
+            setIsLoadingCapitulo(null)
+        }
     }
 
  
@@ -114,7 +133,7 @@ export default function ObraPage({ route }){
         <SafeAreaView style={styles.view}>
           <FlatList
             extraData={leitura}
-            data={obra?.capitulos} 
+            data={obra?.capitulos?.reverse()} 
             ref={ref => setCapitulosRef(ref)}
             ListHeaderComponent={(
               <View >
@@ -194,6 +213,7 @@ export default function ObraPage({ route }){
               return (
                 <CardCapitulo
                     onPress={handlePressCapitulo}
+                    isLoading={isLoadingCapitulo}
                     capitulo={item}
                     leitura={leitura.status.id}
                 />

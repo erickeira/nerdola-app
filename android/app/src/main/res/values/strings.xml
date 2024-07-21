@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">nerdola</string>
+    <string name="app_name">Nerdola</string>
     <string moduleConfig="true" name="CodePushDeploymentKey">wfwNqT27UWF7sblj2w_2eq1poTI2dFNTXpBgk</string>
 </resources>

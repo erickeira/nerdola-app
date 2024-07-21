@@ -76,16 +76,17 @@ export default function HomePage(){
         
         try{
             const response = await api.get(`obras`, {
-                params: filtros
+                params: {
+                    ...filtros,
+                    temCapitulo :true
+                }
             })
-            if(response.data && response.data?.length > 0 || filtros.string.length > 0){
+            if(response.data && response.data?.length > 0 || filtros.string.length > 0 || filtros.tags.length > 0){
               setObras(response.data)
               setPagina(pag)
             }else{
               setEnReached(true)
             }
-            setCarregandoMais(false)
-            setCarregando(false)
         }catch(error){
 
         } finally{
@@ -101,7 +102,7 @@ export default function HomePage(){
                     tageds: true
                 }
             })
-            setTags(tags)
+            setTags(response.data)
         }catch(error){
 
         } 
@@ -176,7 +177,7 @@ export default function HomePage(){
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            { filtros.string.length > 0 ?  'Nenhum obra publicada!' : 'Nenhum obra encontrada!' }
+                            { filtros.string.length > 0 || filtros.tags.length > 0 ?  'Nenhum obra encontrada!' : 'Nenhum obra publicada!'  }
                         </Text>
                     </View>
                 }

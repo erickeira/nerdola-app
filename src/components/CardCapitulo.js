@@ -1,4 +1,4 @@
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { defaultColors, imageUrl, proporcaoCard } from "../utils";
 import { useEffect, useState } from "react";
 import { Icon, ProgressBar, Checkbox  } from "react-native-paper";
@@ -10,7 +10,8 @@ export default function CardCapitulo({
     obra = '',
     capitulo,
     onPress,
-    leitura
+    leitura,
+    isLoading
 }){
     const{
         id,
@@ -29,14 +30,14 @@ export default function CardCapitulo({
 
     useEffect(() => {
         let newLido = lido || leitura == 3
-       if(newLido != capituloLido) setCapituloLido(lido || leitura == 3)
+        if(newLido != capituloLido) setCapituloLido(lido || leitura == 3)
     },[lido, leitura])
 
     return(
         <TouchableOpacity 
             onPress={() => {
                 if(leitura == 2){
-                    onPress()
+                    if(onPress) onPress(id, !lido)
                     setCapituloLido(!capituloLido)
                 }else{
                     Snackbar.show({
@@ -82,6 +83,11 @@ export default function CardCapitulo({
                         Número: {numero}
                     </Text>
                 </View>
+                {
+                    !!isLoading && isLoading == id && (
+                        <ActivityIndicator color={defaultColors.activeColor}/>
+                    )
+                }
                 {
                     [2,3].includes(leitura)  && (
                         <Checkbox 
