@@ -101,7 +101,6 @@ export default function ObraPage({ route }){
 
     const [isLoadingCapitulo, setIsLoadingCapitulo] = useState(null)
     const handlePressCapitulo = async (capitulo, marcarLido = true) => {
-        if(isLoadingCapitulo) return
         setIsLoadingCapitulo(capitulo)
         try{
             let response = null

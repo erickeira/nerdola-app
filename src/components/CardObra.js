@@ -99,7 +99,7 @@ export default function CardObra({
                                 }}
                             />
                             <Text>
-                                {progresso * 100} %
+                                {(progresso * 100).toFixed(2)} %
                             </Text>
                         </>
                         

@@ -91,8 +91,8 @@ export default TabNavigation;
 const styles = StyleSheet.create({
   icon:{
       objectFit: 'contain',
-      width: 30,
-      height: 30
+      width: 25,
+      height: 25
   },
 });
 
