@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "600794534919",
+    "project_id": "nerdola-41ff9",
+    "storage_bucket": "nerdola-41ff9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600794534919:android:472cc070e7ae41592106a2",
+        "android_client_info": {
+          "package_name": "com.nerdola"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_JuCb7b1hB-X3EAtBxPvms2xEPiWJCPA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
