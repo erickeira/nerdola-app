@@ -132,7 +132,7 @@ export default function ObraPage({ route }){
         <SafeAreaView style={styles.view}>
           <FlatList
             extraData={leitura}
-            data={obra?.capitulos?.reverse()} 
+            data={obra?.capitulos} 
             ref={ref => setCapitulosRef(ref)}
             ListHeaderComponent={(
               <View >

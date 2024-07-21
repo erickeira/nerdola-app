@@ -26,6 +26,7 @@ export default function CardObra({
     const imagePath = `${imageUrl}obras/${id}/${imagem}`;
     const [imageError, setImageError] = useState(false)
 
+    console.log(imagePath)
     const leituraColors = {
         1: '#59A0F1',
         2: '#DBD54C',
@@ -100,6 +101,24 @@ export default function CardObra({
                             />
                             <Text>
                                 {(progresso * 100).toFixed(2)} %
+                            </Text>
+                        </>
+                        
+                    }
+                    {
+                        leitura?.status?.id == 3  && 
+                        <>
+                            <ProgressBar 
+                                progress={1} 
+                                color={defaultColors.activeColor} 
+                                style={{
+                                    height: 2,
+                                    marginTop: 10, 
+                                    backgroundColor: '#312E2E'
+                                }}
+                            />
+                            <Text>
+                                100 %
                             </Text>
                         </>
                         
