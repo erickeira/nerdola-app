@@ -25,8 +25,8 @@ export default function CadastroPage(){
         const newErrors = { 
             nome:  !form.email ? "Infome o seu nome" : false,
             email:  !form.email ? "Infome o seu e-mail" : false,
-            telefone:  !form.senha  ? "Infome o seu telefone" : false,
-            senha:  !form.senha  ? "Infome o sua senha" : false,
+            telefone:  !form.telefone  ? "Infome o seu telefone" : false,
+            senha:  !form.senha  ? "Infome o sua senha" : ( form.senha.length < 6 ? "Minimo de 6 caracteres" : false),
         }
         setErrors(newErrors)
         return !Object.entries(newErrors).some(([chave, valor]) => !!valor)

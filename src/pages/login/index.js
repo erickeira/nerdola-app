@@ -54,17 +54,9 @@ export default function LoginPage(){
             },
           });
           await AsyncStorage.setItem('token' , response.data.token )
-          navigation.navigate('tabs')
+          handleCheckAuth()
         }catch(error){
-            console.error('Erro na requisição:', error);
-            if (error.response) {
-              console.error('Dados do erro:', error.response.data);
-              console.error('Status do erro:', error.response.status);
-            } else if (error.request) {
-              console.error('Requisição feita, mas sem resposta:', error.request);
-            } else {
-              console.error('Erro ao configurar a requisição:', error.message);
-            }
+
         } finally {
             setTimeout(() => {
                 setLoadingLogin(false)
@@ -99,7 +91,6 @@ export default function LoginPage(){
         <ScrollView keyboardShouldPersistTaps="handled" style={{ flex : 1}} showsVerticalScrollIndicator={false}>
             <View style={styles.view}>
                 <Image
-                    width={100}
                     style={styles.logo}
                     source={Logo}
                 />
@@ -149,7 +140,6 @@ export default function LoginPage(){
 const styles = StyleSheet.create({
     view: {
       padding: 30,
-      height : height - 60,
       justifyContent: 'flex-end',
     },
     logo:{
@@ -157,7 +147,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         margin: 'auto',
-        marginBottom: 50
+        marginBottom: 0,
+        objectFit: 'contain',
+        width: 200,
+        height: 300
     },
     textInput:{
         

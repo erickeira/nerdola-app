@@ -8,7 +8,7 @@ import IconPerfilFilled from '../../assets/icons/perfil-filled.png';
 import IconHomeOutlined from '../../assets/icons/home-outlined.png';
 import IconHomeFilled from '../../assets/icons/home-filled.png';
 
-import { Image, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 
 import PerfilStack from './stacks/perfilStack';
@@ -50,9 +50,11 @@ const TabNavigation = ({ navigation }) =>{
             tabBarIcon: ({focused, color}) => (  
               focused? 
               <Image
+                style={styles.icon}
                 source={IconHomeFilled}
               />:
               <Image
+                style={styles.icon}
                 source={IconHomeOutlined}
               />
             )
@@ -70,9 +72,11 @@ const TabNavigation = ({ navigation }) =>{
             tabBarIcon: ({focused, color}) => (  
               focused? 
               <Image
+                style={styles.icon}
                 source={IconPerfilFilled}
               />:
               <Image
+                style={styles.icon}
                 source={IconPerfilOutlined}
               />
             ),
@@ -84,4 +88,11 @@ const TabNavigation = ({ navigation }) =>{
 
 export default TabNavigation;
 
+const styles = StyleSheet.create({
+  icon:{
+      objectFit: 'contain',
+      width: 30,
+      height: 30
+  },
+});
 
