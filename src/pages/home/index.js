@@ -55,17 +55,19 @@ export default function HomePage(){
 
     useEffect(() =>{
         setIsLoading(true)
+        console.log('1')
         getObras()
         getTags()
     },[])
 
     useEffect(() => {
         setIsLoading(true)
+        console.log('2')
         getObras(1 , filtros)
     },[filtros])
 
     const getObras = async (pag = 1, filtros = {}) => {
-        if(loading || loadingRefresh) return
+        if(loading || loadingRefresh || loadingMore) return
         
         try{
             const response = await api.get(`obras`, {
@@ -77,16 +79,16 @@ export default function HomePage(){
                 }
             })
             if(response.data?.length < limite){
-                console.log('1')
                 setEnReached(true)
             }
             if(pag == 1){
                 setObras(response.data)
                 setEnReached(false)
             }else{
-                setObras([...obras, ...response.data])
+                const existingIds = obras.map(obra => obra.id); 
+                const newObras = response.data.filter(obra => !existingIds.includes(obra.id));
+                setObras([...obras, ...newObras]);
             }
-            
             setPagina(pag)
         }catch(error){
             console.log(error)
@@ -112,8 +114,8 @@ export default function HomePage(){
 
     function refresh(){
         setIsLoadingRefresh(true)
-        setPagina(1)
         setObras([])
+        console.log('3')
         getObras(1) 
     }
 
@@ -187,6 +189,7 @@ export default function HomePage(){
                 onEndReached={() => {
                     if(!loadingMore && !enReached && !loading && !loadingRefresh){
                         setLoadingMore(true)
+                        console.log('4', pagina + 1)
                         getObras(pagina + 1)
                     }
                 }}

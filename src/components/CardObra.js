@@ -117,7 +117,7 @@ export default function CardObra({
                                 }}
                             />
                             <Text>
-                                100 %
+                                100.00 %
                             </Text>
                         </>
                         

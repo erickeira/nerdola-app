@@ -93,7 +93,9 @@ export default function PerfilPage(){
                 setObras(response.data)
                 setEnReached(false)
             }else{
-                setObras([...obras, ...response.data])
+                const existingIds = obras.map(obra => obra.id); 
+                const newObras = response.data.filter(obra => !existingIds.includes(obra.id));
+                setObras([...obras, ...newObras]);
             }
             
             setPagina(pag)
