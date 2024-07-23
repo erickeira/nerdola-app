@@ -26,7 +26,7 @@ export default function PerfilPage(){
     const [ showIrTopo, setShowIrTopo] = useState(false)
     const [ filtros , setFiltros] = useState({
         string: '',
-        statusleitura: []
+        statusleitura: [1,2,3]
     })
     const handleChange = (dado) => {
         setFiltros((prevFiltros) => ({...prevFiltros, ...dado}))
@@ -62,8 +62,9 @@ export default function PerfilPage(){
 
     useEffect(() =>{
         if(obras.length > 0){
-            getObras()
             getStatusList()
+            getObras()
+            
         }
         getMe()
     },[isFocused])
@@ -75,14 +76,13 @@ export default function PerfilPage(){
 
     const getObras = async (pag = 1, filtros = {}) => {
         if(loading || loadingRefresh) return
-        
         try{
             const response = await api.get(`obras`, {
                 params: {
                     ...filtros,
                     pagina: pag?.toString(),
                     limite: limite?.toString(),
-                    statusleitura : (filtros.statusleitura?.length ? filtros.statusleitura : statusList.map(st => st.id)) || [1,2,3],
+                    statusleitura : (filtros.statusleitura?.length ? filtros.statusleitura : statusList.map(st => st.id)),
                     temCapitulo :true
                 }
             })
