@@ -17,14 +17,14 @@ export default function PerfilPage(){
     const isFocused = useIsFocused()
     const [ obras , setObras] = useState([])
     const [pagina, setPagina] = useState(0)
+    const [limite, setLimite] = useState(20)
     const [loading, setIsLoading] = useState(false)
     const [loadingRefresh, setIsLoadingRefresh] = useState(false)
-    const [ enReached , setEnReached ] = useState(true)
+    const [ enReached , setEnReached ] = useState(false)
     const [loadingMore, setLoadingMore] = useState(false)
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
     const [ filtros , setFiltros] = useState({
-        pagina: 1,
         string: '',
         statusleitura: []
     })
@@ -80,20 +80,27 @@ export default function PerfilPage(){
             const response = await api.get(`obras`, {
                 params: {
                     ...filtros,
-                    statusleitura : filtros.statusleitura.length ? filtros.statusleitura : statusList.map(st => st.id),
+                    pagina: pag?.toString(),
+                    limite: limite?.toString(),
+                    statusleitura : (filtros.statusleitura?.length ? filtros.statusleitura : statusList.map(st => st.id)) || [1,2,3],
                     temCapitulo :true
                 }
             })
-            if(response.data && response.data?.length > 0 || filtros.string.length > 0 || filtros.statusleitura.length > 0){
-              setObras(response.data)
-              setPagina(pag)
-            }else{
-              setEnReached(true)
+            if(response.data?.length < limite){
+                setEnReached(true)
             }
+            if(pag == 1){
+                setObras(response.data)
+                setEnReached(false)
+            }else{
+                setObras([...obras, ...response.data])
+            }
+            
+            setPagina(pag)
         }catch(error){
-
         } finally{
             setIsLoading(false)
+            setLoadingMore(false)
             setIsLoadingRefresh(false)
         }
     }
@@ -215,13 +222,13 @@ export default function PerfilPage(){
                 }
                 keyExtractor={(item, index) => {  return `${item.numero}-${index}` }}
                 onEndReached={() => {
-                    if(!loadingMore && !enReached){
+                    if(!loadingMore && !enReached && !loading && !loadingRefresh){
                         setLoadingMore(true)
                         getObras(pagina + 1)
                     }
                 }}
                 ListFooterComponent={() => {
-                    if(!enReached) return (
+                    if(!enReached && obras.length > 0) return (
                         <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
                     )
                     return null

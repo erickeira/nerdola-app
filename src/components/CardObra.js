@@ -26,7 +26,6 @@ export default function CardObra({
     const imagePath = `${imageUrl}obras/${id}/${imagem}`;
     const [imageError, setImageError] = useState(false)
 
-    console.log(imagePath)
     const leituraColors = {
         1: '#59A0F1',
         2: '#DBD54C',

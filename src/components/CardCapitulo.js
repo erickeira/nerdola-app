@@ -75,7 +75,7 @@ export default function CardCapitulo({
                     <Text style={[styles.nome,{
                         color: capituloLido ? '#666' :'#fff'
                     }]}>
-                        Cap: {nome}
+                        {nome}
                     </Text>
                     <Text style={[styles.numero,{
                         color: capituloLido ? '#666' :'#fff'

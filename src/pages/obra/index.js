@@ -29,6 +29,7 @@ export default function ObraPage({ route }){
         try{
             const response = await api.get(`obras/${id}`)
             setObra({ ...obra, ...response.data})
+           
         }catch(error){
 
         } finally{
@@ -109,13 +110,19 @@ export default function ObraPage({ route }){
                     leitura: leitura.id,
                     capitulo
                 })
+                console.log(obra.total_capitulos == (obra.total_lidos + 1))
+                if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3){
+                    await api.patch(`usuario-leitura/${leitura.id}`, {
+                        status : 3
+                    })
+                }
             }else{
                 response = await api.delete(`usuarios-capitulos-lidos/${leitura.id}/${capitulo}`)
             }
-            console.log(response)
-            getObra()
+           
         }catch(error){
         } finally{
+            getObra()
             setIsLoadingCapitulo(null)
         }
     }
