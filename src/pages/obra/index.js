@@ -8,6 +8,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import CardObra from "../../components/CardObra";
 import CardCapitulo from "../../components/CardCapitulo";
 import Chip from "../../components/Chip";
+import CustomButton from "../../components/CustomButton";
+import Snackbar from "react-native-snackbar";
 const { height, width }  = Dimensions.get('screen');
 
 export default function ObraPage({ route }){
@@ -127,7 +129,22 @@ export default function ObraPage({ route }){
         }
     }
 
- 
+    const [isLoadingInformar, setIsLoadingInformar] = useState(false)
+    const handleInformar = () => {
+        setIsLoadingInformar(true)
+        setTimeout(() => {
+            setIsLoadingInformar(false)
+            Snackbar.show({
+                text: "Obrigado por nos informar",
+                duration: 2000,
+                action: {
+                  text: 'OK',
+                  textColor: 'green',
+                  onPress: () => { /* Do something. */ },
+                },
+              });
+        },2000)
+    }
 
 
     if(isLoading) return (
@@ -231,6 +248,16 @@ export default function ObraPage({ route }){
                 </>
             }
             keyExtractor={(item, index) => {  return `${item.id}-${index}` }}
+            ListFooterComponent={() => (
+                <CustomButton 
+                    mode="outlined"
+                    style={styles.buttonInformar}
+                    onPress={handleInformar}
+                    isLoading={isLoadingInformar}
+                >
+                    Obra desatualizada?
+                </CustomButton>
+            )}
           />
         </SafeAreaView>
     )
@@ -272,5 +299,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         marginBottom: 10,
         color: '#666'
+    },
+    buttonInformar:{
+        height: 51,
+        justifyContent: 'center',
+        marginBottom: 100,
+        borderColor: '#312E2E',
+        borderRadius: 5,
+        marginHorizontal: 10
     }
 });

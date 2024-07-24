@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { TouchableOpacity, StatusBar } from 'react-native';
+import { TouchableOpacity, StatusBar, Linking, Image } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 
 const Stack = createStackNavigator();
 import { navigationRef  } from '../../../App'
 import { defaultStyles } from '../../utils';
+import Discord from '../../../assets/discord.png'
 
 import HomePage from '../../pages/home';
 import { useRoute } from '@react-navigation/native';
@@ -29,11 +30,24 @@ const HomeStack = ({ navigation }) => {
           headerTitle:  "Explorar obras",
           headerTitleAlign: 'left',
           headerLeft: () => null,
-          // headerRight: ()  => (
-          //   <TouchableOpacity onPress={() => navigation.navigate('Busca')} hitSlop={{left: 20, bottom: 20}} style={{marginRight: 12}}>
-          //     <Icon name="search" size={24}  color={"#fff"}/>
-          //   </TouchableOpacity>
-          // ),
+          headerRight: ()  => (
+            <TouchableOpacity 
+              onPress={async () => {
+                await Linking.openURL("https://discord.gg/pc2YmxKF");
+              }} 
+              hitSlop={{left: 20, bottom: 20}} 
+              style={{marginRight: 25}}
+            >
+              <Image
+                style={{
+                  width: 40,
+                  height: 30,
+                  objectFit: 'cover'
+                }}
+                source={Discord}
+              />
+            </TouchableOpacity>
+          ),
           headerShown: true, 
           // headerTransparent: true,
           headerStyle: defaultStyles.defaultHeaderStyles,
