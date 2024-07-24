@@ -13,6 +13,7 @@ import { Image, StyleSheet, View } from 'react-native';
 
 import PerfilStack from './stacks/perfilStack';
 import HomeStack from './stacks/homeStack';
+import PedidosStack from './stacks/pedidosStack';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -58,6 +59,28 @@ const TabNavigation = ({ navigation }) =>{
                 source={IconHomeOutlined}
               />
             )
+          }}  
+        />
+        <Tab.Screen 
+          name="Pedidos"  
+          component={ PedidosStack }   
+          options={{ 
+            headerTitleStyle: { opacity: 0 }, 
+            headerShown: true, 
+            headerTransparent: true,
+            tabBarLabel: 'Início',
+            tabBarBadge: false,
+            tabBarIcon: ({focused, color}) => (  
+              focused? 
+              <Image
+                style={styles.icon}
+                source={IconPerfilFilled}
+              />:
+              <Image
+                style={styles.icon}
+                source={IconPerfilOutlined}
+              />
+            ),
           }}  
         />
         <Tab.Screen 

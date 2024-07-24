@@ -170,7 +170,8 @@ const styles = StyleSheet.create({
         marginBottom: 5
     },
     campoTexto: {
-      width: '100%'
+      width: '100%',
+      color: '#fff'
     },
     errorText: {
       position: 'absolute',
