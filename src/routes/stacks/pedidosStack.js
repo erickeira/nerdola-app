@@ -23,10 +23,10 @@ const PedidosStack = ({ navigation }) => {
   return ( 
   <Stack.Navigator >
       <Stack.Screen 
-        name="perfil" 
+        name="pedidos" 
         component={PedidosPage} 
         options={{
-          headerTitle:  "Perfil",
+          headerTitle:  "Meus pedidos",
           headerTitleAlign: 'left',
           headerLeft: () => null,
           // headerRight: ()  => (

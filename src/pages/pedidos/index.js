@@ -9,6 +9,7 @@ import CardObra from "../../components/CardObra";
 import { Icon } from "react-native-paper";
 import { defaultColors } from "../../utils";
 import CustomButton from "../../components/CustomButton";
+import CardPedido from "../../components/CardPedido";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -86,7 +87,11 @@ export default function PedidosPage(){
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 renderItem={({item, index}) => {
-                    return ( <Text>{item.nome}</Text>) 
+                    return ( 
+                        <CardPedido
+                            pedido={item}
+                        />
+                    ) 
                 }}
                 ListEmptyComponent={
                     loading ? 
@@ -112,7 +117,8 @@ export default function PedidosPage(){
                         right: showIrTopo ? 100 : 10,
                         borderColor: '#312E2E',
                         borderWidth: 1,
-                        paddingHorizontal: 20
+                        paddingHorizontal: 20,
+                        backgroundColor: defaultColors.primary
                     }}
                 >
                     Novo pedido

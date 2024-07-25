@@ -7,15 +7,13 @@ export default function CustomButton({
     ...others
 }){
     return(
-        <View>
-            <Button {...others}>
-                { 
-                    isLoading?
-                    <ActivityIndicator color="#fff"/>
-                    :
-                    children 
-                }
-            </Button>
-        </View>
+        <Button {...others}>
+            { 
+                isLoading?
+                <ActivityIndicator color="#fff"/>
+                :
+                children 
+            }
+        </Button>
     )
 }

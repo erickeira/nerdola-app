@@ -14,6 +14,7 @@ import { Image, StyleSheet, View } from 'react-native';
 import PerfilStack from './stacks/perfilStack';
 import HomeStack from './stacks/homeStack';
 import PedidosStack from './stacks/pedidosStack';
+import { Icon } from 'react-native-paper';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -49,15 +50,16 @@ const TabNavigation = ({ navigation }) =>{
             tabBarLabel: 'Início',
             tabBarBadge: false,
             tabBarIcon: ({focused, color}) => (  
-              focused? 
-              <Image
-                style={styles.icon}
-                source={IconHomeFilled}
-              />:
-              <Image
-                style={styles.icon}
-                source={IconHomeOutlined}
-              />
+              <Icon source={"home"} size={18} color="#666"/>
+              // focused? 
+              // <Image
+              //   style={styles.icon}
+              //   source={IconHomeFilled}
+              // />:
+              // <Image
+              //   style={styles.icon}
+              //   source={IconHomeOutlined}
+              // />
             )
           }}  
         />
