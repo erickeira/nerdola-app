@@ -50,16 +50,11 @@ const TabNavigation = ({ navigation }) =>{
             tabBarLabel: 'Início',
             tabBarBadge: false,
             tabBarIcon: ({focused, color}) => (  
-              <Icon source={"home"} size={18} color="#666"/>
-              // focused? 
-              // <Image
-              //   style={styles.icon}
-              //   source={IconHomeFilled}
-              // />:
-              // <Image
-              //   style={styles.icon}
-              //   source={IconHomeOutlined}
-              // />
+              <Icon 
+                source={"home-circle-outline"} 
+                size={25} 
+                color={focused? defaultColors.activeColor : "#666"}
+              />
             )
           }}  
         />
