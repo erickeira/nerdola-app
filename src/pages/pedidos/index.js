@@ -44,14 +44,18 @@ export default function PedidosPage(){
       };
   
 
-    useEffect(() =>{
-       
-        getPedidos()
+    useEffect(() => {
+        setIsLoading(true)
     },[])
+
+    useEffect(() =>{
+       if(isFocused){
+        getPedidos()
+       }
+    },[isFocused])
 
     const getPedidos = async () => {
         // if(loading) return
-        setIsLoading(true)
         try{
             const response = await api.get(`pedido/me`)
             setPedidos(response.data)
@@ -60,6 +64,19 @@ export default function PedidosPage(){
         } finally{
             setIsLoading(false)
             setIsLoadingRefresh(false)
+        }
+    }
+
+    const [ isLoadingPedido, setIsLoadingPedido] = useState(null)
+    const handleDelete = async (id) => {
+        setIsLoadingPedido(id)
+        try{
+            const response = await api.delete(`pedido/${id}`)
+            getPedidos()
+        }catch(error){
+            
+        } finally{
+            setIsLoadingPedido(null)
         }
     }
 
@@ -90,6 +107,14 @@ export default function PedidosPage(){
                     return ( 
                         <CardPedido
                             pedido={item}
+                            onEdit={() => {
+                                navigation.navigate('pedido', { id : item.id } )
+                            }}
+                            onDelete={() => {
+                              handleDelete(item.id)
+                            }}
+                            isLoading={isLoadingPedido == item.id}
+                            // isLoading={true}
                         />
                     ) 
                 }}
@@ -114,40 +139,22 @@ export default function PedidosPage(){
                         position: 'absolute',
                         zIndex: 10,
                         bottom: 10,
-                        right: showIrTopo ? 100 : 10,
+                        right:  10,
                         borderColor: '#312E2E',
                         borderWidth: 1,
                         paddingHorizontal: 20,
-                        backgroundColor: defaultColors.primary
+                        backgroundColor: defaultColors.primary,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'row',
+                    }}
+                    onPress={() => {
+                        navigation.navigate('pedido')
                     }}
                 >
                     Novo pedido
                 </CustomButton>
             </View>
-            {
-                showIrTopo ? 
-                <Animated.View>
-                    <Chip
-                        style={{
-                            position: 'absolute',
-                            zIndex: 10,
-                            bottom: 10,
-                            right: 10,
-                            backgroundColor: 'rgba(255, 255, 255, 0.3)'
-                        }}
-                        onPress={upButtonHandler}
-                    >
-                         <Icon 
-                            source="arrow-up"
-                            // color={defaultColors.activeColor}
-                            color="#fff"
-                            size={20}
-                        />
-                        </Chip>
-                </Animated.View>
-                : null
-
-            } 
         </>
     )
 }

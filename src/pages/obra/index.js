@@ -146,6 +146,7 @@ export default function ObraPage({ route }){
         },2000)
     }
 
+    const [ordem, setOrdem] = useState("ascending")
 
     if(isLoading) return (
         <View style={{ paddingVertical: 100, alignItems: 'center', justifyContent: 'center' }}>
@@ -156,7 +157,7 @@ export default function ObraPage({ route }){
         <SafeAreaView style={styles.view}>
           <FlatList
             extraData={leitura}
-            data={obra?.capitulos} 
+            data={ ordem == "ascending" ? obra?.capitulos : obra?.capitulos.reverse()} 
             ref={ref => setCapitulosRef(ref)}
             ListHeaderComponent={(
               <View >
@@ -227,6 +228,23 @@ export default function ObraPage({ route }){
                 }
                    
                 </LinearGradient>
+                <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
+                    <Chip 
+                        label={""}
+                        isSelected={false}
+                        onPress={(id) => {
+                            if(ordem == "ascending") setOrdem("descending")
+                            else setOrdem("ascending")
+                        }}
+                        style={{ width: 100}}
+                    >
+                        <Icon 
+                            source={ordem == "ascending" ? "sort-ascending" : "sort-descending"} 
+                            color="#fff" size={18} 
+                        />
+                    </Chip>
+                </View>
+              
                 <Text style={styles.capitulos}>
                     Capitulos
                 </Text>
@@ -235,7 +253,7 @@ export default function ObraPage({ route }){
             renderItem={({item, index}) => {
               return (
                 <CardCapitulo
-                    onPress={handlePressCapitulo}
+                    onLido={handlePressCapitulo}
                     isLoading={isLoadingCapitulo}
                     capitulo={item}
                     leitura={leitura.status.id}
@@ -268,7 +286,7 @@ const styles = StyleSheet.create({
     },
     imageContainer:{
         width: width,
-        height: (width) * (4.3 / 3),
+        minHeight: (width) * (4.3 / 3),
         overflow: 'hidden',
         alignItems: 'center',
         position: 'absolute'

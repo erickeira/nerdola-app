@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import CustomButton from "./CustomButton";
 import { useNavigation } from "@react-navigation/native";
 
-export default function CardPedido({ pedido }){
+export default function CardPedido({ pedido, onDelete , onEdit, isLoading }){
     const navigation = useNavigation()
     const statusData ={
         em_analise:{
@@ -14,7 +14,7 @@ export default function CardPedido({ pedido }){
             label: 'Publicado'
         },
         reprovado: {
-            color: 'red',
+            color: '#DB4C4C',
             label: 'Reprovado'
         }
     }
@@ -27,27 +27,31 @@ export default function CardPedido({ pedido }){
                 borderColor: statusData[pedido.status]?.color,
                 color: statusData[pedido.status]?.color,
             }]}>{statusData[pedido.status]?.label}</Text>
-            { pedido.status != 'em_analise' ||  (pedido.status != 'publicado' && pedido?.obra?.id ) &&
+                <View style={styles.divider}/> 
                 <View style={styles.buttons}>
-                    { pedido.status != 'em_analise' && 
+                    { pedido.status == 'em_analise' && !isLoading &&
                         <>
-                            <View style={styles.divider}/> 
-                            <CustomButton style={styles.button}>
+                            <CustomButton 
+                                style={styles.button}
+                                onPress={onEdit}
+                            >
                                 <Text style={styles.editar}>
                                     Editar
                                 </Text>
-                                
                             </CustomButton>
-                            <CustomButton style={styles.button}>
+                            <CustomButton 
+                                style={styles.button}
+                                onPress={onDelete}
+                            >
                                 <Text style={styles.excluir}>
                                     Excluir
                                 </Text>
                             </CustomButton>
                         </>
                     }
-                    { pedido.status != 'publicado' && pedido?.obra?.id &&
+                    { pedido.status == 'publicado' && pedido?.obra?.id && !isLoading &&
                         <>
-                            <View style={styles.divider}/> 
+                            
                             <CustomButton 
                                 style={styles.button}
                                 onPress={() => {
@@ -61,8 +65,27 @@ export default function CardPedido({ pedido }){
                             </CustomButton>
                         </>
                     }
+                    { pedido.status == 'reprovado' &&  !isLoading &&
+                        <>
+                            <CustomButton 
+                                style={styles.button}
+                                onPress={onDelete}
+                            >
+                                <Text style={styles.excluir}>
+                                    Excluir
+                                </Text>
+                            </CustomButton>
+                        </>
+                    }
+                    {
+                        isLoading &&
+                        <CustomButton
+                            style={styles.button}
+                            isLoading
+                        ></CustomButton>
+                    }
                 </View>
-            }
+            
         </View>
     )
 }
@@ -72,7 +95,8 @@ const styles = StyleSheet.create({
         padding: 10,
         borderColor: '#312E2E',
         borderWidth: 1,
-        borderRadius: 5
+        borderRadius: 5,
+        marginBottom: 15
     },
     criado_em:{
         color: '#d1d1d1',
@@ -89,16 +113,16 @@ const styles = StyleSheet.create({
     status:{
         paddingHorizontal: 5,
         paddingVertical: 2,
-        borderWidth: 1,
+        borderWidth: 0.3,
         borderRadius: 5,
         textAlign: 'center',
         width: 100,
-        fontSize: 11
+        fontSize: 10
     },
     divider:{
         borderColor: '#312E2E',
         borderBottomWidth: 1,
-        marginVertical: 12
+        marginVertical: 13
     },
     buttons:{
         flexDirection: 'row',

@@ -9,6 +9,7 @@ import { defaultStyles } from '../../utils';
 
 import { useRoute } from '@react-navigation/native';
 import PedidosPage from '../../pages/pedidos';
+import PedidoPage from '../../pages/pedido';
 
 const PedidosStack = ({ navigation }) => {
   const currentRouteName = navigationRef?.current?.getCurrentRoute().name;
@@ -34,6 +35,18 @@ const PedidosStack = ({ navigation }) => {
           //     <Icon name="search" size={24}  color={"#fff"}/>
           //   </TouchableOpacity>
           // ),
+          headerShown: true, 
+          // headerTransparent: true,
+          headerStyle: defaultStyles.defaultHeaderStyles,
+          headerTintColor: '#fff'      
+        }}
+      />
+      <Stack.Screen 
+        name="pedido" 
+        component={PedidoPage} 
+        options={{
+          headerTitle:  "Pedido",
+          headerTitleAlign: 'left',
           headerShown: true, 
           // headerTransparent: true,
           headerStyle: defaultStyles.defaultHeaderStyles,

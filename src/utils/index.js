@@ -1,9 +1,9 @@
 import { Dimensions, StyleSheet } from 'react-native';
 
 const { height, width }  = Dimensions.get('screen');
-// const production = !__DEV__
-const production = true
-const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://192.168.1.14:3001/';
+const production = !__DEV__
+// const production = true
+const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://localhost:3001/';
 
 const proporcaoCard = {
     width: width * 0.25,

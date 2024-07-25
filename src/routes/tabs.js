@@ -51,7 +51,7 @@ const TabNavigation = ({ navigation }) =>{
             tabBarBadge: false,
             tabBarIcon: ({focused, color}) => (  
               <Icon 
-                source={"home-circle-outline"} 
+                source={"book"} 
                 size={25} 
                 color={focused? defaultColors.activeColor : "#666"}
               />
@@ -68,14 +68,10 @@ const TabNavigation = ({ navigation }) =>{
             tabBarLabel: 'Início',
             tabBarBadge: false,
             tabBarIcon: ({focused, color}) => (  
-              focused? 
-              <Image
-                style={styles.icon}
-                source={IconPerfilFilled}
-              />:
-              <Image
-                style={styles.icon}
-                source={IconPerfilOutlined}
+              <Icon 
+                source={"inbox"} 
+                size={25} 
+                color={focused? defaultColors.activeColor : "#666"}
               />
             ),
           }}  
@@ -90,14 +86,10 @@ const TabNavigation = ({ navigation }) =>{
             tabBarLabel: 'Início',
             tabBarBadge: false,
             tabBarIcon: ({focused, color}) => (  
-              focused? 
-              <Image
-                style={styles.icon}
-                source={IconPerfilFilled}
-              />:
-              <Image
-                style={styles.icon}
-                source={IconPerfilOutlined}
+              <Icon 
+                source={"account"} 
+                size={25} 
+                color={focused? defaultColors.activeColor : "#666"}
               />
             ),
           }}  

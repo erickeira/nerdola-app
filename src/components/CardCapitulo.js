@@ -10,6 +10,7 @@ export default function CardCapitulo({
     obra = '',
     capitulo,
     onPress,
+    onLido,
     leitura,
     isLoading
 }){
@@ -21,7 +22,8 @@ export default function CardCapitulo({
         nome,
         numero,
         formato,
-        lancado_em
+        lancado_em,
+        totallinks
     } = capitulo
     const navigation = useNavigation()
     const imagePath = `${imageUrl}obras/${obra}/${imagem}`;
@@ -36,20 +38,7 @@ export default function CardCapitulo({
     return(
         <TouchableOpacity 
             onPress={() => {
-                if(leitura == 2){
-                    if(onPress) onPress(id, !lido)
-                    setCapituloLido(!capituloLido)
-                }else{
-                    Snackbar.show({
-                    text: "Atualize o status da obra para lendo",
-                    duration: 2000,
-                    action: {
-                        text: 'OK',
-                        textColor: 'green',
-                        onPress: () => { /* Do something. */ },
-                    },
-                    });
-                }
+                navigation.navigate('capitulo', { id , leitura , lido: capituloLido})
             }}
         >
             <View style={styles.view}>
@@ -78,10 +67,20 @@ export default function CardCapitulo({
                         {nome}
                     </Text>
                     <Text style={[styles.numero,{
-                        color: capituloLido ? '#666' :'#fff'
+                        color: capituloLido ? '#666' :'#fff',
+                        marginBottom: 5
                     }]}>
                         Número: {numero}
                     </Text>
+                    {
+                        !!totallinks && 
+                        <Text style={[styles.numero,{
+                            color:defaultColors.activeColor,
+                        }]}>
+                            {totallinks} { totallinks == 1 ? 'site disponivel': 'sites disponiveis'}
+                        </Text>
+                    }
+                    
                 </View>
                 {
                     !!isLoading && isLoading == id && (
@@ -93,10 +92,28 @@ export default function CardCapitulo({
                         <Checkbox 
                             status={capituloLido ? 'checked' : 'unchecked'} 
                             color={defaultColors.activeColor}
+                            onPress={() => {
+                                if(leitura == 2){
+                                    if(onLido) onLido(id, !lido)
+                                    setCapituloLido(!capituloLido)
+                                }else{
+                                    Snackbar.show({
+                                    text: "Atualize o status da obra para lendo",
+                                    duration: 2000,
+                                    action: {
+                                        text: 'OK',
+                                        textColor: 'green',
+                                        onPress: () => { /* Do something. */ },
+                                    },
+                                    });
+                                }
+                            }}
                         />
                     )
                 }
-              
+                
+                <Icon source={"chevron-right"} color={"#fff"} size={20}/>
+                
             </View>
  
         </TouchableOpacity>

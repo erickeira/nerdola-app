@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {  Dimensions, StyleSheet, View, Text, Image, ScrollView } from "react-native";
 import { Button } from 'react-native-paper';
 import InputText from "../../components/InputText";
@@ -11,22 +11,19 @@ import { useNavigation } from "@react-navigation/native";
 
 const { height, width }  = Dimensions.get('screen');
 
-export default function CadastroPage(){
+export default function PedidoPage({ route }){
     const navigation = useNavigation()
     const [ formulario, setFormulario] = useState({
         nome: '',
-        email: '',
-        senha: ''
+        onde_ler: ''
     })
+    const id  = route?.params?.id
     const [ errors, setErrors] = useState({})
-    const [ isLoadingCadastro, setLoadingCadastro] = useState(false)
+    const [ isLoadingPedido, setLoadingPedido] = useState(false)
 
     const handleValidateForm = (form) => {
         const newErrors = { 
-            nome:  !form.nome ? "Infome o seu nome" : false,
-            email:  !form.email ? "Infome o seu e-mail" : false,
-            telefone:  !form.telefone  ? "Infome o seu telefone" : false,
-            senha:  !form.senha  ? "Infome o sua senha" : ( form.senha.length < 6 ? "Minimo de 6 caracteres" : false),
+            nome:  !form.nome ? "Infome o seu nome da obra" : false,
         }
         setErrors(newErrors)
         return !Object.entries(newErrors).some(([chave, valor]) => !!valor)
@@ -38,10 +35,16 @@ export default function CadastroPage(){
     }
 
     const handleCadastrar = async () => {
-        if(!handleValidateForm(formulario) || isLoadingCadastro) return 
-        setLoadingCadastro(true)
+        if(!handleValidateForm(formulario) || isLoadingPedido) return 
+        setLoadingPedido(true)
         try{
-           const response = await api.post('usuarios', formulario )
+            let response = {}
+            if(id){
+                response = await api.patch(`pedido/${id}`, formulario )
+            }else{
+                response = await api.post('pedido', formulario )
+            }
+           
            Snackbar.show({
             text: response.data?.message,
             duration: 2000,
@@ -53,28 +56,37 @@ export default function CadastroPage(){
           });
           navigation.goBack()
         }catch(error){
-            console.error('Erro na requisição:', error);
-            if (error.response) {
-              console.error('Dados do erro:', error.response.data);
-              console.error('Status do erro:', error.response.status);
-            } else if (error.request) {
-              console.error('Requisição feita, mas sem resposta:', error.request);
-            } else {
-              console.error('Erro ao configurar a requisição:', error.message);
-            }
         } finally {
             setTimeout(() => {
-                setLoadingCadastro(false)
+                setLoadingPedido(false)
             }, 3000);
             
         }
     }
 
+
+    
+
+    useEffect(() => {
+       if(id) getPedido(id)
+    },[id])
+
+    const getPedido = async (id) => {
+        try{
+            const response = await api.get(`pedido/${id}`)
+            setFormulario(response.data)
+        }catch(error){
+            
+        } finally{
+        }
+    }
+
+
     return(
         <ScrollView keyboardShouldPersistTaps="handled" style={{ flex : 1}} showsVerticalScrollIndicator={false}>
             <View style={styles.view}>
                 <InputText
-                    placeholder="Nome"
+                    placeholder="Nome da obra"
                     value={formulario.nome}
                     onChange={(nome) => {
                         handleChange({ nome })
@@ -85,49 +97,23 @@ export default function CadastroPage(){
                     errorText={errors.nome}
                 />
                 <InputText
-                    placeholder="E-mail"
-                    value={formulario.email}
-                    onChange={(email) => {
-                        handleChange({ email })
+                    placeholder="Onde ler"
+                    value={formulario.onde_ler}
+                    onChange={(onde_ler) => {
+                        handleChange({ onde_ler })
                     }}
                     containerStyle={styles.textInput}
-                    tipo="email"
                     height={67}
-                    error={!!errors.email}
-                    errorText={errors.email}
+                    error={!!errors.onde_ler}
+                    errorText={errors.onde_ler}
                 />
-                <InputText
-                    placeholder="Telefone"
-                    value={formulario.telefone}
-                    onChange={(v, telefone) => {
-                        handleChange({ telefone })
-                    }}
-                    containerStyle={styles.textInput}
-                    tipo="telefone"
-                    height={67}
-                    error={!!errors.telefone}
-                    errorText={errors.telefone}
-                />
-                <InputText
-                    placeholder="Senha"
-                    value={formulario.senha}
-                    onChange={(senha) => {
-                        handleChange({ senha })
-                    }}
-                    containerStyle={styles.textInput}
-                    tipo="senha"
-                    height={67}
-                    error={!!errors.senha}
-                    errorText={errors.senha}
-                />
-
                 <CustomButton 
                     mode="contained"
                     style={styles.buttonEntrar}
                     onPress={handleCadastrar}
-                    isLoading={isLoadingCadastro}
+                    isLoading={isLoadingPedido}
                 >
-                    Criar conta
+                    { !!id ? 'Salvar pedido'  : 'Realizar pedido'  }
                 </CustomButton>
             </View>
         </ScrollView>

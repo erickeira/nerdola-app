@@ -9,6 +9,8 @@ import LoginPage from '../pages/login';
 import CadastroPage from '../pages/cadastros';
 import { defaultColors, defaultHeaderProps } from '../utils';
 import ObraPage from '../pages/obra';
+import CapituloPage from '../pages/capitulo';
+import ViewPage from '../pages/view/view';
 
 const Stack = createStackNavigator();
 export default function Routes() {
@@ -39,6 +41,26 @@ export default function Routes() {
                     headerTransparent: true,
                     headerTitle: '',
                     headerTintColor: '#fff',
+                }}
+            />
+            <Stack.Screen 
+                name="capitulo"  
+                component={CapituloPage} 
+                options={{  
+                    headerTransparent: true,
+                    headerTitle: '',
+                    headerTintColor: '#fff',
+                }}
+            />
+            <Stack.Screen 
+                name="view"  
+                component={ViewPage} 
+                options={{  
+                    headerTitle: '',
+                    headerTintColor: '#fff',
+                    headerBackgroundContainerStyle:{
+                        backgroundColor: defaultColors.primary
+                    }
                 }}
             />
         </Stack.Navigator>
