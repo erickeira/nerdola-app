@@ -45,10 +45,10 @@ export default function CardPedido({ pedido, onDelete , onEdit, isLoading }){
                 { pedido.status == 'em_analise' && !isLoading &&
                     <>
                         <TouchableOpacity style={styles.button} onPress={onEdit}>
-                            <Icon source="pencil" color="#fff" size="30px"/>
+                            <Icon source="pencil" color="#fff" size={20}/>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.button} onPress={onDelete}>
-                            <Icon source="delete-outline" color="#DB4C4C" size="30px"/>
+                            <Icon source="delete-outline" color="#DB4C4C" size={20}/>
                         </TouchableOpacity>
                     </>
                 }
@@ -60,14 +60,14 @@ export default function CardPedido({ pedido, onDelete , onEdit, isLoading }){
                                 navigation.navigate('obra', { id : pedido?.obra?.id})
                             }}
                         >
-                            <Icon source="chevron-right" color="#fff" size="30px"/>
+                            <Icon source="chevron-right" color="#fff" size={20}/>
                         </TouchableOpacity>
                     </>
                 }
                 { pedido.status == 'reprovado' &&  !isLoading &&
                     <>
                        <TouchableOpacity style={styles.button} onPress={onDelete}>
-                            <Icon source="delete-outline" color="#DB4C4C" size="30px"/>
+                            <Icon source="delete-outline" color="#DB4C4C" size={20}/>
                         </TouchableOpacity>
                     </>
                 }

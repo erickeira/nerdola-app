@@ -141,13 +141,11 @@ export default function CapituloPage({ route }){
                         }
                         
                         {
-                            [2,3].includes(leitura?.status?.id)  && (
+                            [2,3].includes(leitura?.status?.id) && !isLoadingCapitulo && (
                                 <Checkbox 
                                     status={ lido ? 'checked' : 'unchecked' } 
                                     color={defaultColors.activeColor}
-                                    onPress={() => {
-                                    
-                                    }}
+                                    onPress={() => handlePressCapitulo(!lido)}
                                 />
                             )
                         }

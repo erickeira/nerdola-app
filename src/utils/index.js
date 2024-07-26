@@ -1,8 +1,8 @@
 import { Dimensions, StyleSheet } from 'react-native';
 
 const { height, width }  = Dimensions.get('screen');
-const production = !__DEV__
-// const production = true
+// const production = !__DEV__
+const production = true
 const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://localhost:3001/';
 const botUrl = "https://discord.com/api/v10/webhooks/1266480912481390622/Z9oq5b4rQv-_QHfuC_t6PjlCszo36kWAT0KkQAfLxgpv2EoUheLxM-tbYWL-mhoBpye6?wait=true";
 
