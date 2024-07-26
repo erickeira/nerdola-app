@@ -19,7 +19,7 @@ export default function CapituloPage({ route }){
     const [ isLoading, setIsLoading ] = useState(true)
     const [ capitulo, setCapitulo] = useState({})
     const [ capitulosRef, setCapitulosRef ] = useState(null)
-    const { id, leitura  } = route.params
+    const { id, leitura, obraNome  } = route.params
     const{
         nome,
         numero,
@@ -116,41 +116,53 @@ export default function CapituloPage({ route }){
                         }
                     </View>
                     <View style={{ width: '100%'}}>
-                        <Text style={styles.nome}>
-                            {nome}
-                        </Text>
+                        <View >
+                            <Text style={styles.obraNome}>
+                                {obraNome}
+                            </Text>
+                        </View>
+                        <View style={{ width: '100%'}}>
+                            <Text style={styles.nome}>
+                                {nome}
+                            </Text>
+                        </View>
+                        <View style={{ width: '100%'}}>
+                            <Text style={styles.numero}>
+                                Numero: {numero}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={{ width: '100%'}}>
-                        <Text style={styles.numero}>
-                            {numero}
-                        </Text>
-                    </View>
+                   
                 </View>
                 <Text style={styles.descricao}>
                     {descricao}
                 </Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
-                    <Chip style={{ width: 200, paddingVertical: 3}} onPress={() => handlePressCapitulo(!lido)}>
-                        {
-                            isLoadingCapitulo ?
-                            <ActivityIndicator/>
-                            :
-                            <Text style={{color: defaultColors.activeColor, fontSize: 12}}>
-                                { lido ? "Desmarcar como lido " : "Marcar como lido" } 
-                            </Text>
-                        }
-                        
-                        {
-                            [2,3].includes(leitura?.status?.id) && !isLoadingCapitulo && (
-                                <Checkbox 
-                                    status={ lido ? 'checked' : 'unchecked' } 
-                                    color={defaultColors.activeColor}
-                                    onPress={() => handlePressCapitulo(!lido)}
-                                />
-                            )
-                        }
-                    </Chip>
-                </View>
+                {
+                    [2,3].includes(leitura?.status?.id) &&  
+                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        <Chip style={{ width: 200, paddingVertical: 3}} onPress={() => handlePressCapitulo(!lido)}>
+                            {
+                                isLoadingCapitulo ?
+                                <ActivityIndicator/>
+                                :
+                                <Text style={{color: defaultColors.activeColor, fontSize: 12}}>
+                                    { lido ? "Desmarcar como lido " : "Marcar como lido" } 
+                                </Text>
+                            }
+                            
+                            {
+                                !isLoadingCapitulo && (
+                                    <Checkbox 
+                                        status={ lido ? 'checked' : 'unchecked' } 
+                                        color={defaultColors.activeColor}
+                                        onPress={() => handlePressCapitulo(!lido)}
+                                    />
+                                )
+                            }
+                        </Chip>
+                    </View>
+                }
+               
                 <Text style={styles.capitulos}>
                     Onde ler
                 </Text>
@@ -232,7 +244,7 @@ const styles = StyleSheet.create({
     viewCard:{
         marginTop: 40,
         padding: 10,
-        width: width - 30,
+        width: width - 30, 
         overflow: 'scroll',
         flexDirection: 'row',
         gap: 10
@@ -248,13 +260,23 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    obraNome:{
+        fontSize: 15,
+        flexWrap: 'wrap',
+        color: defaultColors.gray,
+        width: "70%",
+    },
     nome:{
         fontSize: 18,
         flexWrap: 'wrap',
         color: '#fff',
         width: "70%",
+        marginBottom: 5
     },
     numero:{
-        fontSize: 11,
+        fontSize: 12,
+        flexWrap: 'wrap',
+        color: defaultColors.gray,
+        width: "70%",
     }
 });

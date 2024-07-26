@@ -282,6 +282,8 @@ export default function ObraPage({ route }){
                     isLoading={isLoadingCapitulo}
                     capitulo={item}
                     leitura={leitura}
+                    obraNome={nome}
+                    obraId={id}
                 />
               )
             }}

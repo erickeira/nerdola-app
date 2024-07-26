@@ -7,12 +7,13 @@ import Snackbar from "react-native-snackbar";
 const { height, width }  = Dimensions.get('screen');
 
 export default function CardCapitulo({
-    obra = '',
+    obraId = '',
     capitulo,
     onPress,
     onLido,
     leitura,
-    isLoading
+    isLoading,
+    obraNome
 }){
     const{
         id,
@@ -26,7 +27,7 @@ export default function CardCapitulo({
         totallinks
     } = capitulo
     const navigation = useNavigation()
-    const imagePath = `${imageUrl}obras/${obra}/${imagem}`;
+    const imagePath = `${imageUrl}obras/${obraId}/${imagem}`;
     const [imageError, setImageError] = useState(false)
     const [capituloLido, setCapituloLido] = useState(lido || leitura.status.id == 3);
 
@@ -38,7 +39,7 @@ export default function CardCapitulo({
     return(
         <TouchableOpacity 
             onPress={() => {
-                navigation.navigate('capitulo', { id , leitura, lido: capituloLido})
+                navigation.navigate('capitulo', { id , leitura, lido: capituloLido, obraNome })
             }}
         >
             <View style={styles.view}>
