@@ -56,7 +56,19 @@ export default function LoginPage(){
           await AsyncStorage.setItem('token' , response.data.token )
           handleCheckAuth()
         }catch(error){
-
+            if (error.response) {
+                // O servidor respondeu com um código de status fora do intervalo 2xx
+                console.log('Erro na resposta:', error.response.data);
+                console.log('Status:', error.response.status);
+                console.log('Headers:', error.response.headers);
+            } else if (error.request) {
+                // A solicitação foi feita, mas nenhuma resposta foi recebida
+                console.log('Erro na solicitação:', error.request);
+            } else {
+                // Algo aconteceu na configuração da solicitação que gerou um erro
+                console.log('Erro:', error.message);
+            }
+            console.log('Configuração do erro:', error.config);
         } finally {
             setTimeout(() => {
                 setLoadingLogin(false)

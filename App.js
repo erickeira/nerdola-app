@@ -6,6 +6,7 @@ import NetInfo from "@react-native-community/netinfo";
 import codePush from "react-native-code-push";
 import AuthProvider from './src/context/AuthContext'
 import { defaultColors } from './src/utils';
+import NotificationProvider from './src/context/NotificationContext';
 
 const height = Dimensions.get('screen').height;
 
@@ -74,7 +75,9 @@ function App() {
                 </View>
                 : 
                 <AuthProvider>
-                    <Routes/>
+                    <NotificationProvider>
+                        <Routes/>
+                    </NotificationProvider>
                 </AuthProvider>
             }
            
