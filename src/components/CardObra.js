@@ -93,10 +93,10 @@ export default function CardObra({
                                 style={{
                                     height: 2,
                                     marginTop: 10, 
-                                    backgroundColor: '#312E2E'
+                                    backgroundColor: '#312E2E',
                                 }}
                             />
-                            <Text>
+                            <Text style={{color: '#fff'}}>
                                 {(progresso * 100).toFixed(2)} %
                             </Text>
                         </>
@@ -114,7 +114,7 @@ export default function CardObra({
                                     backgroundColor: '#312E2E'
                                 }}
                             />
-                            <Text>
+                            <Text style={{color: '#fff'}}>
                                 100.00 %
                             </Text>
                         </>
@@ -157,14 +157,19 @@ const styles = StyleSheet.create({
     },
     formato:{
         fontSize: 11,
+        color: defaultColors.gray
     },
     total_capitulos:{
         fontSize: 12,
+        color: defaultColors.gray
     },
     tags:{
         fontSize: 12,
+        color: defaultColors.gray,
+        marginBottom: 12
     },
     leitura:{
         fontSize: 12,
+        color: defaultColors.gray
     }
 });

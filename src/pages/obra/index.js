@@ -2,7 +2,7 @@ import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../utils/api";
-import { imageUrl } from "../../utils";
+import { botUrl, imageUrl } from "../../utils";
 import { Icon, IconButton,  Menu, Divider, PaperProvider  } from "react-native-paper";
 import LinearGradient from 'react-native-linear-gradient';
 import CardObra from "../../components/CardObra";
@@ -10,6 +10,7 @@ import CardCapitulo from "../../components/CardCapitulo";
 import Chip from "../../components/Chip";
 import CustomButton from "../../components/CustomButton";
 import Snackbar from "react-native-snackbar";
+import axios from "axios";
 const { height, width }  = Dimensions.get('screen');
 
 export default function ObraPage({ route }){
@@ -20,6 +21,7 @@ export default function ObraPage({ route }){
     const [ capitulosRef, setCapitulosRef ] = useState(null)
     const { id } = route.params
     const{
+        nome,
         imagem,
         descricao,
         leitura
@@ -44,6 +46,10 @@ export default function ObraPage({ route }){
         getObra()
         getStatusList()
     },[])
+
+    useEffect(() => {
+        if(isFocused) getObra()
+    },[isFocused])
 
     const [ statusList, setStatusList] = useState([])
     const getStatusList = async () => {
@@ -127,23 +133,42 @@ export default function ObraPage({ route }){
             getObra()
             setIsLoadingCapitulo(null)
         }
-    }
+    }    
 
     const [isLoadingInformar, setIsLoadingInformar] = useState(false)
-    const handleInformar = () => {
+    const [informado, setInformado] = useState(false)
+    const handleInformar = async () => {
         setIsLoadingInformar(true)
-        setTimeout(() => {
+        try{
+            const response = await axios.post(botUrl,{
+                content: "Obra desatualizada, por favor inserir novo capitulo!\n_ _",
+                embeds: [
+                  {
+                    "title": nome,
+                    "description": `Último capitulo:  ${ obra?.capitulos ? obra?.capitulos[ obra?.capitulos.length - 1]?.numero : ''}`,
+                    "url": `https://admin.nerdola.com.br/capitulos/${id}`,
+                    "color": 5814783,
+                    "thumbnail": {
+                      "url": imagePath
+                    }
+                  }
+                ],
+                attachments: []
+            })
             setIsLoadingInformar(false)
             Snackbar.show({
                 text: "Obrigado por nos informar",
                 duration: 2000,
                 action: {
-                  text: 'OK',
-                  textColor: 'green',
-                  onPress: () => { /* Do something. */ },
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
                 },
-              });
-        },2000)
+            });
+            setInformado(true)
+        }catch(err){
+
+        }
     }
 
     const [ordem, setOrdem] = useState("ascending")
@@ -267,6 +292,7 @@ export default function ObraPage({ route }){
             }
             keyExtractor={(item, index) => {  return `${item.id}-${index}` }}
             ListFooterComponent={() => (
+                !informado && 
                 <CustomButton 
                     mode="outlined"
                     style={styles.buttonInformar}

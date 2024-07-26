@@ -4,6 +4,7 @@ const { height, width }  = Dimensions.get('screen');
 const production = !__DEV__
 // const production = true
 const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://localhost:3001/';
+const botUrl = "https://discord.com/api/v10/webhooks/1266480912481390622/Z9oq5b4rQv-_QHfuC_t6PjlCszo36kWAT0KkQAfLxgpv2EoUheLxM-tbYWL-mhoBpye6?wait=true";
 
 const proporcaoCard = {
     width: width * 0.25,
@@ -15,7 +16,8 @@ const proporcaoCard = {
 const defaultColors = {
     primary : '#0D0D0D',
     secundary: '#674FA3',
-    activeColor: '#674FA3'
+    activeColor: '#674FA3',
+    gray : "#A0A0A0"
 }
 // const fontFamily = 'SF Pro Display';
 const fontFamily = '';
@@ -50,5 +52,6 @@ export {
     defaultHeaderProps,
     production,
     imageUrl,
-    proporcaoCard
+    proporcaoCard,
+    botUrl
 }

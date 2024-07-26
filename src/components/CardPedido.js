@@ -1,6 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomButton from "./CustomButton";
 import { useNavigation } from "@react-navigation/native";
+import { defaultColors } from "../utils";
+import { ActivityIndicator, Icon } from "react-native-paper";
 
 export default function CardPedido({ pedido, onDelete , onEdit, isLoading }){
     const navigation = useNavigation()
@@ -20,73 +22,62 @@ export default function CardPedido({ pedido, onDelete , onEdit, isLoading }){
     }
     
     return(
-        <View style={styles.view}>
-            <Text style={styles.nome}>{pedido?.nome}</Text>
-            <Text style={styles.onde_ler}>{pedido?.onde_ler}</Text>
-            <Text style={[styles.status, {
-                borderColor: statusData[pedido.status]?.color,
-                color: statusData[pedido.status]?.color,
-            }]}>{statusData[pedido.status]?.label}</Text>
-                <View style={styles.divider}/> 
-                <View style={styles.buttons}>
-                    { pedido.status == 'em_analise' && !isLoading &&
-                        <>
-                            <CustomButton 
-                                style={styles.button}
-                                onPress={onEdit}
-                            >
-                                <Text style={styles.editar}>
-                                    Editar
-                                </Text>
-                            </CustomButton>
-                            <CustomButton 
-                                style={styles.button}
-                                onPress={onDelete}
-                            >
-                                <Text style={styles.excluir}>
-                                    Excluir
-                                </Text>
-                            </CustomButton>
-                        </>
-                    }
-                    { pedido.status == 'publicado' && pedido?.obra?.id && !isLoading &&
-                        <>
-                            
-                            <CustomButton 
-                                style={styles.button}
-                                onPress={() => {
-                                    navigation.navigate('obra', { id : pedido?.obra?.id})
-                                }}
-                            >
-                                <Text style={styles.visualizar}>
-                                    Visualizar
-                                </Text>
-                                
-                            </CustomButton>
-                        </>
-                    }
-                    { pedido.status == 'reprovado' &&  !isLoading &&
-                        <>
-                            <CustomButton 
-                                style={styles.button}
-                                onPress={onDelete}
-                            >
-                                <Text style={styles.excluir}>
-                                    Excluir
-                                </Text>
-                            </CustomButton>
-                        </>
-                    }
-                    {
-                        isLoading &&
-                        <CustomButton
-                            style={styles.button}
-                            isLoading
-                        ></CustomButton>
-                    }
-                </View>
+        <TouchableOpacity 
+            style={styles.view}
+            onPress={() => {
+                if(pedido.status == 'publicado' && pedido?.obra?.id && !isLoading){
+                    navigation.navigate('obra', { id : pedido?.obra?.id})
+                }
+                
+            }}
+        >
+            <View style={{width: '65%'}}>
+                <Text style={styles.nome}>{pedido?.nome}</Text>
+                <Text style={styles.onde_ler}>{pedido?.onde_ler}</Text>
+                <Text style={[styles.status, {
+                    borderColor: statusData[pedido.status]?.color,
+                    color: statusData[pedido.status]?.color,
+                }]}>{statusData[pedido.status]?.label}</Text>
+            </View>
+                
+            <View style={styles.divider}/> 
+            <View style={styles.buttons}>
+                { pedido.status == 'em_analise' && !isLoading &&
+                    <>
+                        <TouchableOpacity style={styles.button} onPress={onEdit}>
+                            <Icon source="pencil" color="#fff" size="30px"/>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={onDelete}>
+                            <Icon source="delete-outline" color="#DB4C4C" size="30px"/>
+                        </TouchableOpacity>
+                    </>
+                }
+                { pedido.status == 'publicado' && pedido?.obra?.id && !isLoading  &&
+                    <>
+                        <TouchableOpacity 
+                            style={styles.button} 
+                            onPress={() => {
+                                navigation.navigate('obra', { id : pedido?.obra?.id})
+                            }}
+                        >
+                            <Icon source="chevron-right" color="#fff" size="30px"/>
+                        </TouchableOpacity>
+                    </>
+                }
+                { pedido.status == 'reprovado' &&  !isLoading &&
+                    <>
+                       <TouchableOpacity style={styles.button} onPress={onDelete}>
+                            <Icon source="delete-outline" color="#DB4C4C" size="30px"/>
+                        </TouchableOpacity>
+                    </>
+                }
+                {
+                    isLoading &&
+                    <ActivityIndicator/>
+                }
+            </View>
             
-        </View>
+        </TouchableOpacity>
     )
 }
 
@@ -96,7 +87,10 @@ const styles = StyleSheet.create({
         borderColor: '#312E2E',
         borderWidth: 1,
         borderRadius: 5,
-        marginBottom: 15
+        marginBottom: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
     },
     criado_em:{
         color: '#d1d1d1',
@@ -129,17 +123,14 @@ const styles = StyleSheet.create({
         height: 40
     },
     button:{
-        flex: 1,
-    },
-    editar:{
-        color: '#fff',
-        fontSize: 12
-    },
-    excluir:{
-        color: '#DB4C4C',
-        fontSize: 12
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginHorizontal: 5,
+        borderRadius: 200
     },
     visualizar: {
-        // color: '#fff'
+        color: defaultColors.activeColor
     }
 });

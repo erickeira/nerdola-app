@@ -72,6 +72,7 @@ export default function CapituloPage({ route }){
             }else{
                 response = await api.delete(`usuarios-capitulos-lidos/${leitura.id}/${id}`)
             }
+            setLido(marcarLido)
             getCapitulo()
         }catch(error){
             console.log(error)

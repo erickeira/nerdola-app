@@ -26,7 +26,7 @@ export default function PerfilPage(){
     const [ showIrTopo, setShowIrTopo] = useState(false)
     const [ filtros , setFiltros] = useState({
         string: '',
-        statusleitura: [1,2,3]
+        statusleitura: []
     })
     const handleChange = (dado) => {
         setFiltros((prevFiltros) => ({...prevFiltros, ...dado}))
@@ -83,7 +83,8 @@ export default function PerfilPage(){
                     pagina: pag?.toString(),
                     limite: limite?.toString(),
                     statusleitura : (filtros.statusleitura?.length ? filtros.statusleitura : statusList.map(st => st.id)),
-                    temCapitulo :true
+                    temCapitulo :true,
+                    minhas : true
                 }
             })
             if(response.data?.length < limite){
@@ -231,7 +232,8 @@ export default function PerfilPage(){
                 }}
                 ListFooterComponent={() => {
                     if(!enReached && obras.length > 0) return (
-                        <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
+                        <></>
+                        // <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
                     )
                     return null
                 }}
