@@ -28,17 +28,17 @@ export default function CardCapitulo({
     const navigation = useNavigation()
     const imagePath = `${imageUrl}obras/${obra}/${imagem}`;
     const [imageError, setImageError] = useState(false)
-    const [capituloLido, setCapituloLido] = useState(lido || leitura == 3);
+    const [capituloLido, setCapituloLido] = useState(lido || leitura.status.id == 3);
 
     useEffect(() => {
-        let newLido = lido || leitura == 3
-        if(newLido != capituloLido) setCapituloLido(lido || leitura == 3)
+        let newLido = lido || leitura.status.id == 3
+        if(newLido != capituloLido) setCapituloLido(lido || leitura.status.id == 3)
     },[lido, leitura])
 
     return(
         <TouchableOpacity 
             onPress={() => {
-                navigation.navigate('capitulo', { id , leitura , lido: capituloLido})
+                navigation.navigate('capitulo', { id , leitura, lido: capituloLido})
             }}
         >
             <View style={styles.view}>
@@ -88,12 +88,12 @@ export default function CardCapitulo({
                     )
                 }
                 {
-                    [2,3].includes(leitura)  && (
+                    [2,3].includes(leitura.status.id)  && (
                         <Checkbox 
                             status={capituloLido ? 'checked' : 'unchecked'} 
                             color={defaultColors.activeColor}
                             onPress={() => {
-                                if(leitura == 2){
+                                if(leitura.status.id == 2){
                                     if(onLido) onLido(id, !lido)
                                     setCapituloLido(!capituloLido)
                                 }else{

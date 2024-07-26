@@ -37,8 +37,6 @@ export default function CardObra({
         navigation.navigate('obra', { id })
     }
 
-
-
     return(
         <TouchableOpacity onPress={handleClick}>
             <View style={styles.view}>

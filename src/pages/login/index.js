@@ -17,7 +17,7 @@ const { height, width }  = Dimensions.get('screen');
 export default function LoginPage(){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
-    const { isLoadingCheckAuth, handleCheckAuth } = useAuth()
+    const { isLoadingCheckAuth, handleCheckAuth, } = useAuth()
     const [ formulario, setFormulario] = useState({
         email: '',
         senha: ''

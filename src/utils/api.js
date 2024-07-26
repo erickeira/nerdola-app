@@ -7,6 +7,7 @@ import { navigationRef } from '../../App';
 import { CommonActions } from '@react-navigation/native';
 
 const apiUrl = production ? "https://api.nerdola.com.br/" : "http://localhost:3000/"
+console.log(apiUrl)
 
 const api = axios.create({
     baseURL: apiUrl,

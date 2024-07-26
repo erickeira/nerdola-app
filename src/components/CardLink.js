@@ -9,11 +9,15 @@ export default function CardLink({
     return(
         <TouchableOpacity onPress={onPress}>
             <View  style={styles.view}>
-                <View>
+                <View style={{width: '90%'}}>
                     <Text style={styles.siteNome}>
                         {link?.site?.nome}
                     </Text>
-                    <Text style={styles.url}>
+                    <Text 
+                        style={styles.url}
+                        numberOfLines={1} // Define o número máximo de linhas
+                        ellipsizeMode='tail'
+                    >
                         {link?.url}
                     </Text>
                 </View>
@@ -42,7 +46,8 @@ const styles = StyleSheet.create({
         marginBottom: 5
     },
     url:{
-        color: defaultColors.activeColor
+        color: defaultColors.activeColor,
+         maxWidth: '95%'
     }
 
 });

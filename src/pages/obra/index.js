@@ -256,7 +256,7 @@ export default function ObraPage({ route }){
                     onLido={handlePressCapitulo}
                     isLoading={isLoadingCapitulo}
                     capitulo={item}
-                    leitura={leitura.status.id}
+                    leitura={leitura}
                 />
               )
             }}

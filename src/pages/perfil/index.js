@@ -55,7 +55,7 @@ export default function PerfilPage(){
 
     useEffect(() =>{
         setIsLoading(true)
-        getObras()
+        getObras(1)
         getStatusList()
         getMe()
     },[])

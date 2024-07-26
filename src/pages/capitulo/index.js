@@ -1,6 +1,6 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, FlatList, Image, Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../utils/api";
 import { defaultColors, imageUrl, proporcaoCard } from "../../utils";
 import { Icon, IconButton,  Menu, Divider, PaperProvider, Checkbox  } from "react-native-paper";
@@ -35,7 +35,7 @@ export default function CapituloPage({ route }){
         try{
             const response = await api.get(`capitulos/${id}`)
             setCapitulo({ ...capitulo, ...response.data})
-           
+            console.log(response.data)
         }catch(error){
 
         } finally{
@@ -58,25 +58,27 @@ export default function CapituloPage({ route }){
 
         } 
     }
-
     
     const [isLoadingCapitulo, setIsLoadingCapitulo] = useState(null)
     const handlePressCapitulo = async ( marcarLido = true) => {
+        setIsLoadingCapitulo(true)
         try{
             let response = null
             if(marcarLido){
                 response = await api.post(`usuarios-capitulos-lidos`, {
-                    leitura: leitura.id,
-                    capitulo: id
+                    leitura: leitura.id.toString(),
+                    capitulo: id.toString()
                 })
             }else{
                 response = await api.delete(`usuarios-capitulos-lidos/${leitura.id}/${id}`)
             }
-           
+            getCapitulo()
         }catch(error){
+            console.log(error)
+            setIsLoadingCapitulo(false)
         } finally{
-            getObra()
-            setIsLoadingCapitulo(null)
+            getCapitulo()
+            setIsLoadingCapitulo(false)
         }
     }
 
@@ -127,14 +129,20 @@ export default function CapituloPage({ route }){
                     {descricao}
                 </Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
-                    <Chip style={{ width: 200, paddingVertical: 3}}>
-                        <Text style={{color: defaultColors.activeColor, fontSize: 12}}>
-                            Marcar como lido
-                        </Text>
+                    <Chip style={{ width: 200, paddingVertical: 3}} onPress={() => handlePressCapitulo(!lido)}>
                         {
-                            [2,3].includes(leitura)  && (
+                            isLoadingCapitulo ?
+                            <ActivityIndicator/>
+                            :
+                            <Text style={{color: defaultColors.activeColor, fontSize: 12}}>
+                                { lido ? "Desmarcar como lido " : "Marcar como lido" } 
+                            </Text>
+                        }
+                        
+                        {
+                            [2,3].includes(leitura?.status?.id)  && (
                                 <Checkbox 
-                                    status={'checked' } 
+                                    status={ lido ? 'checked' : 'unchecked' } 
                                     color={defaultColors.activeColor}
                                     onPress={() => {
                                     
@@ -153,16 +161,20 @@ export default function CapituloPage({ route }){
               return (
                 <CardLink 
                     link={item}
-                    onPress={() => {
-                        navigation.navigate('view', { url: item.url })
+                    onPress={async () => {
+                        handlePressCapitulo(!lido)
+                        await Linking.openURL(item.url);
+                        // navigation.navigate('view', { url: item.url })
                     }}
                 />
               )
             }}
             ListEmptyComponent={
-                <>
-                
-                </>
+                <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
+                       Nenhum site encontrado
+                    </Text>
+                </View>
             }
             keyExtractor={(item, index) => {  return `${item.id}-${index}` }}
 
@@ -173,6 +185,7 @@ export default function CapituloPage({ route }){
 
 const styles = StyleSheet.create({
     view: {
+        height: height
     },
     imageContainer:{
         width: width,

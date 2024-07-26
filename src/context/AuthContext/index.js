@@ -14,6 +14,7 @@ export const AuthContext = createContext({})
 export default function AuthProvider({children}){
     const navigation = useNavigation()
     const [ isLoadingCheckAuth, setLoadingCheckAuth] = useState(true)
+    const [authenticated, setAuthenticated] = useState(false)
 
     const handleCheckAuth = async () => {
         setLoadingCheckAuth(true)
@@ -30,6 +31,7 @@ export default function AuthProvider({children}){
             );
 
             setUsuario(response.data)
+            setAuthenticated(true)
         }catch(error){
         } finally {
             setLoadingCheckAuth(false)
@@ -57,7 +59,9 @@ export default function AuthProvider({children}){
             value={{
                 handleCheckAuth,
                 handleLogout,
-                isLoadingCheckAuth
+                isLoadingCheckAuth,
+                setAuthenticated,
+                authenticated
             }}
         >
             { children }
