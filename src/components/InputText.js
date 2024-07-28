@@ -21,6 +21,9 @@ const InputText = ({
     mb = 16,
     leftElement,
     rghtElement,
+    maxWidth,
+    focus,
+    numberOfLines
 }, ...others) => {
   const [text, setText] = useState({ semMascara : value || "" });
   const [mostrarSenha, setMostrarSenha] = useState( tipo == `senha`)
@@ -29,6 +32,15 @@ const InputText = ({
   useEffect(() => {
     if(value != text) setText({ semMascara : value || "" })
   },[value])
+
+  useEffect(() => {
+    if(focus){
+      textoRef.current?.focus()
+      console.log(textoRef)
+    }else{
+      textoRef.current?.blur()
+    }
+  },[focus])
 
 
   const handleChange = (comMascara, semMascara) => {
@@ -89,7 +101,11 @@ const InputText = ({
   }
 
   return (
-    <View style={{marginBottom: error ? 25: mb}}>
+    <View 
+      style={{
+        marginBottom: error ? 25: mb, 
+        maxWidth: maxWidth || '100%', 
+      }}>
         { !!label && <Text style={styles.label}>{label}</Text> }
         <View
             style={{...styles.view, ...containerStyle, ... {
@@ -104,7 +120,7 @@ const InputText = ({
                     if(onPressIn) onPressIn()
                 }}
                 mask={mascara[tipo?.toLowerCase()]}
-                ref={textoRef}
+                ref={others.hasOwnProperty('ref') ? ref :textoRef}
                 onChangeText={(comMascara, semMascara) => handleChange(comMascara, semMascara)}
                 value={text.semMascara}
                 placeholderTextColor='#666'
@@ -116,6 +132,7 @@ const InputText = ({
                 autoCapitalize={capitalize || ( tipo == `area` ? `sentences` : `none`)}
                 multiline={tipo == 'area' ? true : false}
                 keyboardType={verificaTeclado()}
+                numberOfLines={numberOfLines || 1}
             />
             {rghtElement}
             {

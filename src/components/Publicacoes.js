@@ -1,21 +1,23 @@
 import { useEffect, useState } from "react";
 import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl } from "react-native";
-import InputText from "../../components/InputText";
+import InputText from "./InputText";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useAuth } from "../../context/AuthContext";
-import api from "../../utils/api";
-import Chip from "../../components/Chip";
-import CardObra from "../../components/CardObra";
+import { useAuth } from "../context/AuthContext";
+import api from "../utils/api";
+import Chip from "./Chip";
+import CardObra from "./CardObra";
 import { Icon } from "react-native-paper";
-import { defaultColors } from "../../utils";
-import CustomButton from "../../components/CustomButton";
+import { defaultColors } from "../utils";
+import CustomButton from "./CustomButton";
+import CardPublicacao from "./CardPublicacao";
+import Snackbar from "react-native-snackbar";
 
 const { height, width }  = Dimensions.get('screen');
 
-export default function HomePage(){
+export default function Publicacoes({ route }){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
-    const [ obras , setObras] = useState([])
+    const [ publicacoes , setPublicacoes] = useState([])
     const [ tags , setTags] = useState([])
     const [pagina, setPagina] = useState(1)
     const [limite, setLimite] = useState(20)
@@ -26,15 +28,8 @@ export default function HomePage(){
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
     const [ filtros , setFiltros] = useState({
-        string: '',
-        tags: []
     })
-    const handleChange = (dado) => {
-        setFiltros((prevFiltros) => ({...prevFiltros, ...dado}))
-    }
-
     const [listRef, setListRef] = useState(null)
-
     const upButtonHandler = () => {
       listRef?.scrollToOffset({ 
         offset: 0, 
@@ -56,40 +51,43 @@ export default function HomePage(){
 
     useEffect(() =>{
         setIsLoading(true)
-        console.log('1')
-        getObras()
-        getTags()
+        getPublicacoes()
     },[])
 
     useEffect(() => {
         setIsLoading(true)
-        console.log('2')
-        getObras(1 , filtros)
+        getPublicacoes(1 , filtros)
     },[filtros])
 
-    const getObras = async (pag = 1, filtros = {}) => {
+    useEffect(() => {
+        if(isFocused){
+            getPublicacoes(pagina , filtros)
+        }
+    },[isFocused])
+
+    const getPublicacoes = async (pag = 1, filtros = {}) => {
         if(loading || loadingRefresh || loadingMore) return
         
         try{
-            const response = await api.get(`obras`, {
+            const response = await api.get(`publicacoes`, {
                 params: {
                     ...filtros,
                     pagina: pag?.toString(),
-                    limite: limite?.toString(),
-                    temCapitulo :true
+                    limite: limite?.toString()
                 }
             })
             if(response.data?.length < limite){
                 setEnReached(true)
             }
+            console.log('atualizar')
             if(pag == 1){
-                setObras([])
-                setObras(response.data)
+                setPublicacoes([])
+                setPublicacoes([...response.data])
                 setEnReached(false)
             }else{
-                const existingIds = obras.map(obra => obra.id); 
-                const newObras = response.data.filter(obra => !existingIds.includes(obra.id));
-                setObras([...obras, ...newObras]);
+                const existingIds = response.data.map(publicacao => publicacao.id); 
+                const oldPublicacao = publicacoes?.filter(publicacao => !existingIds.includes(publicacao.id));
+                setPublicacoes([...oldPublicacao, ...response.data]);
             }
             setPagina(pag)
         }catch(error){
@@ -101,30 +99,36 @@ export default function HomePage(){
         }
     }
 
-    const getTags = async () => {
-        try{
-            const response = await api.get(`tags`, {
-                params: {
-                    tageds: true
-                }
-            })
-            setTags(response.data)
-        }catch(error){
-
-        } 
-    }
 
     function refresh(){
         setIsLoadingRefresh(true)
-        setObras([])
-        console.log('3')
-        getObras(1) 
+        setPublicacoes([])
+        getPublicacoes(1) 
+    }
+
+    const handleExcluir = async (id) => {
+        try{
+            const response = await api.delete(`publicacoes/${id}`)
+            getPublicacoes(pagina , filtros)
+            Snackbar.show({
+                text: response.data?.message,
+                duration: 2000,
+                action: {
+                  text: 'OK',
+                  textColor: 'green',
+                  onPress: () => { /* Do something. */ },
+                },
+            });
+        }catch(error){
+            console.log(error)
+        } finally{
+        }
     }
 
     return(
         <>
             <FlatList
-                data={obras}
+                data={publicacoes}
                 ref={(ref) => {setListRef(ref)}}
                 onScroll={scrollHandler}
                 style={styles.view}
@@ -135,45 +139,16 @@ export default function HomePage(){
                         onRefresh={refresh}
                     />
                   }
-                ListHeaderComponent={(
-                    <View >
-                        <InputText
-                            placeholder="Pesquisar"
-                            value={filtros.string}
-                            onStopType={(string) => {
-                                handleChange({string})
-                            }}
-                            containerStyle={styles.textInput}
-                            height={45}
-                            leftElement={<Icon source={"magnify"} size={18} color="#666"/>}
-                        />
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tags}>
-                            {
-                                tags?.map((tag, index) => (
-                                    <Chip
-                                        key={index}
-                                        label={tag.nome}
-                                        value={tag.id}
-                                        onPress={(val) => {
-                                            let newTags = [...filtros.tags];
-                                            if (newTags.includes(val)) {
-                                                newTags = newTags.filter(tag => tag !== val);
-                                            } else {
-                                                newTags = [...newTags, val];
-                                            }
-                                            handleChange({ tags: newTags });
-                                        }}
-                                        isSelected={filtros.tags.includes(tag.id)}
-                                    />
-                                ))
-                            }
-                        </ScrollView> 
-                    </View>
-                )}
+                
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 renderItem={({item, index}) => {
-                    return ( <CardObra obra={item} />) 
+                    return ( 
+                        <CardPublicacao 
+                            handleExcluir={() => handleExcluir(item.id)}    
+                            publicacao={item} 
+                        />
+                    ) 
                 }}
                 ListEmptyComponent={
                     loading ? 
@@ -183,7 +158,7 @@ export default function HomePage(){
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            { filtros.string.length > 0 || filtros.tags.length > 0 ?  'Nenhum obra encontrada!' : 'Nenhum obra publicada!'  }
+                           Nenhuma publicação ainda!
                         </Text>
                     </View>
                 }
@@ -191,12 +166,11 @@ export default function HomePage(){
                 onEndReached={() => {
                     if(!loadingMore && !enReached && !loading && !loadingRefresh){
                         setLoadingMore(true)
-                        console.log('4', pagina + 1)
-                        getObras(pagina + 1)
+                        getPublicacoes(pagina + 1)
                     }
                 }}
                 ListFooterComponent={() => {
-                    if(!enReached && obras.length > 0) return (
+                    if(!enReached && publicacoes.length > 0) return (
                         <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
                     )
                     return null

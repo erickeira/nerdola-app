@@ -138,9 +138,9 @@ export default function CapituloPage({ route }){
                     {descricao}
                 </Text>
                 {
-                    [2,3].includes(leitura?.status?.id) &&  
+                    [2].includes(leitura?.status?.id) &&  
                     <View style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
-                        <Chip style={{ width: 200, paddingVertical: 3}} onPress={() => handlePressCapitulo(!lido)}>
+                        <Chip style={{ width: 200, paddingVertical: 3, height: 40}} onPress={() => handlePressCapitulo(!lido)}>
                             {
                                 isLoadingCapitulo ?
                                 <ActivityIndicator/>

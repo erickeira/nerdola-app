@@ -7,6 +7,7 @@ import codePush from "react-native-code-push";
 import AuthProvider from './src/context/AuthContext'
 import { defaultColors } from './src/utils';
 import NotificationProvider from './src/context/NotificationContext';
+import { PaperProvider } from 'react-native-paper';
 
 const height = Dimensions.get('screen').height;
 
@@ -61,6 +62,7 @@ function App() {
                 }, 50)
             }}
          >
+            
             {
                 !navigationReady || appStateVisible != 'active' ? 
                 <View
@@ -76,7 +78,9 @@ function App() {
                 : 
                 <AuthProvider>
                     <NotificationProvider>
-                        <Routes/>
+                        <PaperProvider>
+                            <Routes/>
+                        </PaperProvider>
                     </NotificationProvider>
                 </AuthProvider>
             }
@@ -91,8 +95,8 @@ const codePushOptions = {
     installMode: codePush.InstallMode.ON_NEXT_RESUME
 };
 
-// export default App;
-export default codePush(codePushOptions)(App);
+export default App;
+// export default codePush(codePushOptions)(App);
 
 const theme = {
     ...DefaultTheme,

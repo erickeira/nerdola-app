@@ -15,6 +15,7 @@ export default function AuthProvider({children}){
     const navigation = useNavigation()
     const [ isLoadingCheckAuth, setLoadingCheckAuth] = useState(true)
     const [authenticated, setAuthenticated] = useState(false)
+    const [usuario, setUsuario] = useState({})
 
     const handleCheckAuth = async () => {
         setLoadingCheckAuth(true)
@@ -61,7 +62,8 @@ export default function AuthProvider({children}){
                 handleLogout,
                 isLoadingCheckAuth,
                 setAuthenticated,
-                authenticated
+                authenticated,
+                usuario
             }}
         >
             { children }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
 
 
@@ -15,10 +15,15 @@ import PerfilStack from './stacks/perfilStack';
 import HomeStack from './stacks/homeStack';
 import PedidosStack from './stacks/pedidosStack';
 import { Icon } from 'react-native-paper';
+import PublicacoesStack from './stacks/publicacoesStack';
+import { navigationRef } from '../../App';
+import { useRoute } from '@react-navigation/native';
+import PublicarStack from './stacks/publicarStack';
 
 const Tab = createMaterialBottomTabNavigator();
 
 const TabNavigation = ({ navigation }) =>{
+
     return(
       <Tab.Navigator 
         screenOptions={{
@@ -41,6 +46,24 @@ const TabNavigation = ({ navigation }) =>{
         // shifting={true}
       >
         <Tab.Screen 
+          name="PublicacoesTab"  
+          component={ PublicacoesStack }   
+          options={{ 
+            headerTitleStyle: { opacity: 0 }, 
+            headerShown: true, 
+            headerTransparent: true,
+            tabBarLabel: 'Publicações',
+            tabBarBadge: false,
+            tabBarIcon: ({focused, color}) => (  
+              <Icon 
+                source={"timeline-text"} 
+                size={25} 
+                color={focused? defaultColors.activeColor : "#666"}
+              />
+            )
+          }}  
+        />
+        <Tab.Screen 
           name="HomeTab"  
           component={ HomeStack }   
           options={{ 
@@ -59,13 +82,32 @@ const TabNavigation = ({ navigation }) =>{
           }}  
         />
         <Tab.Screen 
+          name="PublicarTab"  
+          component={ PublicarStack }   
+          options={{ 
+            // headerTitleStyle: { opacity: 0 }, 
+            headerShown: true, 
+            // headerTransparent: true,
+            title: 'Publicar',
+            tabBarLabel: 'Publicar',
+            tabBarBadge: false,
+            tabBarIcon: ({focused, color}) => (  
+              <Icon 
+                source={"tooltip-plus-outline"} 
+                size={25} 
+                color={focused? defaultColors.activeColor : "#666"}
+              />
+            ),
+          }}  
+        />
+        <Tab.Screen 
           name="Pedidos"  
           component={ PedidosStack }   
           options={{ 
             headerTitleStyle: { opacity: 0 }, 
             headerShown: true, 
             headerTransparent: true,
-            tabBarLabel: 'Início',
+            tabBarLabel: 'Pedidos',
             tabBarBadge: false,
             tabBarIcon: ({focused, color}) => (  
               <Icon 
@@ -83,7 +125,7 @@ const TabNavigation = ({ navigation }) =>{
             headerTitleStyle: { opacity: 0 }, 
             headerShown: true, 
             headerTransparent: true,
-            tabBarLabel: 'Início',
+            tabBarLabel: 'Perfil',
             tabBarBadge: false,
             tabBarIcon: ({focused, color}) => (  
               <Icon 

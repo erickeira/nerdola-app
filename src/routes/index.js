@@ -7,10 +7,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import LoginPage from '../pages/login';
 import CadastroPage from '../pages/cadastros';
-import { defaultColors, defaultHeaderProps } from '../utils';
+import { defaultColors, defaultHeaderProps, defaultStyles } from '../utils';
 import ObraPage from '../pages/obra';
 import CapituloPage from '../pages/capitulo';
 import ViewPage from '../pages/view/view';
+import ComentariosPage from '../pages/comentarios';
+import PublicacoesPage from '../pages/publicacoes';
 
 const Stack = createStackNavigator();
 export default function Routes() {
@@ -61,6 +63,32 @@ export default function Routes() {
                     headerBackgroundContainerStyle:{
                         backgroundColor: defaultColors.primary
                     }
+                }}
+            />
+            <Stack.Screen 
+                name="comentarios" 
+                component={ComentariosPage} 
+                options={{
+                headerTitle:  "Comentários",
+                headerTitleAlign: 'left',
+                headerRight: ()  => null,
+                headerShown: true, 
+                // headerTransparent: true,
+                headerStyle: defaultStyles.defaultHeaderStyles,
+                headerTintColor: '#fff'      
+                }}
+            />
+            <Stack.Screen 
+                name="publicar" 
+                component={PublicacoesPage} 
+                options={{
+                headerTitle:  "Publicar",
+                headerTitleAlign: 'left',
+                // headerRight: ()  => null,
+                headerShown: true, 
+                // headerTransparent: true,
+                headerStyle: defaultStyles.defaultHeaderStyles,
+                headerTintColor: '#fff'      
                 }}
             />
         </Stack.Navigator>
