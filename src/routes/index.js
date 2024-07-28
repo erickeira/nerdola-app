@@ -13,6 +13,10 @@ import CapituloPage from '../pages/capitulo';
 import ViewPage from '../pages/view/view';
 import ComentariosPage from '../pages/comentarios';
 import PublicacoesPage from '../pages/publicacoes';
+import PublicacoesStack from './stacks/publicacoesStack';
+import PublicarStack from './stacks/publicarStack';
+import PublicarPage from '../pages/publicar';
+import PerfilPage from '../pages/perfil';
 
 const Stack = createStackNavigator();
 export default function Routes() {
@@ -80,9 +84,22 @@ export default function Routes() {
             />
             <Stack.Screen 
                 name="publicar" 
-                component={PublicacoesPage} 
+                component={PublicarPage} 
                 options={{
                 headerTitle:  "Publicar",
+                headerTitleAlign: 'left',
+                // headerRight: ()  => null,
+                headerShown: true, 
+                // headerTransparent: true,
+                headerStyle: defaultStyles.defaultHeaderStyles,
+                headerTintColor: '#fff'      
+                }}
+            />
+            <Stack.Screen 
+                name="verperfil" 
+                component={PerfilPage} 
+                options={{
+                headerTitle:  "",
                 headerTitleAlign: 'left',
                 // headerRight: ()  => null,
                 headerShown: true, 

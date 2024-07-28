@@ -46,7 +46,7 @@ api?.interceptors?.response.use(function (response) {
     }
     if(status != 401){
         Snackbar.show({
-            text: data?.message,
+            text: data?.message || 'Erro inesperado tente novamente!',
             duration: 3000,
             action: {
               text: 'OK',

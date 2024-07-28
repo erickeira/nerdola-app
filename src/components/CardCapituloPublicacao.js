@@ -8,6 +8,7 @@ const { height, width }  = Dimensions.get('screen');
 
 export default function CardCapituloPublicacao({
     obra,
+    capitulo,
     handleClick
 }){
     const{
@@ -15,7 +16,6 @@ export default function CardCapituloPublicacao({
         imagem,
         nome,
         formato,
-        capitulo
     } = obra
 
     const navigation = useNavigation()
@@ -23,7 +23,12 @@ export default function CardCapituloPublicacao({
     const [imageError, setImageError] = useState(false)
 
     return(
-        <TouchableOpacity onPress={handleClick}>
+        <TouchableOpacity 
+            onPress={() => {
+                if(handleClick) handleClick()
+            }}
+        style={{width: width - 80}}
+        >
             <View style={styles.view}>
                 <View style={styles.imageContainer}>
                     {
@@ -67,7 +72,7 @@ export default function CardCapituloPublicacao({
 const styles = StyleSheet.create({
     view: {
       padding: 10,
-      width: "90%",
+      width: "100%",
       overflow: 'scroll',
       flexDirection: 'row',
       gap: 10,

@@ -7,11 +7,12 @@ import api from "../../utils/api";
 import Chip from "../../components/Chip";
 import CardObra from "../../components/CardObra";
 import { Avatar, Icon } from "react-native-paper";
-import { defaultColors } from "../../utils";
+import { defaultColors, imageUrl } from "../../utils";
 
 const { height, width }  = Dimensions.get('screen');
 
-export default function PerfilPage(){
+export default function PerfilPage({ route }){
+    const id = route?.params?.id 
     const navigation = useNavigation()
     const { usuario, handleLogout } = useAuth()
     const isFocused = useIsFocused()
@@ -57,7 +58,7 @@ export default function PerfilPage(){
         setIsLoading(true)
         getObras(1)
         getStatusList()
-        getMe()
+        getUser()
     },[])
 
     useEffect(() =>{
@@ -66,7 +67,7 @@ export default function PerfilPage(){
             getObras()
             
         }
-        getMe()
+        getUser()
     },[isFocused])
 
     useEffect(() => {
@@ -76,17 +77,18 @@ export default function PerfilPage(){
 
     const getObras = async (pag = 1, filtros = {}) => {
         if(loading || loadingRefresh) return
+        const params =  {
+            ...filtros,
+            pagina: pag?.toString(),
+            limite: limite?.toString(),
+            statusleitura : (filtros.statusleitura?.length ? filtros.statusleitura : statusList.map(st => st.id)),
+            temCapitulo :true,
+        }
+        if(id) params.usuario = id
+        else params.minhas = true
+
         try{
-            const response = await api.get(`obras`, {
-                params: {
-                    ...filtros,
-                    pagina: pag?.toString(),
-                    limite: limite?.toString(),
-                    statusleitura : (filtros.statusleitura?.length ? filtros.statusleitura : statusList.map(st => st.id)),
-                    temCapitulo :true,
-                    minhas : true
-                }
-            })
+            const response = await api.get(`obras`, {  params })
             if(response.data?.length < limite){
                 setEnReached(true)
             }
@@ -125,37 +127,59 @@ export default function PerfilPage(){
     }
     
     useEffect(() => {
-        navigation.setOptions({
-            headerRight : () => (
-                <TouchableOpacity 
-                    style={{
-                        marginRight: 25,
-                        
-                    }}
-                    onPress={handleLogout}
-                >
-                    <Text style={{color: '#EC4A55'}}>
-                        Sair
-                    </Text>
-                </TouchableOpacity>
-            )
-        })
+        if(!id){
+            navigation.setOptions({
+                headerRight : () => (
+                    <TouchableOpacity 
+                        style={{
+                            marginRight: 25,
+                            
+                        }}
+                        onPress={handleLogout}
+                    >
+                        <Text style={{color: '#EC4A55'}}>
+                            Sair
+                        </Text>
+                    </TouchableOpacity>
+                )
+            })
+        }
+       
     },[])
 
-    const [ me, setMe] = useState(null)
+    const [ user, setUser] = useState(null)
     const [ isLoadingMe, setIsLoadingMe] = useState(false)
-    const getMe = async () => {
+    const getUser = async () => {
         setIsLoadingMe(true)
         try{
-            const response = await api.get('usuarios/me')
-            setMe(response.data)
+            const response = await api.get(`usuarios/${id || 'me'}`)
+            setUser(response.data)
         }catch(error){
         } finally {
             setIsLoadingMe(false)
         }
     }
 
+    const totais = {
+        1: user?.obras?.total_interessadas,
+        2: user?.obras?.total_lendo,
+        3: user?.obras?.total_lidos
+    }
 
+    const imagePath = `${imageUrl}usuarios/${user?.id}/${user?.imagem}`;
+    const [imageError, setImageError] = useState(false)
+
+    const [ isLoadingSeguindo, setIsLoadingSeguindo] = useState(false)
+    const handleSeguir = async () => {
+        setIsLoadingSeguindo(true)
+        try{
+            await api.post(`usuarios/${user?.id}/seguir`)
+            getUser()
+        }catch(error){
+        } finally {
+            setIsLoadingSeguindo(false)
+        }
+    }
     return(
         <>
             <FlatList
@@ -171,24 +195,89 @@ export default function PerfilPage(){
                     />
                   }
                 ListHeaderComponent={(
-                    <View >
-                        <View style={{ flexDirection: 'row', alignItems: 'center',  marginBottom: 40, gap: 20}}> 
-                            <Avatar.Text size={60} label={ me?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } />
+                    <View style={{width: '100%'}}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',   gap: 20, padding: 10}}> 
                             <View>
                                 <Text style={styles.me_nome}>
-                                    { me?.nome }
+                                    { user?.nome }
                                 </Text>
                                 <Text style={styles.email}>
-                                    { me?.email }
+                                    { user?.email }
                                 </Text>
+                                <View style={{flexDirection: 'row' , gap: 10}}>
+                                    <Text style={styles.total_seg}>
+                                        { user?.total_seguidores || 0 } seguidores
+                                    </Text>
+                                    <Text style={styles.total_seg}>
+                                        { user?.total_seguindo || 0 } seguindo
+                                    </Text>
+                                </View>
+                               
+                                   
                             </View>
+                            {
+                                user?.imagem && !imageError ?
+                                <View style={styles.imageContainer}>
+                                    <Image
+                                        style={styles.imagem}
+                                        source={{ uri : imagePath }}
+                                        onError={(error) => {
+                                            setImageError(true)
+                                        }}
+                                    />
+                                </View>
+                                :
+                                
+                                <Avatar.Text 
+                                    size={60} 
+                                    color="#000"
+                                    label={ user?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
+                                />
+                            }
+                            
                         </View>
+                        {
+                            user?.id && usuario.id != user?.id ? 
+                            <Chip
+                                style={{
+                                    backgroundColor: user.seguindo ? defaultColors.primary : '#fff',
+                                    width: '50%',
+                                    paddingVertical: 8,
+                                    marginBottom: 40,
+                                }}
+                                onPress={handleSeguir}
+                                isSelected={false}
+                                isLoading={isLoadingSeguindo}
+                            >
+                                <Text 
+                                    style={{
+                                       color: !user.seguindo ? defaultColors.primary : '#fff',
+                                    }} 
+                                >
+                                    { user.seguindo ? 'Deixar de seguir' : 'Seguir' }
+                                </Text>
+                            </Chip>
+                            :
+                            <Chip
+                                label={"Editar perfil"}
+                                style={{
+                                    width: '50%',
+                                    paddingVertical: 8,
+                                    marginBottom: 40,
+                                }}
+                                onPress={() => {
+                                    navigation.navigate('editar-perfil')
+                                }}
+                                isSelected={false}
+                            />
+                        }
+
+                        
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusList}>
                             {
                                 statusList?.map((status, index) => (
                                     <Chip
                                         key={index}
-                                        label={status.nome}
                                         value={status.id}
                                         onPress={(status) => {
                                             let newStatusleitura = [...filtros.statusleitura];
@@ -200,7 +289,16 @@ export default function PerfilPage(){
                                             handleChange({ statusleitura: newStatusleitura });
                                         }}
                                         isSelected={filtros.statusleitura.includes(status.id)}
-                                    />
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 12,
+                                                color :filtros.statusleitura.includes(status.id) ? '#000' : defaultColors.gray
+                                            }}
+                                        >
+                                            {`(${totais[status.id] || 0}) ${status.nome}`}
+                                        </Text>
+                                    </Chip>
                                 ))
                             }
                         </ScrollView> 
@@ -219,7 +317,7 @@ export default function PerfilPage(){
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            {  filtros.string.length > 0 || filtros.statusleitura.length > 0 ?  'Nenhum obra encontrada!' : 'Nenhum obra publicada!'  }
+                            {  filtros.string.length > 0 || filtros.statusleitura.length > 0 ?  'Nenhum leitura ainda!' : 'Nenhum leitura ainda!'  }
                         </Text>
                     </View>
                 }
@@ -276,7 +374,12 @@ const styles = StyleSheet.create({
         marginBottom: 5
     },
     email: {
-       
+       color: defaultColors.gray,
+       marginBottom: 8
+    },
+    total_seg:{
+        color: defaultColors.gray,
+        fontSize: 12
     },
     statusList: {
         display: 'flex',
@@ -301,5 +404,24 @@ const styles = StyleSheet.create({
     textInput:{
         backgroundColor: '#191919',
         borderWidth: 0
-    }
+    },
+    numeros:{
+        flexDirection: 'row',
+        gap: 8
+    },
+    imageContainer:{
+        width: 60,
+        height: 60,
+        borderColor: '#312E2E',
+        borderWidth: 1,
+        marginBottom: 5,
+        borderRadius: 100,
+        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    imagem:{
+        width: '100%',
+        height: '100%'
+    },
 });

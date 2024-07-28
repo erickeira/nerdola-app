@@ -2,7 +2,7 @@ import { Dimensions, StyleSheet } from 'react-native';
 
 const { height, width }  = Dimensions.get('screen');
 // const production = !__DEV__
-const production = true
+const production = false
 const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://192.168.1.14:3001/';
 const botUrl = "https://discord.com/api/v10/webhooks/1266480912481390622/Z9oq5b4rQv-_QHfuC_t6PjlCszo36kWAT0KkQAfLxgpv2EoUheLxM-tbYWL-mhoBpye6?wait=true";
 
@@ -45,6 +45,15 @@ const defaultHeaderProps ={
     headerTintColor: '#fff',
 }
 
+function gerarCorAleatoriaRGBA() {
+    var r = Math.floor(Math.random() * 256); 
+    var g = Math.floor(Math.random() * 256);
+    var b = Math.floor(Math.random() * 256); 
+
+    var corRGBA = "rgba(" + r + ", " + g + ", " + b + ", " + 1 + ")";
+    return corRGBA;
+}
+
 
 export {
     defaultStyles,
@@ -53,5 +62,6 @@ export {
     production,
     imageUrl,
     proporcaoCard,
-    botUrl
+    botUrl,
+    gerarCorAleatoriaRGBA
 }

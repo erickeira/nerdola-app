@@ -1,6 +1,6 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, FlatList, Image, Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../utils/api";
 import { botUrl, imageUrl } from "../../utils";
 import { Icon, IconButton,  Menu, Divider, PaperProvider  } from "react-native-paper";
@@ -11,6 +11,7 @@ import Chip from "../../components/Chip";
 import CustomButton from "../../components/CustomButton";
 import Snackbar from "react-native-snackbar";
 import axios from "axios";
+import CardLink from "../../components/CardLink";
 const { height, width }  = Dimensions.get('screen');
 
 export default function ObraPage({ route }){
@@ -24,10 +25,12 @@ export default function ObraPage({ route }){
         nome,
         imagem,
         descricao,
-        leitura
+        leitura,
+        links
     } = obra
     const imagePath = `${imageUrl}obras/${id}/${imagem}`;
     const [imageError, setImageError] = useState(false)
+    const [ondeLer, setOndeLer] = useState(false)
    
     const getObra = async () => {
         try{
@@ -182,7 +185,7 @@ export default function ObraPage({ route }){
         <SafeAreaView style={styles.view}>
           <FlatList
             extraData={leitura}
-            data={ ordem == "ascending" ? obra?.capitulos : obra?.capitulos.reverse()} 
+            data={ ondeLer ? links : (ordem == "ascending" ? obra?.capitulos : obra?.capitulos.reverse())} 
             ref={ref => setCapitulosRef(ref)}
             ListHeaderComponent={(
               <View >
@@ -253,7 +256,40 @@ export default function ObraPage({ route }){
                 }
                    
                 </LinearGradient>
-                <View style={{ width: '100%', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
+                <View style={{ width: '100%',flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
+                    {
+                        !ondeLer ? 
+                        <Chip 
+                            label={""}
+                            isSelected={false}
+                            onPress={(id) => {
+                                setOndeLer(true)
+                            }}
+                            style={{ alignItems: 'center' }}
+                        >
+                            
+                            <Text>
+                                Onde ler
+                            </Text>
+                            <Icon source="web" size={15}/>
+                        </Chip>
+                        :
+                        <Chip 
+                            label={""}
+                            isSelected={false}
+                            onPress={(id) => {
+                                setOndeLer(false)
+                            }}
+                            style={{ alignItems: 'center' }}
+                        >
+                            
+                            <Text>
+                                Capitulos
+                            </Text>
+                            <Icon source="format-list-checkbox" size={15}/>
+                        </Chip>
+                    }
+                   
                     <Chip 
                         label={""}
                         isSelected={false}
@@ -271,30 +307,41 @@ export default function ObraPage({ route }){
                 </View>
               
                 <Text style={styles.capitulos}>
-                    Capitulos
+                     { ondeLer?  'Onde ler' :'Capitulos' }
                 </Text>
               </View>
             )}
             renderItem={({item, index}) => {
-              return (
-                <CardCapitulo
-                    onLido={handlePressCapitulo}
-                    isLoading={isLoadingCapitulo}
-                    capitulo={item}
-                    leitura={leitura}
-                    obraNome={nome}
-                    obraId={id}
-                />
-              )
+                if(ondeLer){
+                    return (
+                        <CardLink 
+                            link={item} 
+                            onPress={() => {
+                                Linking.openURL(item.url)
+                            }}    
+                        />
+                    )
+                }
+                return (
+                    <CardCapitulo
+                        onLido={handlePressCapitulo}
+                        isLoading={isLoadingCapitulo}
+                        capitulo={item}
+                        leitura={leitura}
+                        obra={obra}
+                    />
+                )
             }}
             ListEmptyComponent={
-                <>
-                
-                </>
+                <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
+                        { ondeLer ? 'Nenhum link informado!' : 'Nenhum capitulo ainda!' }
+                    </Text>
+                </View>
             }
             keyExtractor={(item, index) => {  return `${item.id}-${index}` }}
             ListFooterComponent={() => (
-                !informado && 
+                !informado &&  !ondeLer &&
                 <CustomButton 
                     mode="outlined"
                     style={styles.buttonInformar}

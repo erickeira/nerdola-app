@@ -11,6 +11,9 @@ import Chip from "../../components/Chip";
 import CustomButton from "../../components/CustomButton";
 import Snackbar from "react-native-snackbar";
 import CardLink from "../../components/CardLink";
+import Comentarios from "../../components/Comentarios";
+import CardComentario from "../../components/CardComentario";
+import InputText from "../../components/InputText";
 const { height, width }  = Dimensions.get('screen');
 
 export default function CapituloPage({ route }){
@@ -19,7 +22,7 @@ export default function CapituloPage({ route }){
     const [ isLoading, setIsLoading ] = useState(true)
     const [ capitulo, setCapitulo] = useState({})
     const [ capitulosRef, setCapitulosRef ] = useState(null)
-    const { id, leitura, obraNome  } = route.params
+    const { id, leitura, obra  } = route.params
     const{
         nome,
         numero,
@@ -48,6 +51,10 @@ export default function CapituloPage({ route }){
         getCapitulo()
         getStatusList()
     },[])
+
+    useEffect(() => {
+        if(isFocused) getCapitulo()
+    },[isFocused])
 
     const [ statusList, setStatusList] = useState([])
     const getStatusList = async () => {
@@ -83,16 +90,90 @@ export default function CapituloPage({ route }){
         }
     }
 
+    useEffect(() =>{
+        setIsLoading(true)
+        getComentarios()
+    },[])
+
+    useEffect(() => {
+        if(isFocused){
+            getComentarios()
+        }
+    },[isFocused])
+    const [ comentarios , setComentarios] = useState([])
+
+    const getComentarios = async (pag = 1) => {
+        try{
+            const response = await api.get(`comentarios`, {
+                params: {
+                    capitulo: id
+                }
+            })
+
+            setComentarios([])
+            setComentarios([...response.data])
+            setEnReached(false)
+
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoading(false)
+        }
+    }
+
+    const [comentario, setComentario] = useState("")
+    const [isLoadingComentando, setIsLoadingComentando] = useState(false)
+    
+    const handleComentar = async () => {
+        setIsLoadingComentando(true)
+        try{
+            await api.post(`comentarios`,{
+                capitulo: id,
+                comentario: comentario
+            })
+            getComentarios()
+            getCapitulo()
+            setComentario("")
+            setTimeout(() => {
+                downButtonHandler()
+            }, 1000);
+           
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoadingComentando(false)
+        }
+    }
+
+    const handleExcluir = async (id) => {
+        try{
+            await api.delete(`comentarios/${id}`)
+            getComentarios()
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoadingComentando(false)
+        }
+    }
+
+    
+    const downButtonHandler = () => {
+        capitulosRef?.scrollToEnd({ 
+          animated: true 
+        });
+    };
+
+
     if(isLoading) return (
         <View style={{ paddingVertical: 100, alignItems: 'center', justifyContent: 'center' }}>
             <ActivityIndicator color="#fff" size={30} style={{marginTop: 100}}/>
         </View>
     )
     return(
-        <SafeAreaView style={styles.view}>
+        <>
           <FlatList
             extraData={leitura}
-            data={capitulo?.links} 
+            data={comentarios} 
             ref={ref => setCapitulosRef(ref)}
             ListHeaderComponent={(
               <View>
@@ -115,10 +196,15 @@ export default function CapituloPage({ route }){
                             />
                         }
                     </View>
-                    <View style={{ width: '100%'}}>
+                    <TouchableOpacity 
+                        style={{ width: '100%'}}
+                        onPress={() => {
+                            navigation.navigate('obra', { id : obra.id})
+                        }}
+                    >
                         <View >
                             <Text style={styles.obraNome}>
-                                {obraNome}
+                                {obra?.nome}
                             </Text>
                         </View>
                         <View style={{ width: '100%'}}>
@@ -131,66 +217,95 @@ export default function CapituloPage({ route }){
                                 Numero: {numero}
                             </Text>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                    
                 </View>
                 <Text style={styles.descricao}>
                     {descricao}
                 </Text>
-                {
-                    [2].includes(leitura?.status?.id) &&  
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end'}}>
-                        <Chip style={{ width: 200, paddingVertical: 3, height: 40}} onPress={() => handlePressCapitulo(!lido)}>
-                            {
-                                isLoadingCapitulo ?
-                                <ActivityIndicator/>
-                                :
-                                <Text style={{color: defaultColors.activeColor, fontSize: 12}}>
-                                    { lido ? "Desmarcar como lido " : "Marcar como lido" } 
-                                </Text>
-                            }
-                            
-                            {
-                                !isLoadingCapitulo && (
-                                    <Checkbox 
-                                        status={ lido ? 'checked' : 'unchecked' } 
-                                        color={defaultColors.activeColor}
-                                        onPress={() => handlePressCapitulo(!lido)}
-                                    />
-                                )
-                            }
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10}}>
+                        <Chip
+                            onPress={() => {
+                                navigation.navigate('publicar', {
+                                    obra,
+                                    capitulo,
+                                })
+                            }}
+                            style={{ paddingVertical: 3, height: 40}} 
+                        >
+                            <Text>
+                                Publicar no feed
+                            </Text>
                         </Chip>
+                        {
+                            [2].includes(leitura?.status?.id) &&  
+                            <Chip style={{ width: 200, paddingVertical: 3, height: 40}} onPress={() => handlePressCapitulo(!lido)}>
+                                {
+                                    isLoadingCapitulo ?
+                                    <ActivityIndicator/>
+                                    :
+                                    <Text style={{color: defaultColors.activeColor, fontSize: 12}}>
+                                        { lido ? "Desmarcar como lido " : "Marcar como lido" } 
+                                    </Text>
+                                }
+                                
+                                {
+                                    !isLoadingCapitulo && (
+                                        <Checkbox 
+                                            status={ lido ? 'checked' : 'unchecked' } 
+                                            color={defaultColors.activeColor}
+                                            onPress={() => handlePressCapitulo(!lido)}
+                                        />
+                                    )
+                                }
+                            </Chip>
+                        }
                     </View>
-                }
+                
                
                 <Text style={styles.capitulos}>
-                    Onde ler
+                { capitulo?.total_comentarios } comentarios
                 </Text>
               </View>
             )}
             renderItem={({item, index}) => {
               return (
-                <CardLink 
-                    link={item}
-                    onPress={async () => {
-                        handlePressCapitulo(!lido)
-                        await Linking.openURL(item.url);
-                        // navigation.navigate('view', { url: item.url })
-                    }}
+                <CardComentario 
+                    comentario={item}
+                    handleExcluir={() => handleExcluir(item.id)}
                 />
               )
             }}
             ListEmptyComponent={
                 <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                     <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                       Nenhum site encontrado
+                       Nenhum comentário ainda
                     </Text>
                 </View>
             }
             keyExtractor={(item, index) => {  return `${item.id}-${index}` }}
-
           />
-        </SafeAreaView>
+          <View style={styles.containerComment}>
+                <InputText
+                    placeholder="Faça um comentário"
+                    containerStyle={styles.input}
+                    mb={0}
+                    maxWidth={width - 130}
+                    value={comentario}
+                    onChange={(comentario) => {
+                        setComentario(comentario)
+                    }}
+                />
+                <CustomButton 
+                    style={styles.button}
+                    onPress={handleComentar}
+                    isLoading={isLoadingComentando}
+                    disabled={isLoadingComentando || comentario.length < 1}
+                >
+                    Publicar
+                </CustomButton>
+            </View>
+        </>
     )
 }
 
@@ -278,5 +393,24 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         color: defaultColors.gray,
         width: "70%",
+    },
+    buttons:{
+        paddingHorizontal: 20,
+        marginBottom: 10
+    },
+    containerComment:{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    input: {
+        borderWidth: 0,
+    },
+    button:{
+        width: 100,
+        height: 40,
+        justifyContent: 'center',
+        backgroundColor: defaultColors.activeColor,
+        marginRight: 20
     }
 });

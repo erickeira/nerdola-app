@@ -79,7 +79,7 @@ export default function Publicacoes({ route }){
             if(response.data?.length < limite){
                 setEnReached(true)
             }
-            console.log('atualizar')
+            setEnReached(true)
             if(pag == 1){
                 setPublicacoes([])
                 setPublicacoes([...response.data])
@@ -93,9 +93,12 @@ export default function Publicacoes({ route }){
         }catch(error){
             console.log(error)
         } finally{
-            setIsLoading(false)
-            setLoadingMore(false)
-            setIsLoadingRefresh(false)
+            setTimeout(() => {
+                setIsLoading(false)
+                setLoadingMore(false)
+                setIsLoadingRefresh(false)
+            }, 300);
+
         }
     }
 
@@ -153,7 +156,7 @@ export default function Publicacoes({ route }){
                 ListEmptyComponent={
                     loading ? 
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
-                        <ActivityIndicator color="#fff" size={30}/>
+                        {/* <ActivityIndicator color="#fff" size={30}/> */}
                     </View>
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
@@ -171,7 +174,8 @@ export default function Publicacoes({ route }){
                 }}
                 ListFooterComponent={() => {
                     if(!enReached && publicacoes.length > 0) return (
-                        <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
+                        <></>
+                        // <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
                     )
                     return null
                 }}

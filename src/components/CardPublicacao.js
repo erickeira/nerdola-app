@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View , TouchableOpacity} from "react-native";
+import { StyleSheet, Text, View , TouchableOpacity, Image} from "react-native";
 import { Avatar, Icon } from "react-native-paper";
-import { defaultColors } from "../utils";
+import { defaultColors, gerarCorAleatoriaRGBA, imageUrl } from "../utils";
 import { useState } from "react";
 import CardCapituloPublicacao from "./CardCapituloPublicacao";
 import { useNavigation } from "@react-navigation/native";
@@ -37,18 +37,41 @@ export default function CardPublicacao({
     }
 
     const handleClick = (obra) => {
-        navigation.navigate('capitulo', { id: obra.capitulo.id, obraNome: obra.nome })
+        navigation.navigate('capitulo', { id: obra.capitulo.id, obra })
     }
 
     const handleComentarios = async () => {
         navigation.navigate('comentarios', { publicacao })
     }
+    const imagePath = `${imageUrl}usuarios/${publicacao?.usuario?.id}/${publicacao?.usuario?.imagem}`;
+    const [imageError, setImageError] = useState(false)
 
     return(
         <View style={styles.view}>
-            <View>
-                <Avatar.Text size={30} label={ publicacao?.usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } />
-            </View>
+            <TouchableOpacity
+                onPress={() => {
+                    navigation.navigate('verperfil', { id : publicacao?.usuario?.id })
+                }}
+            >
+                {
+                    publicacao?.usuario?.imagem && !imageError ?
+                    <View style={styles.imageContainer}>
+                        <Image
+                            style={styles.imagem}
+                            source={{ uri : imagePath }}
+                            onError={(error) => {
+                                setImageError(true)
+                            }}
+                        />
+                    </View>
+                    :
+                    
+                    <Avatar.Text 
+                        size={30} 
+                        label={ publicacao?.usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
+                    />
+                }
+            </TouchableOpacity>
             <View style={{width: '95%'}}>
                 <View style={styles.head}>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3}}>
@@ -94,6 +117,7 @@ export default function CardPublicacao({
                     !!publicacao?.obra?.id && (
                         <CardCapituloPublicacao
                             obra={publicacao?.obra}
+                            capitulo={publicacao.obra?.capitulo}
                             handleClick={() => handleClick(publicacao?.obra)}
                         />
                     )
@@ -187,5 +211,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingTop:20,
         gap: 20
-    }
+    },
+    imageContainer:{
+        width: 30,
+        height: 30,
+        borderColor: '#312E2E',
+        borderWidth: 1,
+        marginBottom: 5,
+        borderRadius: 100,
+        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    imagem:{
+        width: '100%',
+        height: '100%'
+    },
 });

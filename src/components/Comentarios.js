@@ -14,7 +14,7 @@ import CardComentario from "./CardComentario";
 
 const { height, width }  = Dimensions.get('screen');
 
-export default function Comentarios({ route }){
+export default function Comentarios({ capitulo, publicacao }){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
     const [ comentarios , setComentarios] = useState([])
@@ -26,7 +26,6 @@ export default function Comentarios({ route }){
     const [loadingMore, setLoadingMore] = useState(false)
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
-    const { publicacao, capitulo } = route.params
     const [ filtros , setFiltros] = useState({
     })
     const [listRef, setListRef] = useState(null)
@@ -194,9 +193,7 @@ export default function Comentarios({ route }){
                     }
                 }}
                 ListFooterComponent={() => {
-                    if(!enReached && comentarios.length > 0) return (
-                        <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
-                    )
+
                     return null
                 }}
             />

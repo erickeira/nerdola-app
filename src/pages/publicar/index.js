@@ -11,6 +11,7 @@ import CustomButton from "../../components/CustomButton";
 import api from "../../utils/api";
 import { refresh } from "@react-native-community/netinfo";
 import Snackbar from "react-native-snackbar";
+import CardCapituloPublicacao from "../../components/CardCapituloPublicacao";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -30,7 +31,10 @@ export default function PublicarPage({ route }){
     const handlePublicar = async () => {
         setIsLoadingPublicando(true)
         try{
-            const response = await api.post(`publicacoes`,{  conteudo })
+            const response = await api.post(`publicacoes`,{  
+                conteudo,
+                capitulo: route?.params?.capitulo?.id
+            })
             setConteudo("")
             navigation.navigate('PublicacoesTab')
             navigation.navigate('publicacoes', { refresh : true })
@@ -79,11 +83,19 @@ export default function PublicarPage({ route }){
                                 }}
                                 focus={focus}
                                 tipo="area"
-                                height={height / 2}
+                                height={!!route.params?.obra?.id ? 80  : (height / 2)}
                                 numberOfLines={20}
                                 value={conteudo}
                                 onChange={setConteudo}
                             />
+                            {
+                                !!route.params?.obra?.id && 
+                                <CardCapituloPublicacao
+                                    obra={route.params.obra}
+                                    capitulo={route.params.capitulo}                                 
+                                />
+                            }
+                           
                         </Text>
                     </View>
                     
@@ -130,7 +142,7 @@ const styles = StyleSheet.create({
     conteudo:{
         fontSize: 13,
         fontWeight: '400',
-        width: '90%'
+        width: '90%',
     },
     containerComment:{
         flexDirection: 'row',

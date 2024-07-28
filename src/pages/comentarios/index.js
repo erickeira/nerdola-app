@@ -8,7 +8,10 @@ export default function ComentariosPage({ route }){
 
     return(
         <>
-            <Comentarios route={route}/>
+            <Comentarios 
+                publicacao={route?.params?.publicacao}
+                capitulo={route?.params?.capitulo}
+            />
         </>
     )
 }
