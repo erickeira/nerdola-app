@@ -104,7 +104,8 @@ export default function CardComentario({
                         style={{
                             flexDirection: 'row',
                             gap: 3,
-                            width: 40
+                            width: 40,
+                            alignItems: 'center'
                         }}
                     >
                         <Icon 
@@ -112,8 +113,8 @@ export default function CardComentario({
                             size={20} 
                             color={ curtido ? "#EC4A55" : "#fff"}
                         />
-                        <Text>
-                        { comentario.total_curtidas }
+                        <Text style={{color: '#fff'}}>
+                        { comentario.total_curtidas } 
                         </Text>
                     </TouchableOpacity>
                     {/* <TouchableOpacity 
@@ -174,7 +175,8 @@ const styles = StyleSheet.create({
     conteudo:{
         fontSize: 13,
         fontWeight: '400',
-        width: '90%'
+        width: '90%',
+        color: '#fff'
     },
     buttons:{
         flexDirection: 'row',

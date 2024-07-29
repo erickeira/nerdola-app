@@ -74,14 +74,19 @@ export default function CardPublicacao({
             </TouchableOpacity>
             <View style={{width: '95%'}}>
                 <View style={styles.head}>
-                    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3}}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            navigation.navigate('verperfil', { id : publicacao?.usuario?.id })
+                        }}
+                        style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3}}
+                    >
                         <Text style={styles.nome}>
                             { publicacao?.usuario?.nome }
                         </Text>
                         <Text style={styles.criada_em}>
                             {/* 6h */}
                         </Text>
-                    </View>
+                    </TouchableOpacity>
                     {
                         publicacao.usuario.id == usuario.id &&
                         <Menu
@@ -142,7 +147,7 @@ export default function CardPublicacao({
                             size={20} 
                             color={ curtido ? "#EC4A55" : "#fff"}
                         />
-                        <Text>
+                        <Text style={{color: '#fff'}}>
                            { publicacao.total_curtidas }
                         </Text>
                     </TouchableOpacity>
@@ -164,7 +169,7 @@ export default function CardPublicacao({
                             size={20} 
                             color={ "#fff"}
                         />
-                        <Text>
+                        <Text style={{color: '#fff'}}>
                         { publicacao.total_comentarios }
                         </Text>
                     </TouchableOpacity>
@@ -205,7 +210,8 @@ const styles = StyleSheet.create({
     conteudo:{
         fontSize: 13,
         fontWeight: '400',
-        width: '90%'
+        width: '90%',
+        color: '#fff'
     },
     buttons:{
         flexDirection: 'row',

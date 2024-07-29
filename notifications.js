@@ -16,7 +16,13 @@ export function setParams(params) {
 }
 
 export async function onClickMensagem(mensagem){
-    console.log('mensagem', mensagem)
+    if(mensagem?.data?.rota){
+        const rota = mensagem?.data?.rota;
+        const params = mensagem?.data?.params? JSON.parse(mensagem?.data?.params) : {}
+        console.log('params', params)
+        navigate(rota, { ...params})
+    }
+
 }
 export const onMessageReceived = async (mensagemRemota, lida = 0) => {
     console.log('mensagemRemota', mensagemRemota)
@@ -43,4 +49,5 @@ export async function getMensagemInicial(){
 }
 
 ConfigurandoNotificacoes()
+
 

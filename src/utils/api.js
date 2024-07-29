@@ -6,7 +6,8 @@ import { production } from './index'
 import { navigationRef } from '../../App';
 import { CommonActions } from '@react-navigation/native';
 
-const apiUrl = production ? "https://api.nerdola.com.br/" : "http://192.168.1.14:3000/"
+// const apiUrl = production ? "https://api.nerdola.com.br/" : "http://192.168.1.14:3000/"
+const apiUrl = production ? "https://api.nerdola.com.br/" : "http://192.168.1.140:3000/"
 
 const api = axios.create({
     baseURL: apiUrl,
