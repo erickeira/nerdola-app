@@ -201,9 +201,12 @@ export default function PerfilPage({ route }){
                                 <Text style={styles.me_nome}>
                                     { user?.nome }
                                 </Text>
-                                <Text style={styles.email}>
-                                    { user?.email }
-                                </Text>
+                                {
+                                    !id &&
+                                    <Text style={styles.email}>
+                                        { user?.email }
+                                    </Text>
+                                }
                                 <View style={{flexDirection: 'row' , gap: 10}}>
                                     <Text style={styles.total_seg}>
                                         { user?.total_seguidores || 0 } seguidores
