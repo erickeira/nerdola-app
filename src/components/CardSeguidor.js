@@ -16,12 +16,12 @@ export default function CardSeguidor({
     const imagePath = `${imageUrl}usuarios/${usuario?.id}/${usuario?.imagem}`;
     const [imageError, setImageError] = useState(false)
 
-
+    console.log(usuario)
 
     return(
         <TouchableOpacity 
             onPress={() => {
-                navigation.navigate('perfil', { usuario })
+                navigation.navigate('verperfil', { id: usuario.id })
             }}
         >
             <View style={styles.view}>

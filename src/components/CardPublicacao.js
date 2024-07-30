@@ -8,6 +8,14 @@ import { Button, Menu, Divider, PaperProvider } from 'react-native-paper';
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 
+import  dayjs from 'dayjs'
+import 'dayjs/locale/pt-br';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import CardObra from "./CardObra";
+dayjs.extend(relativeTime);
+dayjs.locale("pt-br");
+
+
 export default function CardPublicacao({ 
     publicacao : oldPublicacao,
     handleExcluir
@@ -85,6 +93,7 @@ export default function CardPublicacao({
                         </Text>
                         <Text style={styles.criada_em}>
                             {/* 6h */}
+                            { dayjs(dayjs(publicacao.criada_em)).fromNow() }
                         </Text>
                     </TouchableOpacity>
                     {
@@ -119,7 +128,7 @@ export default function CardPublicacao({
                     { publicacao?.conteudo }
                 </Text>
                 {
-                    !!publicacao?.obra?.id && (
+                    !!publicacao?.capitulo?.id && (
                         <CardCapituloPublicacao
                             obra={publicacao?.obra}
                             capitulo={publicacao.obra?.capitulo}
@@ -127,6 +136,15 @@ export default function CardPublicacao({
                         />
                     )
                 }
+
+                {
+                    !publicacao?.capitulo?.id && publicacao?.obra?.id && (
+                        <CardObra
+                            obra={publicacao?.obra}
+                        />
+                    )
+                }
+
                 <View style={styles.buttons}>
                     <TouchableOpacity 
                         onPress={handleCurtir}
@@ -205,7 +223,7 @@ const styles = StyleSheet.create({
     },
     criada_em :{
         color: defaultColors.gray,
-        fontSize: 14
+        fontSize: 11
     },
     conteudo:{
         fontSize: 13,

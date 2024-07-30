@@ -12,13 +12,16 @@ import api from "../../utils/api";
 import { refresh } from "@react-native-community/netinfo";
 import Snackbar from "react-native-snackbar";
 import CardCapituloPublicacao from "../../components/CardCapituloPublicacao";
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import Chip from "../../components/Chip";
+import CardObra from "../../components/CardObra";
 
 const { height, width }  = Dimensions.get('screen');
 
 export default function PublicarPage({ route }){
     const { usuario } = useAuth()
     const navigation = useNavigation()
-    const [conteudo, setConteudo] = useState({})
+    const [publicacao , setPublicacao] = useState({})
     const [ focus, setFocus] = useState(false)
     const inputRef = useRef()
     const isFocused = useIsFocused()
@@ -27,14 +30,24 @@ export default function PublicarPage({ route }){
         setFocus(isFocused)
     },[isFocused])
 
+    const handleChange = (dado) => {
+        setPublicacao({...publicacao, ...dado})
+    }
+
     const [isLoadingPublicando, setIsLoadingPublicando] = useState(false)
     const handlePublicar = async () => {
         setIsLoadingPublicando(true)
+        const body = {
+            ...publicacao
+        }
+        if(route?.params?.capitulo?.id){
+            body.capitulo = route?.params?.capitulo?.id
+        }else if(route?.params?.obra?.id){
+            body.obra = route?.params?.obra?.id
+        }
+
         try{
-            const response = await api.post(`publicacoes`,{  
-                conteudo,
-                capitulo: route?.params?.capitulo?.id
-            })
+            const response = await api.post(`publicacoes`, body )
             setConteudo("")
             navigation.navigate('PublicacoesTab')
             navigation.navigate('publicacoes', { refresh : true })
@@ -53,6 +66,8 @@ export default function PublicarPage({ route }){
             setIsLoadingPublicando(false)
         }
     }
+
+    console.log(route.params)
 
     return(
         <View 
@@ -85,17 +100,26 @@ export default function PublicarPage({ route }){
                                 tipo="area"
                                 height={!!route.params?.obra?.id ? 80  : (height / 2)}
                                 numberOfLines={20}
-                                value={conteudo}
-                                onChange={setConteudo}
+                                value={publicacao.conteudo}
+                                onChange={(conteudo) => {
+                                    handleChange({ conteudo })
+                                }}
                             />
                             {
-                                !!route.params?.obra?.id && 
+                                !!route.params?.capitulo?.id && 
                                 <CardCapituloPublicacao
                                     obra={route.params.obra}
                                     capitulo={route.params.capitulo}                                 
                                 />
                             }
-                           
+                            {
+                                !!route.params?.obra?.id &&  !route.params?.capitulo?.id &&
+                                <CardObra
+                                    obra={route.params.obra}
+                                    feed
+                                /> 
+                            }
+
                         </Text>
                     </View>
                     
@@ -103,11 +127,26 @@ export default function PublicarPage({ route }){
                 
             </ScrollView>
             <View style={styles.containerComment}>
+                <Chip
+                    onPress={async () => {
+                        const options = {
+                            mediaType: 'photo',
+                            quality: 0.8,
+                            includeBase64: true
+                        }
+                        const result = await launchImageLibrary(options);
+                        const imagem = result.assets[0].base64
+                        handleChange({ imagem })
+                        setImageError(false)
+                    }}
+                >
+                    <Icon source="image-outline" size={20}/>
+                </Chip>
                 <CustomButton 
                     style={styles.button}
                     onPress={handlePublicar}
                     isLoading={isLoadingPublicando}
-                    disabled={isLoadingPublicando || conteudo.length < 1}
+                    disabled={isLoadingPublicando || publicacao.conteudo?.length < 1}
                 >
                     Publicar
                 </CustomButton>

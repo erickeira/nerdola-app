@@ -7,7 +7,9 @@ import { useNavigation } from "@react-navigation/native";
 const { height, width }  = Dimensions.get('screen');
 
 export default function CardObra({
-    obra
+    obra,
+    mostrarprogresso,
+    feed
 }){
     const{
         id,
@@ -40,7 +42,10 @@ export default function CardObra({
     return(
         <TouchableOpacity onPress={handleClick}>
             <View style={styles.view}>
-                <View style={styles.imageContainer}>
+                <View style={[styles.imageContainer,{
+                    width: feed ?  80 : 100,
+                    height: feed ?  ((80) * (4.3 / 3)) : ((100) * (4.3 / 3)),
+                }]}>
                     {
                         !imageError ?
                         <Image
@@ -58,7 +63,7 @@ export default function CardObra({
                         />
                     }
                 </View>
-                <View style={{ width: '100%'}}>
+                <View style={{ width: '100%', flexWrap: 'wrap'}}>
                     <Text style={styles.formato}>
                         {formato}
                     </Text>
@@ -70,14 +75,32 @@ export default function CardObra({
                     </Text>
                     
                     {
-                        !!tags.length && 
-                        <Text style={styles.tags}>
-                            {tags.map(tag => tag.nome).join(', ')}
+                        !!tags.length && !feed && 
+                        <View style={[styles.containerTags,{
+                            width: feed ? '60%' : '100%'
+                        }]}>
+                            {
+                                tags.map((tag, index) => (
+                                    <Text style={styles.tags} key={index}>
+                                        {tag.nome},
+                                    </Text>
+                                ))
+                            }
+                        </View>
+                     
+                    }
+                      {
+                        !!status && feed && 
+      
+                        <Text style={styles.status}>
+                            {status.nome}
                         </Text>
+                  
+                     
                     }
                     
                     {
-                        !!leitura.id  && 
+                        !!leitura?.id  && 
                         <Text style={[styles.leitura, {
                             color: leituraColors[leitura?.status?.id]
                         }]}>
@@ -129,14 +152,13 @@ export default function CardObra({
 }
 const styles = StyleSheet.create({
     view: {
-      padding: 10,
-      width: width - 30,
-      overflow: 'scroll',
-      flexDirection: 'row',
-      gap: 10
+        width: '100%',
+        padding: 10,
+        flexDirection: 'row',
+        overflow: 'hidden',
+        gap: 10
     },
     imageContainer:{
-        ...proporcaoCard,
         borderColor: '#312E2E',
         borderWidth: 1,
         marginBottom: 5,
@@ -163,10 +185,19 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: defaultColors.gray
     },
+    containerTags: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        width: '70%',
+        gap: 2
+    },
     tags:{
         fontSize: 12,
         color: defaultColors.gray,
-        marginBottom: 12
+    },
+    status:{
+        fontSize: 12,
+        color: defaultColors.gray,
     },
     leitura:{
         fontSize: 12,
