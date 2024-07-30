@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "Codepush:android" : "npx appcenter codepush release-react -a piahumana-gmail.com/nerdola_android -d Production"
+    "Codepush:android": "npx appcenter codepush release-react -a piahumana-gmail.com/nerdola_android -d Production"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.24.0",
@@ -27,6 +27,7 @@
     "react-native": "0.74.3",
     "react-native-code-push": "^8.3.0",
     "react-native-gesture-handler": "^2.17.1",
+    "react-native-image-picker": "github:react-native-image-picker/react-native-image-picker",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-mask-input": "^1.2.3",
     "react-native-paper": "^5.12.3",

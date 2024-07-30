@@ -10,6 +10,8 @@ import Snackbar from 'react-native-snackbar';
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { imageUrl } from "../../utils";
 import Chip from "../../components/Chip";
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import { assets } from "../../../react-native.config";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -20,6 +22,7 @@ export default function EditarPerfilPage(){
         email: '',
         senha: ''
     })
+    const [dadosAlterados, setDadosAlterados] = useState({})
     const [ errors, setErrors] = useState({})
     const [ isLoadingCadastro, setLoadingCadastro] = useState(false)
 
@@ -54,13 +57,14 @@ export default function EditarPerfilPage(){
     const handleChange = (dado) => {
         setErrors({})
         setFormulario((prevFormulario) => ({...prevFormulario, ...dado}))
+        setDadosAlterados((prevFormulario) => ({...prevFormulario, ...dado}))
     }
 
     const handleCadastrar = async () => {
         if(!handleValidateForm(formulario) || isLoadingCadastro) return 
         setLoadingCadastro(true)
         try{
-           const response = await api.patch(`usuarios/me`, formulario )
+           const response = await api.patch(`usuarios/me`, dadosAlterados )
            Snackbar.show({
             text: response.data?.message,
             duration: 2000,
@@ -89,7 +93,7 @@ export default function EditarPerfilPage(){
         }
     }
 
-    const imagePath = `${imageUrl}usuarios/${formulario?.id}/${formulario?.imagem}`;
+    const imagePath = formulario?.imagem?.endsWith('jpg') ? `${imageUrl}usuarios/${formulario?.id}/${formulario?.imagem}` : `data:image/jpeg;base64,${formulario?.imagem}`;
     const [imageError, setImageError] = useState(false)
 
     return(
@@ -152,20 +156,24 @@ export default function EditarPerfilPage(){
                         }
                     </View>
                     <Chip
-                        label="Adicionar"
+                        label={formulario?.imagem ? "Remover" : "Adicionar"}
                         style={{
                             height: 40
                         }}
-                        onPress={() => {
-                            Snackbar.show({
-                                text: 'Desabilitado por enquanto',
-                                duration: 2000,
-                                action: {
-                                    text: 'OK',
-                                    textColor: 'green',
-                                    onPress: () => { /* Do something. */ },
-                                },
-                            });
+                        onPress={async () => {
+                            if(formulario?.imagem){
+                                handleChange({ imagem : "" })
+                            }else{
+                                const options = {
+                                    mediaType: 'photo',
+                                    quality: 0.8,
+                                    includeBase64: true
+                                }
+                                const result = await launchImageLibrary(options);
+                                const imagem = result.assets[0].base64
+                                handleChange({ imagem })
+                                setImageError(false)
+                            }
                         }}
                     />
                 </View>

@@ -154,6 +154,7 @@ export default function PerfilPage({ route }){
         try{
             const response = await api.get(`usuarios/${id || 'me'}`)
             setUser(response.data)
+            setImageError(false)
         }catch(error){
         } finally {
             setIsLoadingMe(false)
@@ -208,12 +209,24 @@ export default function PerfilPage({ route }){
                                     </Text>
                                 }
                                 <View style={{flexDirection: 'row' , gap: 10}}>
-                                    <Text style={styles.total_seg}>
-                                        { user?.total_seguidores || 0 } seguidores
-                                    </Text>
-                                    <Text style={styles.total_seg}>
-                                        { user?.total_seguindo || 0 } seguindo
-                                    </Text>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            navigation.navigate('seguidores', { id: id || usuario.id })
+                                        }}
+                                    >
+                                        <Text style={styles.total_seg}>
+                                            { user?.total_seguidores || 0 } seguidores
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            navigation.navigate('seguidores', { id: id || usuario.id, seguindo: true })
+                                        }}
+                                    >
+                                        <Text style={styles.total_seg}>
+                                            { user?.total_seguindo || 0 } seguindo
+                                        </Text>
+                                    </TouchableOpacity>
                                 </View>
                                
                                    

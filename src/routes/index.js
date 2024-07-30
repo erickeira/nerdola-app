@@ -17,6 +17,7 @@ import PublicacoesStack from './stacks/publicacoesStack';
 import PublicarStack from './stacks/publicarStack';
 import PublicarPage from '../pages/publicar';
 import PerfilPage from '../pages/perfil';
+import SeguidoresPage from '../pages/seguidores';
 
 const Stack = createStackNavigator();
 export default function Routes() {
@@ -108,6 +109,24 @@ export default function Routes() {
                 headerTintColor: '#fff'      
                 }}
             />
+            <Stack.Screen 
+                name="seguidores" 
+                component={SeguidoresPage} 
+                options={{
+                headerTitle: "Seguidores",
+                headerTitleAlign: 'left',
+                // headerRight: ()  => (
+                //   <TouchableOpacity onPress={() => navigation.navigate('Busca')} hitSlop={{left: 20, bottom: 20}} style={{marginRight: 12}}>
+                //     <Icon name="search" size={24}  color={"#fff"}/>
+                //   </TouchableOpacity>
+                // ),
+                headerShown: true, 
+                // headerTransparent: true,
+                headerStyle: defaultStyles.defaultHeaderStyles,
+                headerTintColor: '#fff'      
+                }}
+            />
+
         </Stack.Navigator>
     )
 }

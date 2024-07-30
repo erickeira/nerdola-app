@@ -10,6 +10,7 @@ import { defaultStyles } from '../../utils';
 import { useRoute } from '@react-navigation/native';
 import PerfilPage from '../../pages/perfil';
 import EditarPerfilPage from '../../pages/editar-perfil';
+import SeguidoresPage from '../../pages/seguidores';
 
 const PerfilStack = ({ navigation }) => {
   const currentRouteName = navigationRef?.current?.getCurrentRoute().name;
@@ -58,7 +59,6 @@ const PerfilStack = ({ navigation }) => {
           headerTintColor: '#fff'      
         }}
       />
-
     </Stack.Navigator>
   )
 }
