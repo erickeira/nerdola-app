@@ -199,15 +199,19 @@ export default function EditarPerfilPage(){
                             if(formulario?.imagem){
                                 handleChange({ imagem : "" })
                             }else{
-                                const options = {
-                                    mediaType: 'photo',
-                                    quality: 0.8,
-                                    includeBase64: true
+                                try{
+                                    const options = {
+                                        mediaType: 'photo',
+                                        quality: 0.8,
+                                        includeBase64: true
+                                    }
+                                    const result = await launchImageLibrary(options);
+                                    const imagem = result.assets[0]?.base64
+                                    handleChange({ imagem })
+                                    setImageError(false)
+                                }catch(error){
+
                                 }
-                                const result = await launchImageLibrary(options);
-                                const imagem = result.assets[0].base64
-                                handleChange({ imagem })
-                                setImageError(false)
                             }
                         }}
                     />

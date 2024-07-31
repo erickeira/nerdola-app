@@ -91,43 +91,54 @@ export default function CardPublicacao({
                         onPress={() => {
                             navigation.navigate('verperfil', { id : publicacao?.usuario?.id })
                         }}
-                        style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3}}
+                        style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 3}}
                     >
-                        <Text style={styles.nome}>
-                            { publicacao?.usuario?.nome }
-                        </Text>
+                        <View>
+                            <Text style={styles.nome}>
+                                { publicacao?.usuario?.nome }
+                            </Text>
+                            { !!publicacao?.usuario?.nick  && (
+                                <Text style={styles.nick}>
+                                    @{ publicacao?.usuario?.nick }
+                                </Text>
+                                )
+                            }
+                            
+                        </View>
+                    </TouchableOpacity>
+                    <View style={{flexDirection: 'row', gap: 10}}>
                         <Text style={styles.criada_em}>
-                            {/* 6h */}
                             { dayjs(dayjs(publicacao.criada_em)).fromNow() }
                         </Text>
-                    </TouchableOpacity>
-                    {
-                        (publicacao.usuario.id == usuario.id || usuario.id == 1) &&
-                        <Menu
-                            visible={visible}
-                            onDismiss={closeMenu}
-                            anchor={
-                                <TouchableOpacity 
-                                    onPress={openMenu}
-                                    hitSlop={{
-                                        left: 15,
-                                        bottom: 15
-                                    }}
-                                >
-                                    <Icon source="dots-horizontal" size={17} color="#fff"/>
-                                </TouchableOpacity>
-                            }
-                            contentStyle={{
-                                backgroundColor: defaultColors.primary,
-                            }}
-                        >
-                            <Menu.Item 
-                                onPress={handleExcluir} 
-                                title="Excluir"  
-                                titleStyle={{ color: '#DB4C4C'}}
-                            />
-                        </Menu>
-                    }
+                        {
+                            (publicacao.usuario.id == usuario.id || usuario.id == 1) &&
+                            <Menu
+                                visible={visible}
+                                onDismiss={closeMenu}
+                                anchor={
+                                    <TouchableOpacity 
+                                        onPress={openMenu}
+                                        hitSlop={{
+                                            left: 15,
+                                            bottom: 15
+                                        }}
+                                    >
+                                        <Icon source="dots-horizontal" size={17} color="#fff"/>
+                                    </TouchableOpacity>
+                                }
+                                contentStyle={{
+                                    backgroundColor: defaultColors.primary,
+                                }}
+                            >
+                                <Menu.Item 
+                                    onPress={handleExcluir} 
+                                    title="Excluir"  
+                                    titleStyle={{ color: '#DB4C4C'}}
+                                />
+                            </Menu>
+                        }
+                    </View>
+                    
                 </View>
                 <Text style={styles.conteudo}>
                     { publicacao?.conteudo }
@@ -238,6 +249,9 @@ const styles = StyleSheet.create({
     nome:{
         color: '#fff',
         fontSize: 15
+    },
+    nick:{
+        fontSize: 11,
     },
     criada_em :{
         color: defaultColors.gray,

@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     },
     gradiente:{
         width: width,
-        height: (width) * (4.3 / 3),
+        minHeight: (width) * (4.3 / 3),
     },
     details:{
         paddingTop: 120

@@ -188,10 +188,15 @@ export default function PublicarPage({ route }){
                                 quality: 0.8,
                                 includeBase64: true
                             }
-                            const result = await launchImageLibrary(options);
-                            const imagem = result.assets[0].base64
-                            handleChange({ imagem })
-                            setImageError(false)
+                            try{
+                                const result = await launchImageLibrary(options);
+                                const imagem = result.assets[0]?.base64
+                                handleChange({ imagem })
+                                setImageError(false)
+                            }catch(error){
+
+                            }
+                           
                         }}
                     >
                         <Icon source="image-outline" size={20}/>
