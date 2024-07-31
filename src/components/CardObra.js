@@ -41,10 +41,16 @@ export default function CardObra({
 
     return(
         <TouchableOpacity onPress={handleClick}>
-            <View style={styles.view}>
+            <View style={[styles.view,{
+                  borderColor: '#312E2E',
+                  borderWidth: feed ? 1 : 0,
+                  borderRadius: 5,
+                  width: feed ? width - 90 :'100%',
+                  marginTop: feed ? 20 : 0
+            }]}>
                 <View style={[styles.imageContainer,{
                     width: feed ?  80 : 100,
-                    height: feed ?  ((80) * (4.3 / 3)) : ((100) * (4.3 / 3)),
+                    height: feed ?  ((80) * (4.3 / 3)) : ((100) * (4.3 / 3)),   
                 }]}>
                     {
                         !imageError ?
@@ -65,7 +71,7 @@ export default function CardObra({
                 </View>
                 <View style={{ width: '100%', flexWrap: 'wrap'}}>
                     <Text style={styles.formato}>
-                        {formato}
+                        {formato?.nome}
                     </Text>
                     <Text style={styles.nome}>
                         {nome}
@@ -75,10 +81,8 @@ export default function CardObra({
                     </Text>
                     
                     {
-                        !!tags.length && !feed && 
-                        <View style={[styles.containerTags,{
-                            width: feed ? '60%' : '100%'
-                        }]}>
+                        !!tags?.length && !feed && 
+                        <View style={[styles.containerTags]}>
                             {
                                 tags.map((tag, index) => (
                                     <Text style={styles.tags} key={index}>
@@ -188,7 +192,7 @@ const styles = StyleSheet.create({
     containerTags: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        width: '70%',
+        width: '60%',
         gap: 2
     },
     tags:{

@@ -22,7 +22,6 @@ export default function CardCapitulo({
         lido,
         nome,
         numero,
-        formato,
         lancado_em,
         totallinks
     } = capitulo

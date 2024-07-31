@@ -1,4 +1,4 @@
-import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Avatar, Icon } from "react-native-paper";
 import { defaultColors } from "../../utils";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -36,6 +36,18 @@ export default function PublicarPage({ route }){
 
     const [isLoadingPublicando, setIsLoadingPublicando] = useState(false)
     const handlePublicar = async () => {
+        if(!publicacao.conteudo?.trim()){
+            Snackbar.show({
+                text: "É necessário escrever algo.",
+                duration: 2000,
+                action: {
+                  text: 'OK',
+                  textColor: 'green',
+                  onPress: () => { /* Do something. */ },
+                },
+              });
+            return
+        }
         setIsLoadingPublicando(true)
         const body = {
             ...publicacao
@@ -48,7 +60,7 @@ export default function PublicarPage({ route }){
 
         try{
             const response = await api.post(`publicacoes`, body )
-            setConteudo("")
+            setPublicacao({})
             navigation.navigate('PublicacoesTab')
             navigation.navigate('publicacoes', { refresh : true })
             Snackbar.show({
@@ -67,7 +79,8 @@ export default function PublicarPage({ route }){
         }
     }
 
-    console.log(route.params)
+    const imagePath =  `data:image/jpeg;base64,${publicacao?.imagem}`;
+    const [imageError, setImageError] = useState(false)
 
     return(
         <View 
@@ -76,7 +89,12 @@ export default function PublicarPage({ route }){
             
         >
             <ScrollView>
-                <View style={styles.view}>
+                <View 
+                    style={styles.view}
+                    onPress={() => {
+                        setFocus(true)
+                    }}    
+                >
                     <View>
                         <Avatar.Text size={30} label={ usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } />
                     </View>
@@ -95,10 +113,10 @@ export default function PublicarPage({ route }){
                                 style={{
                                     width  : width - 100,
                                     textAlignVertical : 'top',
+                                    minHeight: 80
                                 }}
                                 focus={focus}
                                 tipo="area"
-                                height={!!route.params?.obra?.id ? 80  : (height / 2)}
                                 numberOfLines={20}
                                 value={publicacao.conteudo}
                                 onChange={(conteudo) => {
@@ -119,6 +137,40 @@ export default function PublicarPage({ route }){
                                     feed
                                 /> 
                             }
+                            {
+                                !!publicacao?.imagem && (
+                                    <View style={styles.imageContainer}>
+                                        <Image
+                                            style={styles.imagem}
+                                            source={{ uri : imagePath }}
+                                            onError={(error) => {
+                                                setImageError(true)
+                                            }}
+                                            
+                                        />
+                                        <View
+                                            style={{
+                                                position: 'absolute',
+                                                top: 10,
+                                                right: 10,
+                                                backgroundColor: '#DB4C4C',
+                                                padding:10,
+                                                borderRadius: 5
+                                            }}
+                                        >
+                                            <TouchableOpacity 
+                                                onPress={() =>{
+                                                    handleChange({ imagem :''})
+                                                }}
+                                            >
+                                                <Icon source="delete-outline" size={16}/>
+                                            </TouchableOpacity>
+                                        </View>
+                                      
+                                    </View>
+                                    
+                                )
+                            }
 
                         </Text>
                     </View>
@@ -127,21 +179,25 @@ export default function PublicarPage({ route }){
                 
             </ScrollView>
             <View style={styles.containerComment}>
-                <Chip
-                    onPress={async () => {
-                        const options = {
-                            mediaType: 'photo',
-                            quality: 0.8,
-                            includeBase64: true
-                        }
-                        const result = await launchImageLibrary(options);
-                        const imagem = result.assets[0].base64
-                        handleChange({ imagem })
-                        setImageError(false)
-                    }}
-                >
-                    <Icon source="image-outline" size={20}/>
-                </Chip>
+                {
+                    !publicacao?.imagem && (
+                    <Chip
+                        onPress={async () => {
+                            const options = {
+                                mediaType: 'photo',
+                                quality: 0.8,
+                                includeBase64: true
+                            }
+                            const result = await launchImageLibrary(options);
+                            const imagem = result.assets[0].base64
+                            handleChange({ imagem })
+                            setImageError(false)
+                        }}
+                    >
+                        <Icon source="image-outline" size={20}/>
+                    </Chip>
+                    )
+                }
                 <CustomButton 
                     style={styles.button}
                     onPress={handlePublicar}
@@ -199,5 +255,21 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: defaultColors.activeColor,
         marginRight: 20,
-    }
+    },
+    imageContainer:{
+        width: width - 100,
+        height: width - 100,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: 5,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 30,
+        position: 'relative',
+        marginTop: 20
+    },
+    imagem:{
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain'
+    },
 });

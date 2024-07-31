@@ -256,14 +256,14 @@ export default function ObraPage({ route }){
                 }
                    
                 </LinearGradient>
-                <View style={{ width: '100%',flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
+                <View style={{ width: '100%',flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end', flexWrap: 'wrap'}}>
                     <Chip
                         onPress={() => {
                             navigation.navigate('publicar', {
                                 obra
                             })
                         }}
-                        style={{ paddingVertical: 3, height: 40}} 
+                        style={{ paddingVertical: 3, height: 45}} 
                     >
                         <Text>
                             Publicar no feed

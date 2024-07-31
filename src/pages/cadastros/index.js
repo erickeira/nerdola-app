@@ -8,6 +8,7 @@ import Nerd from '../../../assets/nerd.png'
 import api from "../../utils/api";
 import Snackbar from 'react-native-snackbar';
 import { useNavigation } from "@react-navigation/native";
+import { isValidEmail } from "../../utils";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -23,9 +24,9 @@ export default function CadastroPage(){
 
     const handleValidateForm = (form) => {
         const newErrors = { 
-            nome:  !form.nome ? "Infome o seu nome" : false,
-            email:  !form.email ? "Infome o seu e-mail" : false,
-            telefone:  !form.telefone  ? "Infome o seu telefone" : false,
+            nome:  !form.nome?.trim() ? "Infome o seu nome" : false,
+            email:  !form.email?.trim() || !isValidEmail(form.email) ? "Infome o seu e-mail" : false,
+            telefone:  !form.telefone || form.telefone.legth < 10  ? "Infome o seu telefone" : false,
             senha:  !form.senha  ? "Infome o sua senha" : ( form.senha.length < 6 ? "Minimo de 6 caracteres" : false),
         }
         setErrors(newErrors)

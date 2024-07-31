@@ -10,6 +10,7 @@ import { defaultStyles } from '../../utils';
 import { useRoute } from '@react-navigation/native';
 import PublicacoesPage from '../../pages/publicacoes';
 import ComentariosPage from '../../pages/comentarios';
+import { Icon } from 'react-native-paper';
 
 const PublicacoesStack = ({ navigation }) => {
   const currentRouteName = navigationRef?.current?.getCurrentRoute().name;
@@ -30,7 +31,18 @@ const PublicacoesStack = ({ navigation }) => {
           headerTitle:  "Feed",
           headerTitleAlign: 'left',
           headerLeft: () => null,
-          headerRight: ()  => null,
+          headerRight: ()  =>  (
+            <TouchableOpacity
+              style={{
+                marginRight: 30
+              }}
+              onPress={() => {
+                navigation.navigate('usuarios')
+              }}
+            >
+              <Icon source="account-search-outline" color='#fff' size={25}/>
+            </TouchableOpacity>
+          ),
           headerShown: true, 
           // headerTransparent: true,
           headerStyle: defaultStyles.defaultHeaderStyles,

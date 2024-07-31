@@ -8,7 +8,7 @@ import Nerd from '../../../assets/nerd.png'
 import api from "../../utils/api";
 import Snackbar from 'react-native-snackbar';
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { imageUrl } from "../../utils";
+import { imageUrl, isValidEmail } from "../../utils";
 import Chip from "../../components/Chip";
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import { assets } from "../../../react-native.config";
@@ -44,11 +44,16 @@ export default function EditarPerfilPage(){
     },[isFocused])
 
 
-    const handleValidateForm = (form) => {
+    const handleValidateForm = async (form) => {
         const newErrors = { 
-            nome:  !form.nome ? "Infome o seu nome" : false,
-            email:  !form.email ? "Infome o seu e-mail" : false,
-            telefone:  !form.telefone  ? "Infome o seu telefone" : false
+            nome:  !form.nome?.trim() ? "Infome o seu nome" : false,
+            email:  !form.email || !isValidEmail(form.email) ? "Infome o seu e-mail" : false,
+            telefone:  !form.telefone || form.telefone.legth < 10  ? "Infome o seu telefone" : false,
+            nick:    !form.nick ? "Informe seu nick" : false
+        }
+        if(form.hasOwnProperty('nick') && form.nick != formulario.nick){
+            const isValid = await handleCheckNick(form.nick)
+            newErrors.nick = !isValid ? 'Nick já está sendo utilizado' : false
         }
         setErrors(newErrors)
         return !Object.entries(newErrors).some(([chave, valor]) => !!valor)
@@ -61,7 +66,8 @@ export default function EditarPerfilPage(){
     }
 
     const handleCadastrar = async () => {
-        if(!handleValidateForm(formulario) || isLoadingCadastro) return 
+        const isValid = await handleValidateForm(formulario)
+        if(!isValid || isLoadingCadastro) return 
         setLoadingCadastro(true)
         try{
            const response = await api.patch(`usuarios/me`, dadosAlterados )
@@ -93,6 +99,15 @@ export default function EditarPerfilPage(){
         }
     }
 
+    const handleCheckNick = async (nick) => {
+        try{
+            await api.post('usuarios/check-nick',{  nick })
+            return true
+        }catch{
+            return false
+        }
+    }
+
     const imagePath = formulario?.imagem?.endsWith('jpg') ? `${imageUrl}usuarios/${formulario?.id}/${formulario?.imagem}` : `data:image/jpeg;base64,${formulario?.imagem}`;
     const [imageError, setImageError] = useState(false)
 
@@ -109,6 +124,26 @@ export default function EditarPerfilPage(){
                     height={67}
                     error={!!errors.nome}
                     errorText={errors.nome}
+                />
+                <InputText
+                    placeholder="Nick"
+                    value={formulario.nick}
+                    onChange={(nick) => {
+                        handleChange({ nick })
+                    }}
+                    onStopType={async (nick) => {
+                        if(nick != formulario?.nick){
+                            const isValid = await handleCheckNick(nick)
+                            setErrors({ ...errors,
+                                nick: !isValid ? 'Nick já está sendo utilizado' : false
+                            })
+                        }
+                        
+                    }}
+                    containerStyle={styles.textInput}
+                    height={67}
+                    error={!!errors.nick}
+                    errorText={errors.nick}
                 />
                 <InputText
                     placeholder="E-mail"
@@ -183,6 +218,7 @@ export default function EditarPerfilPage(){
                     style={styles.buttonEntrar}
                     onPress={handleCadastrar}
                     isLoading={isLoadingCadastro}
+                    isDisabled={isLoadingCadastro}
                 >
                     Salvar edição
                 </CustomButton>

@@ -10,7 +10,8 @@ const { height, width }  = Dimensions.get('screen');
 
 export default function CardSeguidor({
     usuario,
-    handleSeguir
+    handleSeguir,
+    isLoading
 }){
     const navigation = useNavigation()
     const imagePath = `${imageUrl}usuarios/${usuario?.id}/${usuario?.imagem}`;
@@ -49,8 +50,14 @@ export default function CardSeguidor({
                 </View>
                 <View style={{ flex: 1  }}>
                     <Text style={[styles.nome]}>
-                        {usuario?.nome}
+                        {usuario?.nome?.replace('@gmail.com', '')}
                     </Text>
+                    {
+                        !!usuario?.nick &&
+                        <Text style={styles.nick}>
+                            @{ usuario?.nick }
+                        </Text>
+                    }
                     <Text style={[styles.numero]}>
                         {usuario.total_seguidores} { usuario.total_seguidores == 1 ? 'seguidor' : 'seguidores' }
                     </Text>
@@ -59,18 +66,25 @@ export default function CardSeguidor({
                     style={{
                         backgroundColor: usuario.seguindo ? defaultColors.primary : '#fff',
                         paddingVertical: 8,
+                        minWidth: 80
                     }}
                     onPress={handleSeguir}
                     isSelected={false}
                 >
-                    <Text 
-                        style={{
-                            color: !usuario.seguindo ? defaultColors.primary : '#fff',
-                            fontSize: 11
-                        }} 
-                    >
-                        { usuario.seguindo ? 'Deixar de seguir' : 'Seguir' }
-                    </Text>
+                    {
+                        isLoading  ? 
+                        <ActivityIndicator size={15} color={!usuario.seguindo ? defaultColors.primary : '#fff'}/>
+                        :
+                        <Text 
+                            style={{
+                                color: !usuario.seguindo ? defaultColors.primary : '#fff',
+                                fontSize: 11
+                            }} 
+                        >
+                            { usuario.seguindo ? 'Deixar de seguir' : 'Seguir' }
+                        </Text>
+                    }
+                    
                 </Chip>
             
             </View>
@@ -108,6 +122,10 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         color: '#fff',
     },
+    nick: {
+        color: defaultColors.gray,
+        marginBottom: 8
+     },
     numero:{
         fontSize: 10,
         flexWrap: 'wrap',

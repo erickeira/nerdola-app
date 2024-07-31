@@ -15,7 +15,7 @@ const InputText = ({
     style,
     onPressIn,
     capitalize,
-    height = 50,
+    height = 40,
     error,
     errorText,
     mb = 16,
@@ -109,7 +109,8 @@ const InputText = ({
         { !!label && <Text style={styles.label}>{label}</Text> }
         <View
             style={{...styles.view, ...containerStyle, ... {
-                height: height + 5,
+                height: tipo != 'area' ?  height + 5 : null,
+                maxHeight: 250,
                 borderColor: error ? "#DB4C4C" : '#312E2E'
             }}}
         >
@@ -125,7 +126,9 @@ const InputText = ({
                 value={text.semMascara}
                 placeholderTextColor='#666'
                 style={{...styles.campoTexto,...style, ...{
-                    height,
+                    height : tipo != 'area' ?  height : null,
+                    minHeight:tipo == 'area' ? 80 : '40',
+                    // maxHeight: 130
                 }}}
                 secureTextEntry={mostrarSenha}
                 // autoCorrect={false}

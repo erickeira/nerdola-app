@@ -22,6 +22,7 @@ export default function CardCapituloPublicacao({
     const imagePath = `${imageUrl}obras/${id}/${imagem}`;
     const [imageError, setImageError] = useState(false)
 
+
     return(
         <TouchableOpacity 
             onPress={() => {
@@ -50,7 +51,7 @@ export default function CardCapituloPublicacao({
                 </View>
                 <View style={{ width: '100%'}}>
                     <Text style={styles.formato}>
-                        {formato}
+                        {formato?.nome}
                     </Text>
                     <Text style={styles.nome}>
                         {nome}

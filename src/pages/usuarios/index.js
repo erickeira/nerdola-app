@@ -9,22 +9,27 @@ import CardObra from "../../components/CardObra";
 import { Avatar, Icon } from "react-native-paper";
 import { defaultColors, imageUrl } from "../../utils";
 import CardSeguidor from "../../components/CardSeguidor";
+import CustomButton from "../../components/CustomButton";
 
 const { height, width }  = Dimensions.get('screen');
 
-export default function SeguidoresPage({ route }){
-    const id = route?.params?.id 
-    const seguindo = route?.params?.seguindo
+export default function UsuariosPage({ route }){
     const navigation = useNavigation()
     const { usuario, handleLogout } = useAuth()
     const isFocused = useIsFocused()
-    const [ seguidores , setSeguidores] = useState([])
-    const [pagina, setPagina] = useState(0)
+    const [ usuarios , setUsuarios] = useState([])
+    const [pagina, setPagina] = useState(1)
     const [limite, setLimite] = useState(20)
     const [loading, setIsLoading] = useState(false)
     const [loadingRefresh, setIsLoadingRefresh] = useState(false)
+    const [ enReached , setEnReached ] = useState(false)
+    const [loadingMore, setLoadingMore] = useState(false)
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
+    const [ filtros , setFiltros] = useState({
+        string: '',
+    })
+
     const handleChange = (dado) => {
         setFiltros((prevFiltros) => ({...prevFiltros, ...dado}))
     }
@@ -51,44 +56,66 @@ export default function SeguidoresPage({ route }){
 
     useEffect(() =>{
         setIsLoading(true)
-        getSeguidores(1)
-        navigation.setOptions({
-            headerTitle:  seguindo ? "Seguindo" : "Seguidores"
-        })
+        getUsuarios(1)
     },[])
 
     useEffect(() =>{
-        if(seguidores.length > 0){
-            getSeguidores()
-            
+        if(usuarios.length > 0){
+            getUsuarios()
         }
     },[isFocused])
 
-    const getSeguidores = async () => {
+    useEffect(() => {
+        setIsLoading(true)
+        getUsuarios(1 , filtros)
+    },[filtros])
+
+    const getUsuarios = async (pag = 1, filtros = {}) => {
         if(loading ) return
         try{
-            const response = await api.get(`usuarios/${id}/${ seguindo ? "seguindo" : "seguidores" }`)
-            console.log(response.data)
-            setSeguidores(response.data)            
+            const response = await api.get(`usuarios`, {
+                params: {
+                    ...filtros,
+                    pagina: pag?.toString(),
+                    limite: limite?.toString()
+                }
+            })
+            
+            if(response.data?.length < limite){
+                setEnReached(true)
+            }
+            if(pag == 1){
+                setUsuarios([])
+                setUsuarios(response.data)
+                setEnReached(false)
+            }else{
+                const existingIds = usuarios.map(usuario => usuario.id); 
+                const newObras = response.data.filter(usuario => !existingIds.includes(usuario.id));
+                setUsuarios([...usuarios, ...newObras]);
+            }
             setPagina(pag)
         }catch(error){
+            console.log(error)
         } finally{
             setIsLoading(false)
+            setLoadingMore(false)
+            setIsLoadingRefresh(false)
         }
     }
 
     function refresh(){
         setPagina(1)
-        setSeguidores([])
-        getSeguidores(1) 
+        setUsuarios([])
+        getUsuarios(1) 
     }
 
     const [ isLoadingSeguindo, setIsLoadingSeguindo] = useState(false)
     const handleSeguir = async (id) => {
         setIsLoadingSeguindo(id)
         try{
-            await api.post(`usuarios/${id}/seguir`)
-            getSeguidores()
+            const response = await api.post(`usuarios/${id}/seguir`)
+            console.log(response.data)
+            getUsuarios()
         }catch(error){
         } finally {
             setIsLoadingSeguindo(false)
@@ -99,7 +126,7 @@ export default function SeguidoresPage({ route }){
     return(
         <>
             <FlatList
-                data={seguidores}
+                data={usuarios}
                 ref={(ref) => {setListRef(ref)}}
                 onScroll={scrollHandler}
                 style={styles.view}
@@ -112,6 +139,20 @@ export default function SeguidoresPage({ route }){
                   }
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
+                ListHeaderComponent={(
+                    <View >
+                        <InputText
+                            placeholder="Pesquisar leitor"
+                            value={filtros.string}
+                            onStopType={(string) => {
+                                handleChange({string})
+                            }}
+                            containerStyle={styles.textInput}
+                            height={45}
+                            leftElement={<Icon source={"magnify"} size={18} color="#666"/>}
+                        />
+                    </View>
+                )}
                 renderItem={({item, index}) => {
                     return ( <CardSeguidor usuario={item} handleSeguir={() => handleSeguir(item.id)} isLoading={isLoadingSeguindo == item.id}/>) 
                 }}
@@ -123,36 +164,44 @@ export default function SeguidoresPage({ route }){
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            Nenhum seguidor ainda!
+                        { filtros.string.length > 0 ?  'Nenhum usuario encontrada!' : 'Nenhum usuario ainda!'  }
                         </Text>
                     </View>
                 }
                 keyExtractor={(item, index) => {  return `${item.numero}-${index}` }}
+                onEndReached={() => {
+                    if(!loadingMore && !enReached && !loading && !loadingRefresh){
+                        setLoadingMore(true)
+                        getUsuarios(pagina + 1)
+                    }
+                }}
                 ListFooterComponent={() => {
+                    if(!enReached && usuarios.length > 0) return (
+                        <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
+                    )
                     return null
                 }}
             />
             {
                 showIrTopo ? 
-                <Animated.View>
-                    <Chip
+                    <CustomButton
                         style={{
                             position: 'absolute',
                             zIndex: 10,
                             bottom: 10,
                             right: 10,
-                            backgroundColor: 'rgba(255, 255, 255, 0.3)'
+                            borderColor: '#312E2E',
+                            borderWidth: 1,
+                            paddingHorizontal: 20,
+                            flexDirection: 'row',
+                            backgroundColor: defaultColors.primary,
+                            alignItems: 'center',
+                            gap: 10
                         }}
                         onPress={upButtonHandler}
                     >
-                         <Icon 
-                            source="arrow-up"
-                            // color={defaultColors.activeColor}
-                            color="#fff"
-                            size={20}
-                        />
-                        </Chip>
-                </Animated.View>
+                        Ir para o topo
+                    </CustomButton>
                 : null
 
             } 

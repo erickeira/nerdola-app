@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator } from "react-native";
+import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, Linking } from "react-native";
 import { Button } from 'react-native-paper';
 import InputText from "../../components/InputText";
 import CustomButton  from "../../components/CustomButton";
@@ -145,6 +145,21 @@ export default function LoginPage(){
                 >
                     Criar conta
                 </CustomButton>
+
+                <Text style={{ color : defaultColors.gray, fontSize: 12, marginBottom: 5, textAlign: 'center' }}>
+                    Caso tenha problemas atualize a versão	do app
+                </Text>
+                <CustomButton 
+                    mode="outlined"
+                    style={styles.buttonDownload}
+                    onPress={() => {
+                        Linking.openURL('https://storage.nerdola.com.br/apks/nerdola.apk')
+                    }}
+                >
+                    <Text style={{ color : defaultColors.primary }}>
+                        Baixar versão atualizada
+                    </Text>
+                </CustomButton>
             </View>
         </ScrollView>
     )
@@ -175,7 +190,13 @@ const styles = StyleSheet.create({
     buttonCadastrar:{
         height: 51,
         justifyContent: 'center',
-        marginBottom: 100,
+        marginBottom: 50,
         borderColor: '#312E2E'
+    },
+    buttonDownload:{
+        height: 51,
+        justifyContent: 'center',
+        borderColor: '#312E2E',
+        backgroundColor: '#fff',
     }
 });

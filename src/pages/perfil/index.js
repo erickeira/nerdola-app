@@ -8,6 +8,7 @@ import Chip from "../../components/Chip";
 import CardObra from "../../components/CardObra";
 import { Avatar, Icon } from "react-native-paper";
 import { defaultColors, imageUrl } from "../../utils";
+import CustomButton from "../../components/CustomButton";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -203,9 +204,9 @@ export default function PerfilPage({ route }){
                                     { user?.nome }
                                 </Text>
                                 {
-                                    !id &&
-                                    <Text style={styles.email}>
-                                        { user?.email }
+                                    !!user?.nick &&
+                                    <Text style={styles.nick}>
+                                        @{ user?.nick }
                                     </Text>
                                 }
                                 <View style={{flexDirection: 'row' , gap: 10}}>
@@ -354,25 +355,24 @@ export default function PerfilPage({ route }){
             />
             {
                 showIrTopo ? 
-                <Animated.View>
-                    <Chip
-                        style={{
-                            position: 'absolute',
-                            zIndex: 10,
-                            bottom: 10,
-                            right: 10,
-                            backgroundColor: 'rgba(255, 255, 255, 0.3)'
-                        }}
-                        onPress={upButtonHandler}
-                    >
-                         <Icon 
-                            source="arrow-up"
-                            // color={defaultColors.activeColor}
-                            color="#fff"
-                            size={20}
-                        />
-                        </Chip>
-                </Animated.View>
+                <CustomButton
+                    style={{
+                        position: 'absolute',
+                        zIndex: 10,
+                        bottom: 10,
+                        right: 10,
+                        borderColor: '#312E2E',
+                        borderWidth: 1,
+                        paddingHorizontal: 20,
+                        flexDirection: 'row',
+                        backgroundColor: defaultColors.primary,
+                        alignItems: 'center',
+                        gap: 10
+                    }}
+                    onPress={upButtonHandler}
+                >
+                    Ir para o topo
+                </CustomButton>
                 : null
 
             } 
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 5
     },
-    email: {
+    nick: {
        color: defaultColors.gray,
        marginBottom: 8
     },

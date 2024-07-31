@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View , TouchableOpacity, Image} from "react-native";
+import { StyleSheet, Text, View , TouchableOpacity, Image, Dimensions} from "react-native";
 import { Avatar, Icon } from "react-native-paper";
 import { defaultColors, gerarCorAleatoriaRGBA, imageUrl } from "../utils";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Button, Menu, Divider, PaperProvider } from 'react-native-paper';
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import AutoHeightImage from 'react-native-auto-height-image';
 
 import  dayjs from 'dayjs'
 import 'dayjs/locale/pt-br';
@@ -16,6 +17,7 @@ dayjs.extend(relativeTime);
 dayjs.locale("pt-br");
 
 
+const { height, width }  = Dimensions.get('screen');
 export default function CardPublicacao({ 
     publicacao : oldPublicacao,
     handleExcluir
@@ -44,8 +46,8 @@ export default function CardPublicacao({
         }
     }
 
-    const handleClick = (obra) => {
-        navigation.navigate('capitulo', { id: obra.capitulo.id, obra })
+    const handleClick = (capitulo, obra) => {
+        navigation.navigate('capitulo', { id: capitulo?.id, obra })
     }
 
     const handleComentarios = async () => {
@@ -53,6 +55,9 @@ export default function CardPublicacao({
     }
     const imagePath = `${imageUrl}usuarios/${publicacao?.usuario?.id}/${publicacao?.usuario?.imagem}`;
     const [imageError, setImageError] = useState(false)
+
+    const imagePathPublicacao = `${imageUrl}publicacoes/${publicacao?.id}/${publicacao.imagem}`;
+    const [imageErrorPublicacao, setImageErrorPublicacao] = useState(false)
 
     return(
         <View style={styles.view}>
@@ -97,7 +102,7 @@ export default function CardPublicacao({
                         </Text>
                     </TouchableOpacity>
                     {
-                        publicacao.usuario.id == usuario.id &&
+                        (publicacao.usuario.id == usuario.id || usuario.id == 1) &&
                         <Menu
                             visible={visible}
                             onDismiss={closeMenu}
@@ -131,8 +136,8 @@ export default function CardPublicacao({
                     !!publicacao?.capitulo?.id && (
                         <CardCapituloPublicacao
                             obra={publicacao?.obra}
-                            capitulo={publicacao.obra?.capitulo}
-                            handleClick={() => handleClick(publicacao?.obra)}
+                            capitulo={publicacao.capitulo}
+                            handleClick={() => handleClick(publicacao.capitulo, publicacao?.obra)}
                         />
                     )
                 }
@@ -141,6 +146,19 @@ export default function CardPublicacao({
                     !publicacao?.capitulo?.id && publicacao?.obra?.id && (
                         <CardObra
                             obra={publicacao?.obra}
+                            feed
+                        />
+                    )
+                }
+                {
+                    !!publicacao?.imagem && (
+                        <AutoHeightImage
+                            style={styles.imagemPublicacao}
+                            width={width - 100}
+                            source={{ uri : imagePathPublicacao }}
+                            onError={(error) => {
+                                setImageErrorPublicacao(true)
+                            }}
                         />
                     )
                 }
@@ -250,5 +268,8 @@ const styles = StyleSheet.create({
     imagem:{
         width: '100%',
         height: '100%'
+    },
+    imagemPublicacao:{
+        marginTop: 20
     },
 });

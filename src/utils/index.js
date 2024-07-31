@@ -2,9 +2,9 @@ import { Dimensions, StyleSheet } from 'react-native';
 
 const { height, width }  = Dimensions.get('screen');
 // const production = !__DEV__
-const production = false
-// const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://192.168.1.14:3001/';
-const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://192.168.1.140:3001/';
+const production = true
+const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://192.168.1.14:3001/';
+// const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://192.168.1.140:3001/';
 const botUrl = "https://discord.com/api/v10/webhooks/1266480912481390622/Z9oq5b4rQv-_QHfuC_t6PjlCszo36kWAT0KkQAfLxgpv2EoUheLxM-tbYWL-mhoBpye6?wait=true";
 
 const proporcaoCard = {
@@ -55,6 +55,12 @@ function gerarCorAleatoriaRGBA() {
     return corRGBA;
 }
 
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  
+
 
 export {
     defaultStyles,
@@ -64,5 +70,6 @@ export {
     imageUrl,
     proporcaoCard,
     botUrl,
-    gerarCorAleatoriaRGBA
+    gerarCorAleatoriaRGBA,
+    isValidEmail
 }
