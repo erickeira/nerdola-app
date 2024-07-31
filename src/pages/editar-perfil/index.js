@@ -49,7 +49,7 @@ export default function EditarPerfilPage(){
             nome:  !form.nome?.trim() ? "Infome o seu nome" : false,
             email:  !form.email || !isValidEmail(form.email) ? "Infome o seu e-mail" : false,
             telefone:  !form.telefone || form.telefone.legth < 10  ? "Infome o seu telefone" : false,
-            nick:    !form.nick ? "Informe seu nick" : false
+            nick:    !form.nick ? "Informe seu nick" : ( form.nick?.trim()?.split(' ')?.length > 1 ? "Seu nick não pode conter espaços" : false )
         }
         if(form.hasOwnProperty('nick') && form.nick != formulario.nick){
             const isValid = await handleCheckNick(form.nick)
