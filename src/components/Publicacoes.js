@@ -154,9 +154,9 @@ export default function Publicacoes({ route }){
                     ) 
                 }}
                 ListEmptyComponent={
-                    loading ? 
+                    loading || loadingRefresh ? 
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
-                        {/* <ActivityIndicator color="#fff" size={30}/> */}
+                        <ActivityIndicator color="#fff" size={30}/>
                     </View>
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>

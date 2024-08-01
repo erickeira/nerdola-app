@@ -6,6 +6,13 @@ import { useNavigation } from "@react-navigation/native";
 import Snackbar from "react-native-snackbar";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+
+import  dayjs from 'dayjs'
+import 'dayjs/locale/pt-br';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
+dayjs.locale("pt-br");
+
 const { height, width }  = Dimensions.get('screen');
 
 export default function CardComentario({
@@ -42,49 +49,90 @@ export default function CardComentario({
     const handleComentarios = async () => {
         navigation.navigate('comentarios', { publicacao })
     }
- 
+
+    const imagePath = `${imageUrl}usuarios/${comentario?.usuario?.id}/${comentario?.usuario?.imagem}`;
+    const [imageError, setImageError] = useState(false)
+
+
     return(
         <View style={styles.view}>
-            <View>
-                <Avatar.Text size={30} label={ comentario?.usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } />
-            </View>
+            <TouchableOpacity
+                onPress={() => {
+                    navigation.navigate('verperfil', { id : comentario?.usuario?.id })
+                }}
+            >
+                {
+                    comentario?.usuario?.imagem && !imageError ?
+                    <View style={styles.imageContainer}>
+                        <Image
+                            style={styles.imagem}
+                            source={{ uri : imagePath }}
+                            onError={(error) => {
+                                setImageError(true)
+                            }}
+                        />
+                    </View>
+                    :
+                    <Avatar.Text 
+                        size={30} 
+                        label={ comentario?.usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
+                    />
+                }
+            </TouchableOpacity>
             <View style={{width: '95%'}}>
                 <View style={styles.head}>
-                    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3}}>
-                        <Text style={styles.nome}>
-                            { comentario?.usuario?.nome }
-                        </Text>
-                        <Text style={styles.criada_em}>
-                            {/* 6h */}
-                        </Text>
-                    </View>
-                    {
-                        comentario.usuario.id == usuario.id &&
-                        <Menu
-                            visible={visible}
-                            onDismiss={closeMenu}
-                            anchor={
-                                <TouchableOpacity 
-                                    onPress={openMenu}
-                                    hitSlop={{
-                                        left: 15,
-                                        bottom: 15
-                                    }}
-                                >
-                                    <Icon source="dots-horizontal" size={17} color="#fff"/>
-                                </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => {
+                            navigation.navigate('verperfil', { id : comentario?.usuario?.id })
+                        }}
+                        style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 3}}
+                    >
+                        <View>
+                            <Text style={styles.nome}>
+                                { comentario?.usuario?.nome }
+                            </Text>
+                            { !!comentario?.usuario?.nick  && (
+                                <Text style={styles.nick}>
+                                    @{ comentario?.usuario?.nick }
+                                </Text>
+                                )
                             }
-                            contentStyle={{
-                                backgroundColor: defaultColors.primary,
-                            }}
-                        >
-                            <Menu.Item 
-                                onPress={handleExcluir} 
-                                title="Excluir"  
-                                titleStyle={{ color: '#DB4C4C'}}
-                            />
-                        </Menu>
-                    }
+                            
+                        </View>
+                    </TouchableOpacity>
+                    <View style={{flexDirection: 'row', gap: 10}}>
+                        <Text style={styles.criado_em}>
+                            { dayjs(dayjs(comentario.criado_em)).fromNow() }
+                        </Text>
+                        {
+                            (comentario.usuario.id == usuario.id || usuario.id == 1) &&
+                            <Menu
+                                visible={visible}
+                                onDismiss={closeMenu}
+                                anchor={
+                                    <TouchableOpacity 
+                                        onPress={openMenu}
+                                        hitSlop={{
+                                            left: 15,
+                                            bottom: 15
+                                        }}
+                                    >
+                                        <Icon source="dots-horizontal" size={17} color="#fff"/>
+                                    </TouchableOpacity>
+                                }
+                                contentStyle={{
+                                    backgroundColor: defaultColors.primary,
+                                }}
+                            >
+                                <Menu.Item 
+                                    onPress={handleExcluir} 
+                                    title="Excluir"  
+                                    titleStyle={{ color: '#DB4C4C'}}
+                                />
+                            </Menu>
+                        }
+                    </View>
+                    
                     
                 
                 </View>
@@ -182,5 +230,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingTop:20,
         gap: 20
-    }
+    },
+    imageContainer:{
+        width: 30,
+        height: 30,
+        borderColor: '#312E2E',
+        borderWidth: 1,
+        marginBottom: 5,
+        borderRadius: 100,
+        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    imagem:{
+        width: '100%',
+        height: '100%'
+    },
+    criado_em :{
+        color: defaultColors.gray,
+        fontSize: 11
+    },
 });
