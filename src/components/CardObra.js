@@ -21,7 +21,8 @@ export default function CardObra({
         leitura,
         total_lidos,
         total_capitulos,
-        status
+        status,
+        total_usuarios_lendo
     } = obra
 
     const navigation = useNavigation()
@@ -69,7 +70,7 @@ export default function CardObra({
                         />
                     }
                 </View>
-                <View style={{ width: '100%', flexWrap: 'wrap'}}>
+                <View style={{ width: '90%', flexWrap: 'wrap'}}>
                     <Text style={styles.formato}>
                         {formato?.nome}
                     </Text>
@@ -79,7 +80,6 @@ export default function CardObra({
                     <Text style={styles.total_capitulos}>
                         {total_capitulos} { total_capitulos == 1 ? 'capitulo' : 'capitulos' }
                     </Text>
-                    
                     {
                         !!tags?.length && !feed && 
                         <View style={[styles.containerTags]}>
@@ -93,13 +93,18 @@ export default function CardObra({
                         </View>
                      
                     }
+                    {
+                        !!total_usuarios_lendo && 
+                        <Text style={styles.total_usuarios_lendo}>
+                            {total_usuarios_lendo} lendo
+                        </Text>
+                    }
                       {
                         !!status && feed && 
       
                         <Text style={styles.status}>
                             {status.nome}
                         </Text>
-                  
                      
                     }
                     
@@ -116,7 +121,7 @@ export default function CardObra({
                         <>
                             <ProgressBar 
                                 progress={progresso} 
-                                color={defaultColors.activeColor} 
+                                color={leituraColors[leitura?.status?.id]} 
                                 style={{
                                     height: 2,
                                     marginTop: 10, 
@@ -134,7 +139,7 @@ export default function CardObra({
                         <>
                             <ProgressBar 
                                 progress={1} 
-                                color={defaultColors.activeColor} 
+                                color={leituraColors[leitura?.status?.id]} 
                                 style={{
                                     height: 2,
                                     marginTop: 10, 
@@ -188,6 +193,10 @@ const styles = StyleSheet.create({
     total_capitulos:{
         fontSize: 12,
         color: defaultColors.gray
+    },
+    total_usuarios_lendo:{
+        fontSize: 12,
+        color: defaultColors.activeColor
     },
     containerTags: {
         flexDirection: 'row',

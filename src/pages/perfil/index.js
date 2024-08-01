@@ -324,6 +324,7 @@ export default function PerfilPage({ route }){
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 renderItem={({item, index}) => {
+                    delete item.total_usuarios_lendo
                     return ( <CardObra obra={item} />) 
                 }}
                 ListEmptyComponent={

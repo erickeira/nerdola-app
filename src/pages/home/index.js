@@ -100,7 +100,7 @@ export default function HomePage(){
             setIsLoadingRefresh(false)
         }
     }
-
+    
     const getTags = async () => {
         try{
             const response = await api.get(`tags`, {
