@@ -114,7 +114,7 @@ export default function CardPublicacao({
                             { dayjs(dayjs(publicacao.criada_em)).fromNow() }
                         </Text>
                         {
-                            (publicacao.usuario.id == usuario.id || usuario.id == 1) &&
+                            (publicacao?.usuario?.id == usuario?.id || usuario?.id == 1) &&
                             <Menu
                                 visible={visible}
                                 onDismiss={closeMenu}
@@ -153,8 +153,8 @@ export default function CardPublicacao({
                     !!publicacao?.capitulo?.id && (
                         <CardCapituloPublicacao
                             obra={publicacao?.obra}
-                            capitulo={publicacao.capitulo}
-                            handleClick={() => handleClick(publicacao.capitulo, publicacao?.obra)}
+                            capitulo={publicacao?.capitulo}
+                            handleClick={() => handleClick(publicacao?.capitulo, publicacao?.obra)}
                         />
                     )
                 }

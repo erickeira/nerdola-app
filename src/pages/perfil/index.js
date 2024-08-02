@@ -9,6 +9,7 @@ import CardObra from "../../components/CardObra";
 import { Avatar, Icon } from "react-native-paper";
 import { defaultColors, gerarCorPorString, imageUrl } from "../../utils";
 import CustomButton from "../../components/CustomButton";
+import CardPublicacao from "../../components/CardPublicacao";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -18,14 +19,20 @@ export default function PerfilPage({ route }){
     const { usuario, handleLogout } = useAuth()
     const isFocused = useIsFocused()
     const [ obras , setObras] = useState([])
+    const [ publicacoes , setPublicacoes] = useState([])
     const [pagina, setPagina] = useState(0)
+    const [paginaPublicacoes, setPaginaPublicacoes] = useState(0)
     const [limite, setLimite] = useState(20)
     const [loading, setIsLoading] = useState(false)
     const [loadingRefresh, setIsLoadingRefresh] = useState(false)
     const [ enReached , setEnReached ] = useState(false)
+    const [ enReachedPublicacoes , setEnReachedPublicacoes ] = useState(false)
     const [loadingMore, setLoadingMore] = useState(false)
+    const [loadingMorePublicacoes, setLoadingMorePublicacoes] = useState(false)
+
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
+    const [ listMode, setListMode ] = useState("obras")
     const [ filtros , setFiltros] = useState({
         string: '',
         statusleitura: []
@@ -52,12 +59,13 @@ export default function PerfilPage({ route }){
           setShowIrTopo(true);
         }
         setPosicaoNaTela(offsetY)
-      };
+    };
   
 
     useEffect(() =>{
         setIsLoading(true)
         getObras(1)
+        getPublicacoes(1)
         getStatusList()
         getUser()
     },[])
@@ -74,6 +82,7 @@ export default function PerfilPage({ route }){
     useEffect(() => {
         setIsLoading(true)
         getObras(1 , filtros)
+        getPublicacoes(1)
     },[filtros])
 
     const getObras = async (pag = 1, filtros = {}) => {
@@ -111,6 +120,35 @@ export default function PerfilPage({ route }){
         }
     }
 
+    const getPublicacoes = async (pag = 1) => {
+        if(loading || loadingRefresh) return
+        const params =  {
+            usuario: id?.toString() || user?.id?.toString(),
+            limite: limite?.toString()
+        }
+        try{
+            const response = await api.get(`publicacoes`, {  params })
+            if(response.data?.length < limite){
+                setEnReachedPublicacoes(true)
+            }
+            if(pag == 1){
+                setPublicacoes(response.data)
+                setEnReachedPublicacoes(false)
+            }else{
+                const existingIds = publicacoes.map(publicacao => publicacao.id); 
+                const newPublicacoes = response.data.filter(publicacao => !existingIds.includes(publicacao.id));
+                setPublicacoes([...publicacoes, ...newPublicacoes]);
+            }
+            
+            setPaginaPublicacoes(pag)
+        }catch(error){
+        } finally{
+            setIsLoading(false)
+            setLoadingMorePublicacoes(false)
+            setIsLoadingRefresh(false)
+        }
+    }
+
     const [ statusList, setStatusList] = useState([])
     const getStatusList = async () => {
         try{
@@ -125,6 +163,9 @@ export default function PerfilPage({ route }){
         setPagina(1)
         setObras([])
         getObras(1) 
+        setPaginaPublicacoes(1)
+        setPublicacoes([])
+        getPublicacoes(1)
     }
     
     useEffect(() => {
@@ -182,10 +223,13 @@ export default function PerfilPage({ route }){
             setIsLoadingSeguindo(false)
         }
     }
+
+    
+
     return(
         <>
             <FlatList
-                data={obras}
+                data={listMode == "obras" ? obras : publicacoes }
                 ref={(ref) => {setListRef(ref)}}
                 onScroll={scrollHandler}
                 style={styles.view}
@@ -292,43 +336,77 @@ export default function PerfilPage({ route }){
                             />
                         }
 
-                        
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusList}>
-                            {
-                                statusList?.map((status, index) => (
-                                    <Chip
-                                        key={index}
-                                        value={status.id}
-                                        onPress={(status) => {
-                                            let newStatusleitura = [...filtros.statusleitura];
-                                            if (newStatusleitura.includes(status)) {
-                                                newStatusleitura = newStatusleitura.filter(tag => tag !== status);
-                                            } else {
-                                                newStatusleitura = [...newStatusleitura, status];
-                                            }
-                                            handleChange({ statusleitura: newStatusleitura });
-                                        }}
-                                        isSelected={filtros.statusleitura.includes(status.id)}
-                                    >
-                                        <Text
-                                            style={{
-                                                fontSize: 12,
-                                                color :filtros.statusleitura.includes(status.id) ? '#000' : defaultColors.gray
+                        <View style={styles.containerTab}>
+                            <Chip
+                                label="Minhas obras"
+                                style={[styles.tab,{
+                                    borderColor: listMode == 'obras' ? defaultColors.activeColor : "#666"
+                                }]}
+                                onPress={() => {
+                                    setListMode('obras')
+                                }}
+                            >
+                                <Text 
+                                    style={{ color: listMode == 'obras' ? '#fff' : defaultColors.gray}}
+                                >
+                                   { id ?  "Leituras" : "Minhas leituras" }
+                                </Text>
+                            </Chip>
+                            <Chip
+                                label="Publicações"
+                                style={[styles.tab,{
+                                    borderColor: listMode == 'publicacoes' ? defaultColors.activeColor : "#666"
+                                }]}
+                                onPress={() => {
+                                    setListMode('publicacoes')
+                                }}
+                            >
+                                <Text 
+                                    style={{ color: listMode == 'publicacoes' ? '#fff' : defaultColors.gray}}
+                                >Publicações</Text>
+                            </Chip>
+                        </View>
+                        {
+                            listMode == "obras" && 
+                            <View style={styles.statusList}>
+                                {
+                                    statusList?.map((status, index) => (
+                                        <Chip
+                                            key={index}
+                                            value={status.id}
+                                            onPress={(status) => {
+                                                let newStatusleitura = [...filtros.statusleitura];
+                                                if (newStatusleitura.includes(status)) {
+                                                    newStatusleitura = newStatusleitura.filter(tag => tag !== status);
+                                                } else {
+                                                    newStatusleitura = [...newStatusleitura, status];
+                                                }
+                                                handleChange({ statusleitura: newStatusleitura });
                                             }}
+                                            isSelected={filtros.statusleitura.includes(status.id)}
                                         >
-                                            {`(${totais[status.id] || 0}) ${status.nome}`}
-                                        </Text>
-                                    </Chip>
-                                ))
-                            }
-                        </ScrollView> 
+                                            <Text
+                                                style={{
+                                                    fontSize: 12,
+                                                    color :filtros.statusleitura.includes(status.id) ? '#000' : defaultColors.gray
+                                                }}
+                                            >
+                                                {`(${totais[status.id] || 0}) ${status.nome}`}
+                                            </Text>
+                                        </Chip>
+                                    ))
+                                }
+                            </View> 
+                        }
+                        
                     </View>
                 )}
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 renderItem={({item, index}) => {
                     delete item.total_usuarios_lendo
-                    return ( <CardObra obra={item} />) 
+                    if(listMode == "obras") return ( <CardObra obra={item} />) 
+                    return ( <CardPublicacao publicacao={item} />) 
                 }}
                 ListEmptyComponent={
                     loading ? 
@@ -338,15 +416,21 @@ export default function PerfilPage({ route }){
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            {  filtros.string.length > 0 || filtros.statusleitura.length > 0 ?  'Nenhum leitura ainda!' : 'Nenhum leitura ainda!'  }
+                            {  listMode == "obras" ?  'Nenhum leitura ainda!' : 'Nenhum publicação ainda!'  }
                         </Text>
                     </View>
                 }
                 keyExtractor={(item, index) => {  return `${item.numero}-${index}` }}
                 onEndReached={() => {
                     if(!loadingMore && !enReached && !loading && !loadingRefresh){
-                        setLoadingMore(true)
-                        getObras(pagina + 1)
+                        if(listMode == "obras"){
+                            setLoadingMorePublicacoes(true)
+                            getPublicacoes(paginaPublicacoes + 1)
+                        }else if(listMode == "publicacoes"){
+                            setLoadingMore(true)
+                            getObras(pagina + 1)
+                        }
+                     
                     }
                 }}
                 ListFooterComponent={() => {
@@ -404,7 +488,7 @@ const styles = StyleSheet.create({
     statusList: {
         display: 'flex',
         flexDirection: 'row',
-        gap: 10
+        gap: 5
     },
     containerTopoCapitulos:{
         display: 'flex', 
@@ -444,4 +528,16 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%'
     },
+    containerTab:{
+        flexDirection: 'row',
+        width: '100%'
+    },
+    tab: {
+        flex: 1,
+        borderWidth: 0 ,
+        borderBottomWidth: 1,
+        marginHorizontal: 0,
+        paddingHorizontal: 0,
+        marginRight: 0 
+    }
 });

@@ -56,6 +56,7 @@ function gerarCorAleatoriaRGBA() {
 }
 
 function gerarCorPorString(str) {
+    if(!str) return defaultColors.activeColor
     // Função para gerar um hash a partir da string
     function hashString(str) {
         let hash = 0;
