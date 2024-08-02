@@ -37,12 +37,28 @@ export default function CardCapitulo({
 
     return(
         <TouchableOpacity 
+            // onPress={() => {
+            //     navigation.navigate('capitulo', { id , leitura, lido: capituloLido, obra })
+            // }}
             onPress={() => {
-                navigation.navigate('capitulo', { id , leitura, lido: capituloLido, obra })
+                if(leitura.status.id == 2){
+                    if(onLido) onLido(id, !lido)
+                    setCapituloLido(!capituloLido)
+                }else{
+                    Snackbar.show({
+                    text: "Atualize o status da obra para lendo",
+                    duration: 2000,
+                    action: {
+                        text: 'OK',
+                        textColor: 'green',
+                        onPress: () => { /* Do something. */ },
+                    },
+                    });
+                }
             }}
         >
             <View style={styles.view}>
-                <View style={styles.imageContainer}>
+                {/* <View style={styles.imageContainer}>
                     {
                         !imageError ?
                         <Image
@@ -59,7 +75,7 @@ export default function CardCapitulo({
                             size={30}
                         />
                     }
-                </View>
+                </View> */}
                 <View style={{ flex: 1  }}>
                     <Text style={[styles.nome,{
                         color: capituloLido ? '#666' :'#fff'
@@ -103,7 +119,7 @@ export default function CardCapitulo({
                     )
                 }
                 
-                <Icon source={"chevron-right"} color={"#fff"} size={20}/>
+                {/* <Icon source={"chevron-right"} color={"#fff"} size={20}/> */}
                 
             </View>
  
@@ -113,11 +129,15 @@ export default function CardCapitulo({
 const styles = StyleSheet.create({
     view: {
       padding: 10,
-      width: width - 30,
+      width: width - 20,
+      marginHorizontal: 10,
+      minHeight: 60,
       overflow: 'scroll',
       flexDirection: 'row',
       gap: 10,
-      alignItems: 'center'
+      alignItems: 'center',
+    borderBottomWidth: 0.2,
+    borderBottomColor: '#262626'
     },
     imageContainer:{
         width: width * 0.18,

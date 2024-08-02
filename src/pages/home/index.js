@@ -173,7 +173,7 @@ export default function HomePage(){
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 renderItem={({item, index}) => {
-                    return ( <CardObra obra={item} />) 
+                    return ( <CardObra obra={item} showtags={false}/>) 
                 }}
                 ListEmptyComponent={
                     loading ? 

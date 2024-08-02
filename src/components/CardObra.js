@@ -3,13 +3,16 @@ import { defaultColors, imageUrl, proporcaoCard } from "../utils";
 import { useState } from "react";
 import { Icon, ProgressBar, } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import Chip from "./Chip";
 
 const { height, width }  = Dimensions.get('screen');
 
 export default function CardObra({
     obra,
     mostrarprogresso,
-    feed
+    feed,
+    showtags = false,
+    showstatus = false
 }){
     const{
         id,
@@ -41,122 +44,134 @@ export default function CardObra({
     }
 
     return(
-        <TouchableOpacity onPress={handleClick}>
-            <View style={[styles.view,{
-                  borderColor: '#312E2E',
-                  borderWidth: feed ? 1 : 0,
-                  borderRadius: 5,
-                  width: feed ? width - 90 :'100%',
-                  marginTop: feed ? 20 : 0
-            }]}>
-                <View style={[styles.imageContainer,{
-                    width: feed ?  80 : 100,
-                    height: feed ?  ((80) * (4.3 / 3)) : ((100) * (4.3 / 3)),   
+        <>
+            <TouchableOpacity onPress={handleClick}>
+                <View style={[styles.view,{
+                    borderColor: '#312E2E',
+                    borderWidth: feed ? 1 : 0,
+                    borderRadius: 5,
+                    width: feed ? width - 90 :'100%',
+                    marginTop: feed ? 20 : 0
                 }]}>
-                    {
-                        !imageError ?
-                        <Image
-                            style={styles.imagem}
-                            source={{ uri : imagePath }}
-                            onError={(error) => {
-                                setImageError(true)
-                            }}
-                        />
-                        :
-                        <Icon 
-                            source="image-off-outline" 
-                            color="#312E2E" 
-                            size={30}
-                        />
-                    }
-                </View>
-                <View style={{ width: '90%', flexWrap: 'wrap'}}>
-                    <Text style={styles.formato}>
-                        {formato?.nome}
-                    </Text>
-                    <Text style={styles.nome}>
-                        {nome}
-                    </Text>
-                    <Text style={styles.total_capitulos}>
-                        {total_capitulos} { total_capitulos == 1 ? 'capitulo' : 'capitulos' }
-                    </Text>
-                    {
-                        !!tags?.length && !feed && 
-                        <View style={[styles.containerTags]}>
-                            {
-                                tags.map((tag, index) => (
-                                    <Text style={styles.tags} key={index}>
-                                        {tag.nome},
-                                    </Text>
-                                ))
-                            }
-                        </View>
-                     
-                    }
-                    {
-                        !!total_usuarios_lendo && 
-                        <Text style={styles.total_usuarios_lendo}>
-                            {total_usuarios_lendo} lendo
-                        </Text>
-                    }
-                      {
-                        !!status && feed && 
-      
-                        <Text style={styles.status}>
-                            {status.nome}
-                        </Text>
-                     
-                    }
-                    
-                    {
-                        !!leitura?.id  && 
-                        <Text style={[styles.leitura, {
-                            color: leituraColors[leitura?.status?.id]
-                        }]}>
-                            {leitura.status?.nome}
-                        </Text>
-                    }
-                    {
-                        leitura?.status?.id == 2  && 
-                        <>
-                            <ProgressBar 
-                                progress={progresso} 
-                                color={leituraColors[leitura?.status?.id]} 
-                                style={{
-                                    height: 2,
-                                    marginTop: 10, 
-                                    backgroundColor: '#312E2E',
+                    <View style={[styles.imageContainer,{
+                        width: feed ?  80 : 100,
+                        height: feed ?  ((80) * (4.3 / 3)) : ((100) * (4.3 / 3)),   
+                    }]}>
+                        {
+                            !imageError ?
+                            <Image
+                                style={styles.imagem}
+                                source={{ uri : imagePath }}
+                                onError={(error) => {
+                                    setImageError(true)
                                 }}
                             />
-                            <Text style={{color: '#fff'}}>
-                                {(progresso * 100).toFixed(2)} %
-                            </Text>
-                        </>
-                        
-                    }
-                    {
-                        leitura?.status?.id == 3  && 
-                        <>
-                            <ProgressBar 
-                                progress={1} 
-                                color={leituraColors[leitura?.status?.id]} 
-                                style={{
-                                    height: 2,
-                                    marginTop: 10, 
-                                    backgroundColor: '#312E2E'
-                                }}
+                            :
+                            <Icon 
+                                source="image-off-outline" 
+                                color="#312E2E" 
+                                size={30}
                             />
-                            <Text style={{color: '#fff'}}>
-                                100.00 %
+                        }
+                    </View>
+                    <View style={{ width: '90%', flexWrap: 'wrap'}}>
+                        <Text style={styles.formato}>
+                            {formato?.nome}
+                        </Text>
+                        <Text style={styles.nome}>
+                            {nome}
+                        </Text>
+                        <Text style={styles.total_capitulos}>
+                            {showstatus ? `${status?.nome} - `  : ''}{total_capitulos} { total_capitulos == 1 ? 'capitulo' : 'capitulos' }
+                        </Text>
+                        {
+                            !!total_usuarios_lendo && 
+                            <Text style={styles.total_usuarios_lendo}>
+                                {total_usuarios_lendo} lendo
                             </Text>
-                        </>
+                        }
+                        {
+                            !!status && feed && 
+        
+                            <Text style={styles.status}>
+                                {status.nome}
+                            </Text>
                         
-                    }
-                </View>
+                        }
+                        
+                        {
+                            !!leitura?.id  && 
+                            <Text style={[styles.leitura, {
+                                color: leituraColors[leitura?.status?.id]
+                            }]}>
+                                {leitura.status?.nome}
+                            </Text>
+                        }
+                        {
+                            leitura?.status?.id == 2  && 
+                            <>
+                                <ProgressBar 
+                                    progress={progresso} 
+                                    color={leituraColors[leitura?.status?.id]} 
+                                    style={{
+                                        height: 2,
+                                        marginTop: 10, 
+                                        backgroundColor: '#312E2E',
+                                    }}
+                                />
+                                <Text style={{color: '#fff'}}>
+                                    {(progresso * 100).toFixed(2)} %
+                                </Text>
+                            </>
+                            
+                        }
+                        {
+                            leitura?.status?.id == 3  && 
+                            <>
+                                <ProgressBar 
+                                    progress={1} 
+                                    color={leituraColors[leitura?.status?.id]} 
+                                    style={{
+                                        height: 2,
+                                        marginTop: 10, 
+                                        backgroundColor: '#312E2E'
+                                    }}
+                                />
+                                <Text style={{color: '#fff'}}>
+                                    100.00 %
+                                </Text>
+                            </>
+                            
+                        }
+                    </View>
 
-            </View>
- 
-        </TouchableOpacity>
+                </View>
+    
+            </TouchableOpacity>
+            {
+                !!tags?.length &&  showtags &&
+                <View style={[styles.containerTags]}>
+                    {
+                        tags.map((tag, index) => (
+                            <Chip
+                                key={index}
+                                style={{
+                                    paddingVertical : 4,
+                                    marginBottom: 0
+                                }}
+                            >
+                                <Text style={styles.tags} key={index}>
+                                    {tag.nome}
+                                </Text>
+                            </Chip>
+                            
+                        ))
+                    }
+                </View>
+                
+            }
+        
+        </>
     )
 }
 const styles = StyleSheet.create({
@@ -201,11 +216,12 @@ const styles = StyleSheet.create({
     containerTags: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        width: '60%',
-        gap: 2
+        width: '100%',
+        gap: 0,
+        paddingHorizontal: 10
     },
     tags:{
-        fontSize: 12,
+        fontSize: 10,
         color: defaultColors.gray,
     },
     status:{

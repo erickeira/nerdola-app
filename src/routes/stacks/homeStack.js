@@ -33,7 +33,7 @@ const HomeStack = ({ navigation }) => {
           headerRight: ()  => (
             <TouchableOpacity 
               onPress={async () => {
-                await Linking.openURL("https://discord.gg/pc2YmxKF");
+                await Linking.openURL("https://discord.gg/4ErYfkvQPD");
               }} 
               hitSlop={{left: 20, bottom: 20}} 
               style={{marginRight: 25}}

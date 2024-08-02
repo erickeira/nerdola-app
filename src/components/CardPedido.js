@@ -35,7 +35,6 @@ export default function CardPedido({ pedido, onDelete , onEdit, isLoading }){
                 <Text style={styles.nome}>{pedido?.nome}</Text>
                 <Text style={styles.onde_ler}>{pedido?.onde_ler}</Text>
                 <Text style={[styles.status, {
-                    borderColor: statusData[pedido.status]?.color,
                     color: statusData[pedido.status]?.color,
                 }]}>{statusData[pedido.status]?.label}</Text>
             </View>
@@ -105,12 +104,10 @@ const styles = StyleSheet.create({
         marginBottom: 8
     },
     status:{
-        paddingHorizontal: 5,
-        paddingVertical: 2,
-        borderWidth: 0.3,
+        paddingVertical: 0,
         borderRadius: 5,
-        textAlign: 'center',
-        width: 100,
+        textAlign: 'left',
+        width: 80,
         fontSize: 10
     },
     divider:{

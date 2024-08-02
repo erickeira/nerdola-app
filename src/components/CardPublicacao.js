@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View , TouchableOpacity, Image, Dimensions} from "react-native";
 import { Avatar, Icon } from "react-native-paper";
-import { defaultColors, gerarCorAleatoriaRGBA, imageUrl } from "../utils";
+import { defaultColors, gerarCorAleatoriaRGBA, gerarCorPorString, imageUrl } from "../utils";
 import { useState } from "react";
 import CardCapituloPublicacao from "./CardCapituloPublicacao";
 import { useNavigation } from "@react-navigation/native";
@@ -81,6 +81,9 @@ export default function CardPublicacao({
                     
                     <Avatar.Text 
                         size={30} 
+                        style={{
+                            backgroundColor: gerarCorPorString(publicacao?.usuario?.nome)
+                        }}
                         label={ publicacao?.usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
                     />
                 }
@@ -140,9 +143,12 @@ export default function CardPublicacao({
                     </View>
                     
                 </View>
-                <Text style={styles.conteudo}>
-                    { publicacao?.conteudo }
-                </Text>
+                <TouchableOpacity onPress={handleComentarios}>
+                    <Text style={styles.conteudo}>
+                        { publicacao?.conteudo }
+                    </Text>
+                </TouchableOpacity>
+                
                 {
                     !!publicacao?.capitulo?.id && (
                         <CardCapituloPublicacao

@@ -222,7 +222,8 @@ export default function ObraPage({ route }){
                 {
                     !!obra.id && (
                         <View style={styles.details}>
-                            <CardObra obra={obra}/>
+                            <CardObra obra={obra} showstatus showtags/>
+                            <View style={styles.divider}/> 
                             <View style={styles.statusList}>
                                 {
                                     statusList?.map((status) => (
@@ -265,7 +266,7 @@ export default function ObraPage({ route }){
                         }}
                         style={{ paddingVertical: 3, height: 45}} 
                     >
-                        <Text>
+                        <Text style={{color: '#fff'}}>
                             Publicar no feed
                         </Text>
                     </Chip>
@@ -280,7 +281,7 @@ export default function ObraPage({ route }){
                             style={{ alignItems: 'center' }}
                         >
                             
-                            <Text>
+                            <Text style={{color: '#fff'}}>
                                 Onde ler
                             </Text>
                             <Icon source="web" size={15}/>
@@ -402,7 +403,7 @@ const styles = StyleSheet.create({
     },
     capitulos:{
         paddingHorizontal: 15,
-        marginBottom: 10,
+        marginVertical: 10,
         color: '#666'
     },
     buttonInformar:{
@@ -412,5 +413,12 @@ const styles = StyleSheet.create({
         borderColor: '#312E2E',
         borderRadius: 5,
         marginHorizontal: 10
-    }
+    },
+    divider:{
+        borderColor: '#312E2E',
+        borderBottomWidth: 1,
+        marginVertical: 20,
+        width: width - 40,
+        marginHorizontal: 20,
+    },
 });

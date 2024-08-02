@@ -23,7 +23,8 @@ const InputText = ({
     rghtElement,
     maxWidth,
     focus,
-    numberOfLines
+    numberOfLines,
+    maxLength
 }, ...others) => {
   const [text, setText] = useState({ semMascara : value || "" });
   const [mostrarSenha, setMostrarSenha] = useState( tipo == `senha`)
@@ -136,6 +137,7 @@ const InputText = ({
                 multiline={tipo == 'area' ? true : false}
                 keyboardType={verificaTeclado()}
                 numberOfLines={numberOfLines || 1}
+                maxLength={maxLength}
             />
             {rghtElement}
             {

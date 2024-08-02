@@ -162,6 +162,22 @@ export default function Comentarios({ capitulo, publicacao }){
                 
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
+                ListHeaderComponent={ 
+                    publicacao &&
+                    <>
+                        <CardPublicacao publicacao={publicacao}/>
+                        <View
+                            style={{
+                                borderBottomWidth: 0.2,
+                                borderBottomColor: '#262626',
+                                paddingVertical: 20
+                            }}
+                        >
+                            <Text style={{ color: defaultColors.gray }}>Comentários</Text>
+                        </View>
+                    </>
+                    
+                }
                 renderItem={({item, index}) => {
                     return ( 
                         <CardComentario 
@@ -207,6 +223,8 @@ export default function Comentarios({ capitulo, publicacao }){
                     onChange={(comentario) => {
                         setComentario(comentario)
                     }}
+                    tipo="area"
+                    maxLength={190}
                 />
                 <CustomButton 
                     style={styles.button}

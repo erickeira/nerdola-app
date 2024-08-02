@@ -1,5 +1,5 @@
 import { ActivityIndicator, Dimensions, Image, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-import { defaultColors, imageUrl, proporcaoCard } from "../utils";
+import { defaultColors, gerarCorPorString, imageUrl, proporcaoCard } from "../utils";
 import { useEffect, useState } from "react";
 import { Icon, ProgressBar, Checkbox, Avatar, Menu, Divider  } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
@@ -75,6 +75,9 @@ export default function CardComentario({
                     :
                     <Avatar.Text 
                         size={30} 
+                        style={{
+                            backgroundColor: gerarCorPorString(comentario?.usuario?.nome)
+                        }}
                         label={ comentario?.usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
                     />
                 }

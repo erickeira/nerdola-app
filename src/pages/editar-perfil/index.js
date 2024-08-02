@@ -25,6 +25,7 @@ export default function EditarPerfilPage(){
     const [dadosAlterados, setDadosAlterados] = useState({})
     const [ errors, setErrors] = useState({})
     const [ isLoadingCadastro, setLoadingCadastro] = useState(false)
+    const [oldNick, setOldNick] = useState("")
 
     const [ isLoadingMe, setIsLoadingMe] = useState(false)
     const getMe = async () => {
@@ -32,6 +33,7 @@ export default function EditarPerfilPage(){
         try{
             const response = await api.get('usuarios/me')
             setFormulario(response.data)
+            setOldNick(response.data.nick)
         }catch(error){
         } finally {
             setIsLoadingMe(false)
@@ -51,7 +53,7 @@ export default function EditarPerfilPage(){
             telefone:  !form.telefone || form.telefone.legth < 10  ? "Infome o seu telefone" : false,
             nick:    !form.nick ? "Informe seu nick" : ( form.nick?.trim()?.split(' ')?.length > 1 ? "Seu nick não pode conter espaços" : false )
         }
-        if(form.hasOwnProperty('nick') && form.nick != formulario.nick){
+        if(form.hasOwnProperty('nick') && form.nick != oldNick){
             const isValid = await handleCheckNick(form.nick)
             newErrors.nick = !isValid ? 'Nick já está sendo utilizado' : false
         }
@@ -66,7 +68,7 @@ export default function EditarPerfilPage(){
     }
 
     const handleCadastrar = async () => {
-        const isValid = await handleValidateForm(formulario)
+        const isValid = await handleValidateForm({ ...formulario, ...dadosAlterados})
         if(!isValid || isLoadingCadastro) return 
         setLoadingCadastro(true)
         try{
@@ -129,7 +131,7 @@ export default function EditarPerfilPage(){
                     placeholder="Nick"
                     value={formulario.nick}
                     onChange={(nick) => {
-                        handleChange({ nick })
+                        handleChange({ nick : nick.toLowerCase().trim() })
                     }}
                     onStopType={async (nick) => {
                         if(nick != formulario?.nick){

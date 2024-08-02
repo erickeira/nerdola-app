@@ -7,7 +7,7 @@ import api from "../../utils/api";
 import Chip from "../../components/Chip";
 import CardObra from "../../components/CardObra";
 import { Avatar, Icon } from "react-native-paper";
-import { defaultColors, imageUrl } from "../../utils";
+import { defaultColors, gerarCorPorString, imageUrl } from "../../utils";
 import CustomButton from "../../components/CustomButton";
 
 const { height, width }  = Dimensions.get('screen');
@@ -247,7 +247,9 @@ export default function PerfilPage({ route }){
                                 
                                 <Avatar.Text 
                                     size={60} 
-                                    color="#000"
+                                    style={{
+                                        backgroundColor: user?.nome ? gerarCorPorString(user?.nome) : defaultColors.activeColor
+                                    }}
                                     label={ user?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
                                 />
                             }
@@ -285,6 +287,7 @@ export default function PerfilPage({ route }){
                                 onPress={() => {
                                     navigation.navigate('editar-perfil')
                                 }}
+                                isLoading={isLoadingMe}
                                 isSelected={false}
                             />
                         }
