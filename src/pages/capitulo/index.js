@@ -14,7 +14,36 @@ import CardLink from "../../components/CardLink";
 import Comentarios from "../../components/Comentarios";
 import CardComentario from "../../components/CardComentario";
 import InputText from "../../components/InputText";
+import AutoHeightImage from "react-native-auto-height-image";
 const { height, width }  = Dimensions.get('screen');
+
+const CustomImage = ( { imagem, obra, capitulo }) => {
+    const imagePath = `${imageUrl}obras/${obra?.id}/capitulos/${capitulo.numero}/${imagem?.src}`;
+    const [imageError, setImageError] = useState(false)
+
+    console.log(imagePath)
+    return(
+        <>
+            {
+                imagem && !imageError ?
+                    <AutoHeightImage
+                        width={width}
+                        source={{ uri : imagePath }}
+                        onError={(error) => {
+                            setImageError(true)
+                        }}
+                    />
+                :
+                
+                <Icon 
+                    source="image-off-outline" 
+                    color="#312E2E" 
+                    size={30}
+                />
+            }
+        </>
+    )
+}
 
 export default function CapituloPage({ route }){
     const navigation = useNavigation()
@@ -22,6 +51,8 @@ export default function CapituloPage({ route }){
     const [ isLoading, setIsLoading ] = useState(true)
     const [ capitulo, setCapitulo] = useState({})
     const [ capitulosRef, setCapitulosRef ] = useState(null)
+    const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
+    const [ showIrTopo, setShowIrTopo] = useState(false)
     const { id, leitura, obra  } = route.params
     const{
         nome,
@@ -34,6 +65,37 @@ export default function CapituloPage({ route }){
     const [imageError, setImageError] = useState(false)
     const [lido, setLido] = useState(route.params.lido)
 
+    
+    const upButtonHandler = () => {
+        capitulosRef?.scrollToOffset({ 
+          offset: 0, 
+          animated: true 
+        });
+        setShowIrTopo(false)
+    };
+
+    const scrollHandler = event => {
+        const offsetY = parseInt(event.nativeEvent.contentOffset.y);
+        if (offsetY > posicaoNaTela && showIrTopo) {
+          setShowIrTopo(false);
+        } else if (offsetY < posicaoNaTela && !showIrTopo && (posicaoNaTela > height - 0)) {
+          setShowIrTopo(true);
+        }
+        setPosicaoNaTela(offsetY)
+    };
+
+    useEffect(() =>{
+        setIsLoading(true)
+        if(id) getCapitulo(id)
+    },[id])
+
+    useEffect(() => {
+        if(isFocused){
+            if(id) getCapitulo()
+        }
+    },[isFocused])
+
+    const [isLoadingCapitulo, setIsLoadingCapitulo] = useState(null)
     const getCapitulo = async () => {
         try{
             const response = await api.get(`capitulos/${id}`)
@@ -48,120 +110,8 @@ export default function CapituloPage({ route }){
 
     useEffect(() => {
         setIsLoading(true)
-        getCapitulo()
-        getStatusList()
     },[])
 
-    useEffect(() => {
-        if(isFocused) getCapitulo()
-    },[isFocused])
-
-    const [ statusList, setStatusList] = useState([])
-    const getStatusList = async () => {
-        try{
-            const response = await api.get(`leitura-status`)
-            setStatusList(response.data)
-        }catch(error){
-
-        } 
-    }
-    
-    const [isLoadingCapitulo, setIsLoadingCapitulo] = useState(null)
-    const handlePressCapitulo = async ( marcarLido = true) => {
-        setIsLoadingCapitulo(true)
-        try{
-            let response = null
-            if(marcarLido){
-                response = await api.post(`usuarios-capitulos-lidos`, {
-                    leitura: leitura.id.toString(),
-                    capitulo: id.toString()
-                })
-            }else{
-                response = await api.delete(`usuarios-capitulos-lidos/${leitura.id}/${id}`)
-            }
-            setLido(marcarLido)
-            getCapitulo()
-        }catch(error){
-            console.log(error)
-            setIsLoadingCapitulo(false)
-        } finally{
-            getCapitulo()
-            setIsLoadingCapitulo(false)
-        }
-    }
-
-    useEffect(() =>{
-        setIsLoading(true)
-        getComentarios()
-    },[])
-
-    useEffect(() => {
-        if(isFocused){
-            getComentarios()
-        }
-    },[isFocused])
-    const [ comentarios , setComentarios] = useState([])
-
-    const getComentarios = async (pag = 1) => {
-        try{
-            const response = await api.get(`comentarios`, {
-                params: {
-                    capitulo: id
-                }
-            })
-
-            setComentarios([])
-            setComentarios([...response.data])
-            setEnReached(false)
-
-        }catch(error){
-            console.log(error)
-        } finally{
-            setIsLoading(false)
-        }
-    }
-
-    const [comentario, setComentario] = useState("")
-    const [isLoadingComentando, setIsLoadingComentando] = useState(false)
-    
-    const handleComentar = async () => {
-        setIsLoadingComentando(true)
-        try{
-            await api.post(`comentarios`,{
-                capitulo: id,
-                comentario: comentario
-            })
-            getComentarios()
-            getCapitulo()
-            setComentario("")
-            setTimeout(() => {
-                downButtonHandler()
-            }, 1000);
-           
-        }catch(error){
-            console.log(error)
-        } finally{
-            setIsLoadingComentando(false)
-        }
-    }
-
-    const handleExcluir = async (id) => {
-        try{
-            await api.delete(`comentarios/${id}`)
-            getComentarios()
-        }catch(error){
-            console.log(error)
-        } finally{
-            setIsLoadingComentando(false)
-        }
-    }
-
-    
-    const downButtonHandler = () => {
-        capitulosRef?.scrollToEnd({ 
-          animated: true 
-        });
-    };
 
 
     if(isLoading) return (
@@ -172,139 +122,49 @@ export default function CapituloPage({ route }){
     return(
         <>
           <FlatList
-            extraData={leitura}
-            data={comentarios} 
+            data={capitulo.paginas} 
             ref={ref => setCapitulosRef(ref)}
-            ListHeaderComponent={(
-              <View>
-                <View style={styles.viewCard}>
-                    <View style={styles.imageContainerCard}>
-                        {
-                            !imageError ?
-                            <Image
-                                style={styles.imagem}
-                                source={{ uri : imagePath }}
-                                onError={(error) => {
-                                    setImageError(true)
-                                }}
-                            />
-                            :
-                            <Icon 
-                                source="image-off-outline" 
-                                color="#312E2E" 
-                                size={30}
-                            />
-                        }
-                    </View>
-                    <TouchableOpacity 
-                        style={{ width: '100%'}}
-                        onPress={() => {
-                            navigation.navigate('obra', { id : obra.id})
-                        }}
-                    >
-                        <View >
-                            <Text style={styles.obraNome}>
-                                {obra?.nome}
-                            </Text>
-                        </View>
-                        <View style={{ width: '100%'}}>
-                            <Text style={styles.nome}>
-                                {nome}
-                            </Text>
-                        </View>
-                        <View style={{ width: '100%'}}>
-                            <Text style={styles.numero}>
-                                Numero: {numero}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                   
-                </View>
-                <Text style={styles.descricao}>
-                    {descricao}
-                </Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10}}>
-                        <Chip
-                            onPress={() => {
-                                navigation.navigate('publicar', {
-                                    obra,
-                                    capitulo,
-                                })
-                            }}
-                            style={{ paddingVertical: 3, height: 40}} 
-                        >
-                            <Text>
-                                Publicar no feed
-                            </Text>
-                        </Chip>
-                        {
-                            [2].includes(leitura?.status?.id) &&  
-                            <Chip style={{ width: 200, paddingVertical: 3, height: 40}} onPress={() => handlePressCapitulo(!lido)}>
-                                {
-                                    isLoadingCapitulo ?
-                                    <ActivityIndicator/>
-                                    :
-                                    <Text style={{color: defaultColors.activeColor, fontSize: 12}}>
-                                        { lido ? "Desmarcar como lido " : "Marcar como lido" } 
-                                    </Text>
-                                }
-                                
-                                {
-                                    !isLoadingCapitulo && (
-                                        <Checkbox 
-                                            status={ lido ? 'checked' : 'unchecked' } 
-                                            color={defaultColors.activeColor}
-                                            onPress={() => handlePressCapitulo(!lido)}
-                                        />
-                                    )
-                                }
-                            </Chip>
-                        }
-                    </View>
-                
-               
-                <Text style={styles.capitulos}>
-                { capitulo?.total_comentarios } comentarios
-                </Text>
-              </View>
-            )}
+            onScroll={scrollHandler}
             renderItem={({item, index}) => {
               return (
-                <CardComentario 
-                    comentario={item}
-                    handleExcluir={() => handleExcluir(item.id)}
+                <CustomImage 
+                    imagem={item}
+                    obra={obra}
+                    capitulo={capitulo}
                 />
               )
             }}
             ListEmptyComponent={
                 <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                     <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                       Nenhum comentário ainda
+                       Nenhuma página ainda!
                     </Text>
                 </View>
             }
-            keyExtractor={(item, index) => {  return `${item.id}-${index}` }}
+            keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
           />
-          <View style={styles.containerComment}>
-                <InputText
-                    placeholder="Faça um comentário"
-                    containerStyle={styles.input}
-                    mb={0}
-                    maxWidth={width - 130}
-                    value={comentario}
-                    onChange={(comentario) => {
-                        setComentario(comentario)
+            {
+                showIrTopo ? 
+                <CustomButton
+                    style={{
+                        position: 'absolute',
+                        zIndex: 10,
+                        bottom: 10,
+                        right: 10,
+                        borderColor: '#312E2E',
+                        borderWidth: 1,
+                        paddingHorizontal: 20,
+                        flexDirection: 'row',
+                        backgroundColor: defaultColors.primary,
+                        alignItems: 'center',
+                        gap: 10
                     }}
-                />
-                <CustomButton 
-                    style={styles.button}
-                    onPress={handleComentar}
-                    isLoading={isLoadingComentando}
-                    disabled={isLoadingComentando || comentario.length < 1}
+                    onPress={upButtonHandler}
                 >
-                    Publicar
+                    Ir para o topo
                 </CustomButton>
-            </View>
+                : null
+            } 
         </>
     )
 }
@@ -313,17 +173,7 @@ const styles = StyleSheet.create({
     view: {
         height: height
     },
-    imageContainer:{
-        width: width,
-        height: (width) * (4.3 / 3),
-        overflow: 'hidden',
-        alignItems: 'center',
-        position: 'absolute'
-    },
-    imagem:{
-        width: '100%',
-        height: '100%',
-    },
+
     statusList:{
         paddingHorizontal: 15,
         flexDirection: 'row',

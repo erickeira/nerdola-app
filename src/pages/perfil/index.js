@@ -13,6 +13,7 @@ import CardPublicacao from "../../components/CardPublicacao";
 
 const { height, width }  = Dimensions.get('screen');
 
+
 export default function PerfilPage({ route }){
     const id = route?.params?.id 
     const navigation = useNavigation()
@@ -64,8 +65,6 @@ export default function PerfilPage({ route }){
 
     useEffect(() =>{
         setIsLoading(true)
-        getObras(1)
-        getPublicacoes(1)
         getStatusList()
         getUser()
     },[])
@@ -73,19 +72,21 @@ export default function PerfilPage({ route }){
     useEffect(() =>{
         if(obras.length > 0){
             getStatusList()
-            getObras()
-            
+           if(user.id) getObras()
         }
         getUser()
     },[isFocused])
 
     useEffect(() => {
         setIsLoading(true)
-        getObras(1 , filtros)
-        getPublicacoes(1)
+        if(user?.id){
+            getObras(1 , filtros)
+            getPublicacoes(1, user.id)
+        }
+        
     },[filtros])
 
-    const getObras = async (pag = 1, filtros = {}) => {
+    const getObras = async (pag = 1, filtros = {}, id ) => {
         if(loading || loadingRefresh) return
         const params =  {
             ...filtros,
@@ -120,10 +121,10 @@ export default function PerfilPage({ route }){
         }
     }
 
-    const getPublicacoes = async (pag = 1) => {
+    const getPublicacoes = async (pag = 1, id = user.id) => {
         if(loading || loadingRefresh) return
         const params =  {
-            usuario: id?.toString() || user?.id?.toString(),
+            usuario: id?.toString(),
             limite: limite?.toString()
         }
         try{
@@ -158,6 +159,7 @@ export default function PerfilPage({ route }){
 
         } 
     }
+
     function refresh(){
         setIsLoadingRefresh(true)
         setPagina(1)
@@ -196,6 +198,8 @@ export default function PerfilPage({ route }){
         try{
             const response = await api.get(`usuarios/${id || 'me'}`)
             setUser(response.data)
+            getPublicacoes(1, response.data.id)
+            getObras(1, id)
             setImageError(false)
         }catch(error){
         } finally {

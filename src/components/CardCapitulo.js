@@ -23,7 +23,8 @@ export default function CardCapitulo({
         nome,
         numero,
         lancado_em,
-        totallinks
+        totallinks,
+        tem_paginas
     } = capitulo
     const navigation = useNavigation()
     const imagePath = `${imageUrl}obras/${obra.id}/${imagem}`;
@@ -37,13 +38,15 @@ export default function CardCapitulo({
 
     return(
         <TouchableOpacity 
-            // onPress={() => {
-            //     navigation.navigate('capitulo', { id , leitura, lido: capituloLido, obra })
-            // }}
             onPress={() => {
                 if(leitura.status.id == 2){
-                    if(onLido) onLido(id, !lido)
                     setCapituloLido(!capituloLido)
+                    if(tem_paginas){
+                        if(onLido && !lido) onLido(id, true)
+                        navigation.navigate('capitulo', { id , leitura, lido: capituloLido, obra })
+                    }else{
+                        if(onLido) onLido(id, !lido)
+                    }
                 }else{
                     Snackbar.show({
                     text: "Atualize o status da obra para lendo",
@@ -119,7 +122,7 @@ export default function CardCapitulo({
                     )
                 }
                 
-                {/* <Icon source={"chevron-right"} color={"#fff"} size={20}/> */}
+                {tem_paginas && <Icon source={"chevron-right"} color={"#fff"} size={20}/> }
                 
             </View>
  
