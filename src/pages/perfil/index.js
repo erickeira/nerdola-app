@@ -344,7 +344,7 @@ export default function PerfilPage({ route }){
                             <Chip
                                 label="Minhas obras"
                                 style={[styles.tab,{
-                                    borderColor: listMode == 'obras' ? defaultColors.activeColor : "#666"
+                                    borderColor: listMode == 'obras' ? "#fff" : "#666"
                                 }]}
                                 onPress={() => {
                                     setListMode('obras')
@@ -359,7 +359,7 @@ export default function PerfilPage({ route }){
                             <Chip
                                 label="Publicações"
                                 style={[styles.tab,{
-                                    borderColor: listMode == 'publicacoes' ? defaultColors.activeColor : "#666"
+                                    borderColor: listMode == 'publicacoes' ? "#fff" : "#666"
                                 }]}
                                 onPress={() => {
                                     setListMode('publicacoes')

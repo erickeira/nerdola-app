@@ -49,13 +49,13 @@ export default function CardCapitulo({
                     }
                 }else{
                     Snackbar.show({
-                    text: "Atualize o status da obra para lendo",
-                    duration: 2000,
-                    action: {
-                        text: 'OK',
-                        textColor: 'green',
-                        onPress: () => { /* Do something. */ },
-                    },
+                        text: "Atualize o status da obra para lendo",
+                        duration: 2000,
+                        action: {
+                            text: 'OK',
+                            textColor: 'green',
+                            onPress: () => { /* Do something. */ },
+                        },
                     });
                 }
             }}

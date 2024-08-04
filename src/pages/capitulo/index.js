@@ -1,46 +1,67 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, FlatList, Image, Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, FlatList, Image, Linking, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../utils/api";
 import { defaultColors, imageUrl, proporcaoCard } from "../../utils";
 import { Icon, IconButton,  Menu, Divider, PaperProvider, Checkbox  } from "react-native-paper";
-import LinearGradient from 'react-native-linear-gradient';
-import CardObra from "../../components/CardObra";
-import CardCapitulo from "../../components/CardCapitulo";
-import Chip from "../../components/Chip";
 import CustomButton from "../../components/CustomButton";
-import Snackbar from "react-native-snackbar";
-import CardLink from "../../components/CardLink";
-import Comentarios from "../../components/Comentarios";
-import CardComentario from "../../components/CardComentario";
-import InputText from "../../components/InputText";
 import AutoHeightImage from "react-native-auto-height-image";
+import FastImage from 'react-native-fast-image';
+import Snackbar from "react-native-snackbar";
+
 const { height, width }  = Dimensions.get('screen');
 
 const CustomImage = ( { imagem, obra, capitulo }) => {
-    const imagePath = `${imageUrl}obras/${obra?.id}/capitulos/${capitulo.numero}/${imagem?.src}`;
+    const imagePath = `${imageUrl}obras/${obra?.id}/capitulos/${capitulo?.numero}/${imagem?.src}`;
     const [imageError, setImageError] = useState(false)
+    const [imageHeight, setImageHeight] = useState(0);
+    const [loading, setLoading] = useState(true);
 
-    console.log(imagePath)
+    useEffect(() => {
+        if (imagem) {
+            Image.getSize(imagePath, (width, height) => {
+                const scaleFactor = width / Dimensions.get('window').width;
+                const imageHeight = height / scaleFactor;
+                setImageHeight(imageHeight);
+                setLoading(false);
+            }, (error) => {
+                setImageError(true);
+                setLoading(false);
+            });
+        }
+    }, [imagePath]);
+
+    useEffect(() => {
+        setImageError(false);
+    },[imagem])
+
     return(
-        <>
-            {
-                imagem && !imageError ?
-                    <AutoHeightImage
-                        width={width}
-                        source={{ uri : imagePath }}
-                        onError={(error) => {
-                            setImageError(true)
-                        }}
-                    />
-                :
+         <>
+            {loading ? (
+                <View style={{ width :"100%", height: 300, flexDirection: 'row' , alignItems: 'center', justifyContent: 'center'}}>
+                    <ActivityIndicator size="large" color={defaultColors.activeColor} />
+                </View>
                 
-                <Icon 
-                    source="image-off-outline" 
-                    color="#312E2E" 
-                    size={30}
-                />
-            }
+            ) : (
+                imagem && !imageError ? (
+                    <FastImage
+                        style={{ width, height: imageHeight }}
+                        source={{
+                            uri: imagePath,
+                            priority: FastImage.priority.high,
+                        }}
+                        resizeMode={FastImage.resizeMode.contain}
+                        onError={() => setImageError(true)}
+                    />
+                ) : (
+                    <Icon
+                        name="image-off-outline"
+                        type="material-community"
+                        color="#312E2E"
+                        size={30}
+                    />
+                )
+            )}
         </>
     )
 }
@@ -48,12 +69,14 @@ const CustomImage = ( { imagem, obra, capitulo }) => {
 export default function CapituloPage({ route }){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
-    const [ isLoading, setIsLoading ] = useState(true)
+    const [ isLoading, setIsLoading ] = useState(false)
+    const [loadingRefresh, setIsLoadingRefresh] = useState(false)
+    const [ capituloId, setCapituloId] = useState(route.params?.id)
     const [ capitulo, setCapitulo] = useState({})
     const [ capitulosRef, setCapitulosRef ] = useState(null)
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
-    const { id, leitura, obra  } = route.params
+    const { leitura, obra  } = route.params
     const{
         nome,
         numero,
@@ -61,10 +84,8 @@ export default function CapituloPage({ route }){
         descricao,
         links
     } = capitulo
-    const imagePath = `${imageUrl}obras/${id}/${imagem}`;
-    const [imageError, setImageError] = useState(false)
-    const [lido, setLido] = useState(route.params.lido)
 
+    const [lido, setLido] = useState(route.params.lido)
     
     const upButtonHandler = () => {
         capitulosRef?.scrollToOffset({ 
@@ -85,33 +106,64 @@ export default function CapituloPage({ route }){
     };
 
     useEffect(() =>{
-        setIsLoading(true)
-        if(id) getCapitulo(id)
-    },[id])
+        if(capituloId) getCapitulo(capituloId)
+    },[capituloId])
 
     useEffect(() => {
         if(isFocused){
-            if(id) getCapitulo()
+            if(capituloId) getCapitulo(capituloId)
         }
     },[isFocused])
 
-    const [isLoadingCapitulo, setIsLoadingCapitulo] = useState(null)
-    const getCapitulo = async () => {
+
+    const getCapitulo = async (id) => {
+        if(isLoading) return
+        setIsLoading(true)
         try{
             const response = await api.get(`capitulos/${id}`)
-            setCapitulo({ ...capitulo, ...response.data})
-            console.log(response.data)
+            setCapitulo([])
+            setCapitulo(response.data)
         }catch(error){
 
         } finally{
             setIsLoading(false)
+            setIsLoadingRefresh(false)
         }
     }
 
-    useEffect(() => {
-        setIsLoading(true)
-    },[])
+    const handleCapituloLido = async () => {
+        if(isLoading) return
+        try{
+            const response = await api.post(`usuarios-capitulos-lidos`, {
+                leitura: leitura.id,
+                capitulo : capituloId
+            })
+            Snackbar.show({
+                text: "Marcado como lido!",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+            if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3){
+                await api.patch(`usuario-leitura/${leitura.id}`, {
+                    status : 3
+                })
+                
+            }
+            obra.total_lidos = obra.total_lidos + 1
+        }catch(error){
+        } finally{
+        }
+    }  
 
+    function refresh(){
+        setIsLoadingRefresh(true)
+        setCapitulo([])
+        getCapitulo(capituloId) 
+    }
 
 
     if(isLoading) return (
@@ -125,12 +177,20 @@ export default function CapituloPage({ route }){
             data={capitulo.paginas} 
             ref={ref => setCapitulosRef(ref)}
             onScroll={scrollHandler}
+            refreshControl={
+                <RefreshControl 
+                    refreshing={loadingRefresh} 
+                    tintColor={`#666`}
+                    onRefresh={refresh}
+                />
+            }
             renderItem={({item, index}) => {
               return (
                 <CustomImage 
                     imagem={item}
                     obra={obra}
                     capitulo={capitulo}
+                    key={index}
                 />
               )
             }}
@@ -141,7 +201,41 @@ export default function CapituloPage({ route }){
                     </Text>
                 </View>
             }
+            ListFooterComponent={
+                <View style={{ flexDirection: 'row', marginTop: 20 }}>
+                    {
+                          capitulo?.cap_anterior &&
+                          <CustomButton 
+                              mode="outlined"
+                              style={styles.buttonNext}
+                              onPress={() => {
+                                  setCapituloId(capitulo?.cap_anterior)
+                              }}
+                          >
+          
+                              Capitulo anterior
+                          </CustomButton>
+                    }
+                    {
+                          capitulo?.prox_cap &&
+                          <CustomButton 
+                              mode="outlined"
+                              style={styles.buttonNext}
+                              onPress={() => {
+                                  setCapituloId(capitulo?.prox_cap)
+                              }}
+                          >
+          
+                              Próximo capitulo
+                          </CustomButton>
+                    }
+                </View>
+              
+            }
             keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
+            onEndReached={() => {
+                if(!capitulo.lido) handleCapituloLido()
+            }}
           />
             {
                 showIrTopo ? 
@@ -173,7 +267,6 @@ const styles = StyleSheet.create({
     view: {
         height: height
     },
-
     statusList:{
         paddingHorizontal: 15,
         flexDirection: 'row',
@@ -198,9 +291,12 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         color: '#666'
     },
-    buttonInformar:{
+    buttonNext:{
+        flex: 1,
         height: 51,
         justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row',
         marginBottom: 100,
         borderColor: '#312E2E',
         borderRadius: 5,
