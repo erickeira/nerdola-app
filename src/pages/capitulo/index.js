@@ -8,6 +8,7 @@ import CustomButton from "../../components/CustomButton";
 import AutoHeightImage from "react-native-auto-height-image";
 import FastImage from 'react-native-fast-image';
 import Snackbar from "react-native-snackbar";
+import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -37,6 +38,7 @@ const CustomImage = ( { imagem, obra, capitulo }) => {
 
     return(
          <>
+          
             {loading ? (
                 <View style={{ width :"100%", height: 300, flexDirection: 'row' , alignItems: 'center', justifyContent: 'center'}}>
                     <ActivityIndicator size="large" color={defaultColors.activeColor} />
@@ -173,70 +175,71 @@ export default function CapituloPage({ route }){
     )
     return(
         <>
-          <FlatList
-            data={capitulo.paginas} 
-            ref={ref => setCapitulosRef(ref)}
-            onScroll={scrollHandler}
-            refreshControl={
-                <RefreshControl 
-                    refreshing={loadingRefresh} 
-                    tintColor={`#666`}
-                    onRefresh={refresh}
-                />
-            }
-            renderItem={({item, index}) => {
-              return (
-                <CustomImage 
-                    imagem={item}
-                    obra={obra}
-                    capitulo={capitulo}
-                    key={index}
-                />
-              )
-            }}
-            ListEmptyComponent={
-                <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                       Nenhuma página ainda!
-                    </Text>
-                </View>
-            }
-            ListFooterComponent={
-                <View style={{ flexDirection: 'row', marginTop: 20 }}>
-                    {
-                          capitulo?.cap_anterior &&
-                          <CustomButton 
-                              mode="outlined"
-                              style={styles.buttonNext}
-                              onPress={() => {
-                                  setCapituloId(capitulo?.cap_anterior)
-                              }}
-                          >
           
-                              Capitulo anterior
-                          </CustomButton>
-                    }
-                    {
-                          capitulo?.prox_cap &&
-                          <CustomButton 
-                              mode="outlined"
-                              style={styles.buttonNext}
-                              onPress={() => {
-                                  setCapituloId(capitulo?.prox_cap)
-                              }}
-                          >
-          
-                              Próximo capitulo
-                          </CustomButton>
-                    }
-                </View>
-              
-            }
-            keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
-            onEndReached={() => {
-                if(!capitulo.lido) handleCapituloLido()
-            }}
-          />
+            <FlatList
+                data={capitulo.paginas} 
+                ref={ref => setCapitulosRef(ref)}
+                onScroll={scrollHandler}
+                refreshControl={
+                    <RefreshControl 
+                        refreshing={loadingRefresh} 
+                        tintColor={`#666`}
+                        onRefresh={refresh}
+                    />
+                }
+                renderItem={({item, index}) => {
+                return (
+                    <CustomImage 
+                        imagem={item}
+                        obra={obra}
+                        capitulo={capitulo}
+                        key={index}
+                    />
+                )
+                }}
+                ListEmptyComponent={
+                    <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
+                        Nenhuma página ainda!
+                        </Text>
+                    </View>
+                }
+                ListFooterComponent={
+                    <View style={{ flexDirection: 'row', marginTop: 20 }}>
+                        {
+                            capitulo?.cap_anterior &&
+                            <CustomButton 
+                                mode="outlined"
+                                style={styles.buttonNext}
+                                onPress={() => {
+                                    setCapituloId(capitulo?.cap_anterior)
+                                }}
+                            >
+            
+                                Capitulo anterior
+                            </CustomButton>
+                        }
+                        {
+                            capitulo?.prox_cap &&
+                            <CustomButton 
+                                mode="outlined"
+                                style={styles.buttonNext}
+                                onPress={() => {
+                                    setCapituloId(capitulo?.prox_cap)
+                                }}
+                            >
+            
+                                Próximo capitulo
+                            </CustomButton>
+                        }
+                    </View>
+                
+                }
+                keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
+                onEndReached={() => {
+                    if(!capitulo.lido) handleCapituloLido()
+                }}
+            />
             {
                 showIrTopo ? 
                 <CustomButton
