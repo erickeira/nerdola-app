@@ -25,7 +25,8 @@ export default function CardObra({
         total_lidos,
         total_capitulos,
         status,
-        total_usuarios_lendo
+        total_usuarios_lendo,
+        capitulos_importados
     } = obra
 
     const navigation = useNavigation()
@@ -53,6 +54,15 @@ export default function CardObra({
                     width: feed ? width - 90 :'100%',
                     marginTop: feed ? 20 : 0
                 }]}>
+                    {
+                        capitulos_importados > 0 &&
+                        <Chip style={{ paddingHorizontal: 8, paddingVertical: 4, position: 'absolute', right: 0, top: 0}}>
+                            <Text style={styles.disponivel}>
+                            Leitura no app disponível
+                            </Text>
+                        </Chip>
+                        
+                    }
                     <View style={[styles.imageContainer,{
                         width: feed ?  80 : 100,
                         height: feed ?  ((80) * (4.3 / 3)) : ((100) * (4.3 / 3)),   
@@ -74,7 +84,8 @@ export default function CardObra({
                             />
                         }
                     </View>
-                    <View style={{ width: '90%', flexWrap: 'wrap'}}>
+                    
+                    <View style={{ width: '90%', flexWrap: 'wrap', marginTop: 5}}>
                         <Text style={styles.formato}>
                             {formato?.nome}
                         </Text>
@@ -200,10 +211,15 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         color: '#fff',
         width: "70%",
+        
     },
     formato:{
         fontSize: 11,
         color: defaultColors.gray
+    },
+    disponivel:{
+        fontSize: 9,
+        color: "#fff"
     },
     total_capitulos:{
         fontSize: 12,

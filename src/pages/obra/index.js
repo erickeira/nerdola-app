@@ -55,7 +55,11 @@ export default function ObraPage({ route }){
     const getObra = async () => {
         try{
             const response = await api.get(`obras/${id}`)
-            setObra({ ...obra, ...response.data})
+            setObra({ 
+                ...obra, 
+                ...response.data,
+                capitulos: ordenaCapitulos(response.data.capitulos)
+            })
            
         }catch(error){
 
@@ -63,6 +67,17 @@ export default function ObraPage({ route }){
             setIsLoading(false)
         }
     }
+    const ordenaCapitulos = (capitulos) => {
+        if (!capitulos || !Array.isArray(capitulos)) {
+          return [];
+        }
+      
+        return capitulos.sort((a, b) => {
+          const numA = parseInt(a.numero, 10);
+          const numB = parseInt(b.numero, 10);
+          return numA - numB;
+        });
+    };
 
     useEffect(() => {
         setIsLoading(true)
@@ -135,22 +150,13 @@ export default function ObraPage({ route }){
     const handlePressCapitulo = async (capitulo, marcarLido = true) => {
         setIsLoadingCapitulo(capitulo)
         try{
-            let response = null
-            if(marcarLido){
-                response = await api.post(`usuarios-capitulos-lidos`, {
-                    leitura: leitura.id,
-                    capitulo
+            await api.post(`capitulos/${capitulo}/marcar-como-lido`)
+
+            if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3 && [2,4].includes(obra.status)){
+                await api.patch(`usuario-leitura/${leitura.id}`, {
+                    status : 3
                 })
-                console.log(obra.total_capitulos == (obra.total_lidos + 1))
-                if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3){
-                    await api.patch(`usuario-leitura/${leitura.id}`, {
-                        status : 3
-                    })
-                }
-            }else{
-                response = await api.delete(`usuarios-capitulos-lidos/${leitura.id}/${capitulo}`)
             }
-           
         }catch(error){
         } finally{
             getObra()
@@ -193,6 +199,8 @@ export default function ObraPage({ route }){
     }
 
     const [ordem, setOrdem] = useState("ascending")
+
+
 
     if(isLoading) return (
         <View style={{ paddingVertical: 100, alignItems: 'center', justifyContent: 'center' }}>

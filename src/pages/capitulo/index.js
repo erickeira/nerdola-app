@@ -82,10 +82,9 @@ export default function CapituloPage({ route }){
         numero,
         imagem,
         descricao,
-        links
+        links,
+        lido
     } = capitulo
-
-    const [lido, setLido] = useState(route.params.lido)
     
     const upButtonHandler = () => {
         capitulosRef?.scrollToOffset({ 
@@ -123,6 +122,9 @@ export default function CapituloPage({ route }){
             const response = await api.get(`capitulos/${id}`)
             setCapitulo([])
             setCapitulo(response.data)
+            navigation.setOptions({
+                headerTitle: response.data?.nome
+            })
         }catch(error){
 
         } finally{
@@ -132,12 +134,10 @@ export default function CapituloPage({ route }){
     }
 
     const handleCapituloLido = async () => {
-        if(isLoading) return
+        if(isLoading && lido) return
         try{
-            const response = await api.post(`usuarios-capitulos-lidos`, {
-                leitura: leitura.id,
-                capitulo : capituloId
-            })
+            await api.post(`capitulos/${capitulo}/marcar-como-lido`)
+
             Snackbar.show({
                 text: "Marcado como lido!",
                 duration: 2000,
@@ -147,11 +147,11 @@ export default function CapituloPage({ route }){
                     onPress: () => { /* Do something. */ },
                 },
             });
-            if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3){
+
+            if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3 && [2,4].includes(obra.status)){
                 await api.patch(`usuario-leitura/${leitura.id}`, {
                     status : 3
                 })
-                
             }
             obra.total_lidos = obra.total_lidos + 1
         }catch(error){

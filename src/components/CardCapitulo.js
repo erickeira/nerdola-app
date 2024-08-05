@@ -39,24 +39,13 @@ export default function CardCapitulo({
     return(
         <TouchableOpacity 
             onPress={() => {
-                if(leitura.status.id == 2){
-                    setCapituloLido(!capituloLido)
-                    if(tem_paginas){
-                        if(onLido && !lido) onLido(id, true)
-                        navigation.navigate('capitulo', { id , leitura, lido: capituloLido, obra })
-                    }else{
-                        if(onLido) onLido(id, !lido)
-                    }
+                if(tem_paginas){
+                    setCapituloLido(true)
+                    if(onLido && !lido) onLido(id, true)
+                    navigation.navigate('capitulo', { id , leitura, lido: capituloLido, obra })
                 }else{
-                    Snackbar.show({
-                        text: "Atualize o status da obra para lendo",
-                        duration: 2000,
-                        action: {
-                            text: 'OK',
-                            textColor: 'green',
-                            onPress: () => { /* Do something. */ },
-                        },
-                    });
+                    setCapituloLido(!capituloLido)
+                    if(onLido) onLido(id, !lido)
                 }
             }}
         >
@@ -103,20 +92,8 @@ export default function CardCapitulo({
                             status={capituloLido ? 'checked' : 'unchecked'} 
                             color={defaultColors.activeColor}
                             onPress={() => {
-                                if(leitura.status.id == 2){
-                                    if(onLido) onLido(id, !lido)
-                                    setCapituloLido(!capituloLido)
-                                }else{
-                                    Snackbar.show({
-                                    text: "Atualize o status da obra para lendo",
-                                    duration: 2000,
-                                    action: {
-                                        text: 'OK',
-                                        textColor: 'green',
-                                        onPress: () => { /* Do something. */ },
-                                    },
-                                    });
-                                }
+                                if(onLido) onLido(id, !lido)
+                                setCapituloLido(!capituloLido)
                             }}
                         />
                     )
