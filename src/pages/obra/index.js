@@ -34,6 +34,10 @@ export default function ObraPage({ route }){
     const [imageError, setImageError] = useState(false)
     const [ondeLer, setOndeLer] = useState(false)
 
+    useEffect(() => {
+        setImageError(false)
+    },[imagePath])
+
     const upButtonHandler = () => {
         capitulosRef?.scrollToOffset({ 
         offset: 0, 
@@ -60,7 +64,7 @@ export default function ObraPage({ route }){
                 ...response.data,
                 capitulos: ordenaCapitulos(response.data.capitulos)
             })
-           
+            
         }catch(error){
 
         } finally{
