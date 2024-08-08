@@ -222,7 +222,7 @@ export default function CapituloPage({ route }){
                 ListEmptyComponent={
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                        Nenhuma página ainda!
+                            Nenhuma página ainda!
                         </Text>
                     </View>
                 }

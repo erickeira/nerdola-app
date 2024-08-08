@@ -11,6 +11,7 @@
     "Codepush:android": "npx appcenter codepush release-react -a piahumana-gmail.com/nerdola_android -d Production"
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^4.6.4",
     "@openspacelabs/react-native-zoomable-view": "^2.1.6",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/netinfo": "^11.3.2",

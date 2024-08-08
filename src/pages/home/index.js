@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl } from "react-native";
+import { useEffect, useState , useCallback, useMemo, useRef } from "react";
+import {  Dimensions, StyleSheet, View, Text, Image,Button, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl } from "react-native";
 import InputText from "../../components/InputText";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../context/AuthContext";
@@ -9,6 +9,13 @@ import CardObra from "../../components/CardObra";
 import { Icon } from "react-native-paper";
 import { defaultColors } from "../../utils";
 import CustomButton from "../../components/CustomButton";
+
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
+
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -117,12 +124,26 @@ export default function HomePage(){
     function refresh(){
         setIsLoadingRefresh(true)
         setObras([])
-        console.log('3')
-        getObras(1) 
+        getObras(1, filtros) 
     }
 
+
+      // ref
+    const bottomSheetModalRef = useRef(null);
+
+    // variables
+    const snapPoints = useMemo(() => ['25%', '50%'], []);
+
+    // callbacks
+    const handlePresentModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+    }, []);
+    const handleSheetChanges = useCallback((index) => {
+        console.log('handleSheetChanges', index);
+    }, []);
+
     return(
-        <>
+        <BottomSheetModalProvider>
             <FlatList
                 data={obras}
                 ref={(ref) => {setListRef(ref)}}
@@ -168,6 +189,11 @@ export default function HomePage(){
                                 ))
                             }
                         </ScrollView> 
+                        <Button
+                            onPress={handlePresentModalPress}
+                            title="Present Modal"
+                            color="black"
+                        />
                     </View>
                 )}
                 showsVerticalScrollIndicator={false}
@@ -191,7 +217,6 @@ export default function HomePage(){
                 onEndReached={() => {
                     if(!loadingMore && !enReached && !loading && !loadingRefresh){
                         setLoadingMore(true)
-                        console.log('4', pagina + 1)
                         getObras(pagina + 1)
                     }
                 }}
@@ -224,7 +249,17 @@ export default function HomePage(){
                 </CustomButton>
                 : null
             } 
-        </>
+            <BottomSheetModal
+                ref={bottomSheetModalRef}
+                index={1}
+                snapPoints={snapPoints}
+                onChange={handleSheetChanges}
+            >
+            <BottomSheetView style={styles.contentContainer}>
+                <Text>Awesome 🎉</Text>
+            </BottomSheetView>
+            </BottomSheetModal>
+        </BottomSheetModalProvider>
     )
 }
 const styles = StyleSheet.create({
@@ -258,5 +293,15 @@ const styles = StyleSheet.create({
     textInput:{
         backgroundColor: '#191919',
         borderWidth: 0
-    }
+    },
+    container: {
+        flex: 1,
+        padding: 24,
+        justifyContent: 'center',
+        backgroundColor: 'grey',
+      },
+      contentContainer: {
+        flex: 1,
+        alignItems: 'center',
+      },
 });

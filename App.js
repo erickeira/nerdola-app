@@ -76,13 +76,13 @@ function App() {
                     <ActivityIndicator size={50} color={"#fff"}/>
                 </View>
                 : 
-                <AuthProvider>
-                    <NotificationProvider>
-                        <PaperProvider>
-                            <Routes/>
-                        </PaperProvider>
-                    </NotificationProvider>
-                </AuthProvider>
+                    <AuthProvider>
+                        <NotificationProvider>
+                            <PaperProvider>
+                                <Routes/>
+                            </PaperProvider>
+                        </NotificationProvider>
+                    </AuthProvider>
             }
            
         </NavigationContainer>
@@ -95,8 +95,8 @@ const codePushOptions = {
     installMode: codePush.InstallMode.ON_NEXT_RESUME
 };
 
-export default App;
-// export default codePush(codePushOptions)(App);
+// export default App;
+export default codePush(codePushOptions)(App);
 
 const theme = {
     ...DefaultTheme,
