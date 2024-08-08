@@ -1,5 +1,5 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Dimensions, FlatList, Image, Linking, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../utils/api";
 import { defaultColors, imageUrl, proporcaoCard } from "../../utils";
@@ -9,6 +9,7 @@ import AutoHeightImage from "react-native-auto-height-image";
 import FastImage from 'react-native-fast-image';
 import Snackbar from "react-native-snackbar";
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -38,7 +39,6 @@ const CustomImage = ( { imagem, obra, capitulo }) => {
 
     return(
          <>
-          
             {loading ? (
                 <View style={{ width :"100%", height: 300, flexDirection: 'row' , alignItems: 'center', justifyContent: 'center'}}>
                     <ActivityIndicator size="large" color={defaultColors.activeColor} />
@@ -46,7 +46,8 @@ const CustomImage = ( { imagem, obra, capitulo }) => {
                 
             ) : (
                 imagem && !imageError ? (
-                    <FastImage
+                    // <FastImage
+                    <AutoHeightImage
                         style={{ width, height: imageHeight }}
                         source={{
                             uri: imagePath,
@@ -75,21 +76,22 @@ export default function CapituloPage({ route }){
     const [loadingRefresh, setIsLoadingRefresh] = useState(false)
     const [ capituloId, setCapituloId] = useState(route.params?.id)
     const [ capitulo, setCapitulo] = useState({})
-    const [ capitulosRef, setCapitulosRef ] = useState(null)
+    const capitulosRef = useRef()
+    // const [ capitulosRef, setCapitulosRef ] = useState(null)
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
     const { leitura, obra  } = route.params
+    const [lido, setLido ] = useState(false)
     const{
         nome,
         numero,
         imagem,
         descricao,
-        links,
-        lido
+        links
     } = capitulo
     
     const upButtonHandler = () => {
-        capitulosRef?.scrollToOffset({ 
+        capitulosRef?.current?.scrollToOffset({ 
           offset: 0, 
           animated: true 
         });
@@ -104,18 +106,14 @@ export default function CapituloPage({ route }){
           setShowIrTopo(true);
         }
         setPosicaoNaTela(offsetY)
+        if(!isLoading){
+            AsyncStorage.setItem(`posicao-${capituloId}`, offsetY.toString())
+        }
     };
 
     useEffect(() =>{
         if(capituloId) getCapitulo(capituloId)
     },[capituloId])
-
-    useEffect(() => {
-        if(isFocused){
-            if(capituloId) getCapitulo(capituloId)
-        }
-    },[isFocused])
-
 
     const getCapitulo = async (id) => {
         if(isLoading) return
@@ -127,6 +125,29 @@ export default function CapituloPage({ route }){
             navigation.setOptions({
                 headerTitle: response.data?.nome
             })
+            setLido(response.data.lido)
+            setTimeout(async () => {
+                const posicaoAnterior = await AsyncStorage.getItem(`posicao-${response.data.id}`)
+                console.log('posicaoAnterior', posicaoAnterior)
+                if (posicaoAnterior) {
+                    capitulosRef?.current?.scrollToOffset({ 
+                        offset: parseInt(posicaoAnterior), 
+                        animated: true 
+                    });
+                    setShowIrTopo(true);
+                    setTimeout(() => {
+                        Snackbar.show({
+                            text: "Voltando para onde parou",
+                            duration: 2000,
+                            action: {
+                                text: 'OK',
+                                textColor: 'green',
+                                onPress: () => { /* Do something. */ },
+                            },
+                        });
+                    })
+                }
+            },1000)
         }catch(error){
 
         } finally{
@@ -136,9 +157,9 @@ export default function CapituloPage({ route }){
     }
 
     const handleCapituloLido = async () => {
-        if(isLoading && lido) return
+        if(isLoading) return
         try{
-            await api.post(`capitulos/${capitulo}/marcar-como-lido`)
+            await api.post(`capitulos/${capituloId}/marcar-como-lido`)
 
             Snackbar.show({
                 text: "Marcado como lido!",
@@ -149,7 +170,7 @@ export default function CapituloPage({ route }){
                     onPress: () => { /* Do something. */ },
                 },
             });
-
+            AsyncStorage.removeItem(`posicao-${capituloId}`)
             if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3 && [2,4].includes(obra.status)){
                 await api.patch(`usuario-leitura/${leitura.id}`, {
                     status : 3
@@ -178,7 +199,8 @@ export default function CapituloPage({ route }){
           
             <FlatList
                 data={capitulo.paginas} 
-                ref={ref => setCapitulosRef(ref)}
+                // ref={ref => setCapitulosRef(ref)}
+                ref={capitulosRef}
                 onScroll={scrollHandler}
                 refreshControl={
                     <RefreshControl 
@@ -237,7 +259,10 @@ export default function CapituloPage({ route }){
                 }
                 keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
                 onEndReached={() => {
-                    if(!capitulo.lido) handleCapituloLido()
+                    if(!lido) {
+                        setLido(true)
+                        handleCapituloLido()
+                    }
                 }}
             />
             {
