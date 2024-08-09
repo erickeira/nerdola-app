@@ -64,7 +64,7 @@ export default function ObraPage({ route }){
                 ...response.data,
                 capitulos: ordenaCapitulos(response.data.capitulos)
             })
-            
+
         }catch(error){
 
         } finally{

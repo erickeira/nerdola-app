@@ -8,6 +8,7 @@ import AuthProvider from './src/context/AuthContext'
 import { defaultColors } from './src/utils';
 import NotificationProvider from './src/context/NotificationContext';
 import { PaperProvider } from 'react-native-paper';
+import * as Sentry from "@sentry/react-native";
 
 const height = Dimensions.get('screen').height;
 
@@ -95,8 +96,21 @@ const codePushOptions = {
     installMode: codePush.InstallMode.ON_NEXT_RESUME
 };
 
+Sentry.init({
+    dsn: "https://097fe1e236890306110f753056ae8eee@o4507651866755072.ingest.us.sentry.io/4507651868000256",
+    // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+    // We recommend adjusting this value in production.
+    tracesSampleRate: 1.0,
+    _experiments: {
+      // profilesSampleRate is relative to tracesSampleRate.
+      // Here, we'll capture profiles for 100% of transactions.
+      profilesSampleRate: 1.0,
+    },
+});
+  
+
 // export default App;
-export default codePush(codePushOptions)(App);
+export default Sentry.wrap(codePush(codePushOptions)(App));
 
 const theme = {
     ...DefaultTheme,

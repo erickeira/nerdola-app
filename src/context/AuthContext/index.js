@@ -5,7 +5,7 @@ import api from "../../utils/api";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import * as Sentry from "@sentry/react-native";
 
 
 
@@ -32,6 +32,7 @@ export default function AuthProvider({children}){
             );
 
             setUsuario(response.data)
+            Sentry.setUser({ ...response.data})
             setAuthenticated(true)
         }catch(error){
         } finally {
