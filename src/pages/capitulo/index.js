@@ -46,8 +46,8 @@ const CustomImage = ( { imagem, obra, capitulo }) => {
                 
             ) : (
                 imagem && !imageError ? (
-                    // <FastImage
-                    <AutoHeightImage
+                    <FastImage
+                    // <AutoHeightImage
                         style={{ width, height: imageHeight }}
                         source={{
                             uri: imagePath,

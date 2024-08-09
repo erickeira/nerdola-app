@@ -6,7 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../utils/api";
 import Chip from "../../components/Chip";
 import CardObra from "../../components/CardObra";
-import { Icon } from "react-native-paper";
+import { Icon, Badge  } from "react-native-paper";
 import { defaultColors } from "../../utils";
 import CustomButton from "../../components/CustomButton";
 
@@ -15,15 +15,15 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
+import { useFiltrar } from "../../routes/stacks/homeStack";
 
 
 const { height, width }  = Dimensions.get('screen');
 
-export default function HomePage(){
+export default function HomePage({ route }){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
     const [ obras , setObras] = useState([])
-    const [ tags , setTags] = useState([])
     const [pagina, setPagina] = useState(1)
     const [limite, setLimite] = useState(20)
     const [loading, setIsLoading] = useState(false)
@@ -32,12 +32,16 @@ export default function HomePage(){
     const [loadingMore, setLoadingMore] = useState(false)
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
-    const [ filtros , setFiltros] = useState({
+    const [ filtros, setFiltros ] = useState({
+        tags:[],
+        site: "",
         string: '',
-        tags: []
+        ...route?.params?.filtros
     })
+    const isFiltrado = Object.entries(filtros).filter(([key, val]) => key != "string").some(([key,val]) => !!val && val.length > 0)
+
     const handleChange = (dado) => {
-        setFiltros((prevFiltros) => ({...prevFiltros, ...dado}))
+      setFiltros((prevFiltros) => ({...prevFiltros, ...dado}))
     }
 
     const [listRef, setListRef] = useState(null)
@@ -63,16 +67,58 @@ export default function HomePage(){
 
     useEffect(() =>{
         setIsLoading(true)
-        console.log('1')
         getObras()
-        getTags()
+        
     },[])
 
     useEffect(() => {
+        navigation.setOptions({
+            headerRight:  () =>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Chip 
+                        onPress={() => {
+                            navigation.push('filtrar', { filtros })
+                        }}
+                        style={{
+                            height: 60,
+                            borderWidth:0,
+                            position: 'relative'
+                        }}
+                    >
+                        {
+                            isFiltrado && 
+                            <View 
+                                style={{ 
+                                    position: 'absolute', 
+                                    top: 8, 
+                                    right: 18,
+                                    zIndex: 2, 
+                                    width: 10, 
+                                    height: 10, 
+                                    backgroundColor: 'red',
+                                    borderRadius: 10
+                                }} 
+                                size={14} 
+                            />
+                        }
+                        
+                        <Icon source="filter" size={24}/>
+                    </Chip>
+                </View>
+           
+        })
+    },[isFiltrado])
+
+    useEffect(() =>{
         setIsLoading(true)
-        console.log('2')
-        getObras(1 , filtros)
+        getObras(1 ,filtros)
     },[filtros])
+
+    useEffect(() => {
+        console.log({...filtros,  ...route?.params?.filtros})
+        setFiltros({...filtros,  ...route?.params?.filtros})
+     },[isFocused])
+
 
     const getObras = async (pag = 1, filtros = {}) => {
         if(loading || loadingRefresh || loadingMore) return
@@ -86,6 +132,7 @@ export default function HomePage(){
                     temCapitulo :true
                 }
             })
+            console.log(response.data?.length)
             if(response.data?.length < limite){
                 setEnReached(true)
             }
@@ -100,7 +147,6 @@ export default function HomePage(){
             }
             setPagina(pag)
         }catch(error){
-            console.log(error)
         } finally{
             setIsLoading(false)
             setLoadingMore(false)
@@ -108,18 +154,6 @@ export default function HomePage(){
         }
     }
     
-    const getTags = async () => {
-        try{
-            const response = await api.get(`tags`, {
-                params: {
-                    tageds: true
-                }
-            })
-            setTags(response.data)
-        }catch(error){
-
-        } 
-    }
 
     function refresh(){
         setIsLoadingRefresh(true)
@@ -127,23 +161,8 @@ export default function HomePage(){
         getObras(1, filtros) 
     }
 
-
-      // ref
-    const bottomSheetModalRef = useRef(null);
-
-    // variables
-    const snapPoints = useMemo(() => ['25%', '50%'], []);
-
-    // callbacks
-    const handlePresentModalPress = useCallback(() => {
-        bottomSheetModalRef.current?.present();
-    }, []);
-    const handleSheetChanges = useCallback((index) => {
-        console.log('handleSheetChanges', index);
-    }, []);
-
     return(
-        <BottomSheetModalProvider>
+        <>
             <FlatList
                 data={obras}
                 ref={(ref) => {setListRef(ref)}}
@@ -168,32 +187,6 @@ export default function HomePage(){
                             height={45}
                             leftElement={<Icon source={"magnify"} size={18} color="#666"/>}
                         />
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tags}>
-                            {
-                                tags?.map((tag, index) => (
-                                    <Chip
-                                        key={index}
-                                        label={tag.nome}
-                                        value={tag.id}
-                                        onPress={(val) => {
-                                            let newTags = [...filtros.tags];
-                                            if (newTags.includes(val)) {
-                                                newTags = newTags.filter(tag => tag !== val);
-                                            } else {
-                                                newTags = [...newTags, val];
-                                            }
-                                            handleChange({ tags: newTags });
-                                        }}
-                                        isSelected={filtros.tags.includes(tag.id)}
-                                    />
-                                ))
-                            }
-                        </ScrollView> 
-                        <Button
-                            onPress={handlePresentModalPress}
-                            title="Present Modal"
-                            color="black"
-                        />
                     </View>
                 )}
                 showsVerticalScrollIndicator={false}
@@ -217,7 +210,7 @@ export default function HomePage(){
                 onEndReached={() => {
                     if(!loadingMore && !enReached && !loading && !loadingRefresh){
                         setLoadingMore(true)
-                        getObras(pagina + 1)
+                        getObras(pagina + 1, filtros)
                     }
                 }}
                 ListFooterComponent={() => {
@@ -249,19 +242,11 @@ export default function HomePage(){
                 </CustomButton>
                 : null
             } 
-            <BottomSheetModal
-                ref={bottomSheetModalRef}
-                index={1}
-                snapPoints={snapPoints}
-                onChange={handleSheetChanges}
-            >
-            <BottomSheetView style={styles.contentContainer}>
-                <Text>Awesome 🎉</Text>
-            </BottomSheetView>
-            </BottomSheetModal>
-        </BottomSheetModalProvider>
+            
+        </>
     )
 }
+
 const styles = StyleSheet.create({
     view: {
       padding: 10,
@@ -292,16 +277,12 @@ const styles = StyleSheet.create({
     },
     textInput:{
         backgroundColor: '#191919',
-        borderWidth: 0
+        borderWidth: 0,
     },
     container: {
         flex: 1,
         padding: 24,
         justifyContent: 'center',
         backgroundColor: 'grey',
-      },
-      contentContainer: {
-        flex: 1,
-        alignItems: 'center',
-      },
+    },
 });

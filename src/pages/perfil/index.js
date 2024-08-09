@@ -72,7 +72,7 @@ export default function PerfilPage({ route }){
     useEffect(() =>{
         if(obras.length > 0){
             getStatusList()
-           if(user.id) getObras()
+           if(!loading && user.id) getObras()
         }
         getUser()
     },[isFocused])
@@ -80,13 +80,12 @@ export default function PerfilPage({ route }){
     useEffect(() => {
         setIsLoading(true)
         if(user?.id){
-            getObras(1 , filtros)
+            getObras(1 , filtros, )
             getPublicacoes(1, user.id)
         }
-        
     },[filtros])
 
-    const getObras = async (pag = 1, filtros = {}, id ) => {
+    const getObras = async (pag = 1, filtros = {}, id = id || user.id) => {
         if(loading || loadingRefresh) return
         const params =  {
             ...filtros,
@@ -94,10 +93,9 @@ export default function PerfilPage({ route }){
             limite: limite?.toString(),
             statusleitura : (filtros.statusleitura?.length ? filtros.statusleitura : statusList.map(st => st.id)),
             temCapitulo :true,
+            usuario: id 
         }
-        if(id) params.usuario = id
-        else params.minhas = true
-
+        
         try{
             const response = await api.get(`obras`, {  params })
             if(response.data?.length < limite){
@@ -199,7 +197,7 @@ export default function PerfilPage({ route }){
             const response = await api.get(`usuarios/${id || 'me'}`)
             setUser(response.data)
             getPublicacoes(1, response.data.id)
-            getObras(1, id)
+            getObras(1,filtros, id || response.data.id)
             setImageError(false)
         }catch(error){
         } finally {
@@ -432,9 +430,8 @@ export default function PerfilPage({ route }){
                             getPublicacoes(paginaPublicacoes + 1)
                         }else if(listMode == "publicacoes"){
                             setLoadingMore(true)
-                            getObras(pagina + 1)
+                            getObras(pagina + 1, filtros)
                         }
-                     
                     }
                 }}
                 ListFooterComponent={() => {
