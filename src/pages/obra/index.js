@@ -12,6 +12,8 @@ import CustomButton from "../../components/CustomButton";
 import Snackbar from "react-native-snackbar";
 import axios from "axios";
 import CardLink from "../../components/CardLink";
+import CardObraSkeleton from "../../components/CardObraSkeleton";
+import Skeleton from "../../components/Skeleton";
 const { height, width }  = Dimensions.get('screen');
 
 export default function ObraPage({ route }){
@@ -204,13 +206,6 @@ export default function ObraPage({ route }){
 
     const [ordem, setOrdem] = useState("ascending")
 
-
-
-    if(isLoading) return (
-        <View style={{ paddingVertical: 100, alignItems: 'center', justifyContent: 'center' }}>
-            <ActivityIndicator color="#fff" size={30} style={{marginTop: 100}}/>
-        </View>
-    )
     return(
             <SafeAreaView style={styles.view}>
             <FlatList
@@ -253,102 +248,121 @@ export default function ObraPage({ route }){
                     {
                         !!obra.id && (
                             <View style={styles.details}>
-                                <CardObra obra={obra} showstatus showtags/>
-                                <View style={styles.divider}/> 
-                                <View style={styles.statusList}>
-                                    {
-                                        statusList?.map((status) => (
-                                            <Chip 
-                                                key={status.id}
-                                                label={status?.nome}
-                                                value={status.id}
-                                                isSelected={leitura.status.id == status.id}
-                                                onPress={(id) => {
-                                                    if(leitura.status.id == id){
-                                                        handleRemoveLeitura()
-                                                    }else if(!!leitura.id){
-                                                        handleUpdateLeitura(id)
-                                                    }else{
-                                                        handleAddLeitura(id)
-                                                    }
-                                                }}
-                                            />
-                                        ))
-                                    }
-                                    
-                                </View>
                                 {
-                                    !!descricao  && 
-                                    <Text style={styles.descricao}>
-                                        {descricao}
-                                    </Text>
+                                    isLoading? <CardObraSkeleton/> :
+                                    <CardObra obra={obra} showstatus showtags/>
+                                }
+                                
+                                <View style={styles.divider}/> 
+                                {
+                                    !isLoading && (
+                                        <View style={styles.statusList}>
+                                            {
+                                                statusList?.map((status) => (
+                                                    <Chip 
+                                                        key={status.id}
+                                                        label={status?.nome}
+                                                        value={status.id}
+                                                        isSelected={leitura.status.id == status.id}
+                                                        onPress={(id) => {
+                                                            if(leitura.status.id == id){
+                                                                handleRemoveLeitura()
+                                                            }else if(!!leitura.id){
+                                                                handleUpdateLeitura(id)
+                                                            }else{
+                                                                handleAddLeitura(id)
+                                                            }
+                                                        }}
+                                                    />
+                                                ))
+                                            }
+                                            
+                                        </View>
+                                    )
+                                }
+                                
+                                {
+                                    isLoading ? <Skeleton style={{ width: '100%', height: 200, paddingHorizontal: 10}}/> :
+                                    (
+                                        !!descricao  && 
+                                        <Text style={styles.descricao}>
+                                            {descricao}
+                                        </Text>
+                                    )
+                                    
                                 }
                             </View>
                         )
                     }
                     
                     </LinearGradient>
-                    <View style={{ width: '100%',flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end', flexWrap: 'wrap'}}>
-                        <Chip
-                            onPress={() => {
-                                navigation.navigate('publicar', {
-                                    obra
-                                })
-                            }}
-                            style={{ paddingVertical: 3, height: 45}} 
-                        >
-                            <Text style={{color: '#fff'}}>
-                                Publicar no feed
-                            </Text>
-                        </Chip>
-                        {
-                            !ondeLer ? 
-                            <Chip 
-                                label={""}
-                                isSelected={false}
-                                onPress={(id) => {
-                                    setOndeLer(true)
-                                }}
-                                style={{ alignItems: 'center' }}
-                            >
-                                
-                                <Text style={{color: '#fff'}}>
-                                    Onde ler
-                                </Text>
-                                <Icon source="web" size={15}/>
-                            </Chip>
-                            :
-                            <Chip 
-                                label={""}
-                                isSelected={false}
-                                onPress={(id) => {
-                                    setOndeLer(false)
-                                }}
-                                style={{ alignItems: 'center' }}
-                            >
-                                
-                                <Text>
-                                    Capitulos
-                                </Text>
-                                <Icon source="format-list-checkbox" size={15}/>
-                            </Chip>
-                        }
+                    {
+                        !isLoading && (
+                            <View style={{ width: '100%',flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end', flexWrap: 'wrap'}}>
+                                <Chip
+                                    onPress={() => {
+                                        navigation.navigate('publicar', {
+                                            obra
+                                        })
+                                    }}
+                                    style={{ paddingVertical: 3, height: 45}} 
+                                >
+                                    <Text style={{color: '#fff'}}>
+                                        Publicar no feed
+                                    </Text>
+                                </Chip>
+                                {
+                                    !ondeLer ? 
+                                    <Chip 
+                                        label={""}
+                                        isSelected={false}
+                                        onPress={(id) => {
+                                            setOndeLer(true)
+                                        }}
+                                        style={{ alignItems: 'center' }}
+                                    >
+                                        
+                                        <Text style={{color: '#fff'}}>
+                                            Onde ler
+                                        </Text>
+                                        <Icon source="web" size={15}/>
+                                    </Chip>
+                                    :
+                                    <Chip 
+                                        label={""}
+                                        isSelected={false}
+                                        onPress={(id) => {
+                                            setOndeLer(false)
+                                        }}
+                                        style={{ alignItems: 'center' }}
+                                    >
+                                        
+                                        <Text>
+                                            Capitulos
+                                        </Text>
+                                        <Icon source="format-list-checkbox" size={15}/>
+                                    </Chip>
+                                }
+                            
+                                <Chip 
+                                    label={""}
+                                    isSelected={false}
+                                    onPress={(id) => {
+                                        if(ordem == "ascending") setOrdem("descending")
+                                        else setOrdem("ascending")
+                                    }}
+                                    style={{ width: 100}}
+                                >
+                                    <Icon 
+                                        source={ordem == "ascending" ? "sort-ascending" : "sort-descending"} 
+                                        color="#fff" size={18} 
+                                    />
+                                </Chip>
+                            </View>
+
+                        )
+                    }
                     
-                        <Chip 
-                            label={""}
-                            isSelected={false}
-                            onPress={(id) => {
-                                if(ordem == "ascending") setOrdem("descending")
-                                else setOrdem("ascending")
-                            }}
-                            style={{ width: 100}}
-                        >
-                            <Icon 
-                                source={ordem == "ascending" ? "sort-ascending" : "sort-descending"} 
-                                color="#fff" size={18} 
-                            />
-                        </Chip>
-                    </View>
                 
                     <Text style={styles.capitulos}>
                         { ondeLer?  'Onde ler' :'Capitulos' }

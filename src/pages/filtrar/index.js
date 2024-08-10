@@ -5,7 +5,7 @@ import api from "../../utils/api";
 import { defaultColors } from "../../utils";
 import InputSelect from "../../components/InputSelect";
 import CustomButton from "../../components/CustomButton";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { CommonActions, useIsFocused, useNavigation } from "@react-navigation/native";
 import { Checkbox } from "react-native-paper";
 
 const { height, width }  = Dimensions.get('screen');
@@ -16,6 +16,7 @@ export default function FiltrarPage({ route }){
     const [ filtros, setFiltros ] = useState({
         tags:[],
         site: "",
+        formato: "",
         ...route?.params?.filtros
     })
     const handleChange = (dado) => {
@@ -24,6 +25,7 @@ export default function FiltrarPage({ route }){
     const [ tags , setTags] = useState([])
     const [ sites , setSites] = useState([])
     const [ obraStatus, setObraStatus] = useState([])
+    const [ formatos, setFormatos] = useState([])
     const [loading, setIsLoading] = useState(false)
 
     
@@ -37,6 +39,7 @@ export default function FiltrarPage({ route }){
         getTags()
         getSites()
         getObraStatus()
+        getFormatos()
     },[])
 
     const getTags = async () => {
@@ -70,28 +73,32 @@ export default function FiltrarPage({ route }){
         } 
     }
 
+    const getFormatos = async () => {
+        try{
+            const response = await api.get(`formato`, {
+                params: {
+                    tageds: true
+                }
+            })
+            setFormatos(response.data)
+        }catch(error){
+
+        } 
+    }
+
     return(
         <ScrollView style={styles.view}>
+            
             <InputSelect
-                label={"Tags"}
+                label={"Formato"}
                 placeholder="Selecione"
-                options={tags}
-                value={filtros.tags}
-                isMulti
-                onChange={(tags) => {
-                    handleChange({tags})
+                options={formatos}
+                value={filtros.formato}
+                onChange={(formato) => {
+                    handleChange({formato})
                 }}
                 containerStyle={{marginBottom: 25}}
-            />
-            <InputSelect
-                label={"Site"}
-                placeholder="Selecione"
-                options={sites}
-                value={filtros.site}
-                onChange={(site) => {
-                    handleChange({site})
-                }}
-                containerStyle={{marginBottom: 25}}
+                snap="40%"
             />
             <InputSelect
                 label={"Status da obra"}
@@ -104,6 +111,28 @@ export default function FiltrarPage({ route }){
                 containerStyle={{marginBottom: 25}}
                 snap="40%"
             />
+            <InputSelect
+                label={"Site"}
+                placeholder="Selecione"
+                options={sites}
+                value={filtros.site}
+                onChange={(site) => {
+                    handleChange({site})
+                }}
+                containerStyle={{marginBottom: 25}}
+            />
+            <InputSelect
+                label={"Tags"}
+                placeholder="Selecione"
+                options={tags}
+                value={filtros.tags}
+                isMulti
+                onChange={(tags) => {
+                    handleChange({tags})
+                }}
+                containerStyle={{marginBottom: 25}}
+            />
+            
             <TouchableOpacity 
                 style={{ flexDirection: 'row' , alignItems: 'center', gap: 8}}
                 onPress={() => {
@@ -133,6 +162,7 @@ export default function FiltrarPage({ route }){
                 }}
                 onPress={() => {
                     navigation.navigate("home", { filtros })
+               
                 }}
             >
                 Filtrar
@@ -147,14 +177,13 @@ export default function FiltrarPage({ route }){
                     
                 }}
                 onPress={() => {
-                    setFiltros({ string: "", tags: [], site: "", temPaginas: false })
+                    setFiltros({ string: "", tags: [], site: "", formato: "", status: "", temPaginas: false })
                 }}
 
             >
                 <Text style={{color : '#fff', fontSize: 12}}>
-                Limpar filtros
+                    Limpar filtros
                 </Text>
-                
             </CustomButton>
         </ScrollView>
     )

@@ -11,6 +11,7 @@ import { defaultColors } from "../utils";
 import CustomButton from "./CustomButton";
 import CardPublicacao from "./CardPublicacao";
 import Snackbar from "react-native-snackbar";
+import CardPublicacaoSkeleton from "./CardPublicacaoSkeleton";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -54,10 +55,10 @@ export default function Publicacoes({ route }){
         getPublicacoes()
     },[])
 
-    useEffect(() => {
-        setIsLoading(true)
-        getPublicacoes(1 , filtros)
-    },[filtros])
+    // useEffect(() => {
+    //     setIsLoading(true)
+    //     getPublicacoes(1 , filtros)
+    // },[filtros])
 
     useEffect(() => {
         if(isFocused){
@@ -153,12 +154,16 @@ export default function Publicacoes({ route }){
                         />
                     ) 
                 }}
-                ListEmptyComponent={
-                    loading || loadingRefresh ? 
-                    <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
-                        <ActivityIndicator color="#fff" size={30}/>
+                ListHeaderComponent={
+                    (loading || loadingRefresh) &&
+                    <View>
+                        <CardPublicacaoSkeleton/>
+                        <CardPublicacaoSkeleton/>
+                        <CardPublicacaoSkeleton/>
                     </View>
-                    :
+                }
+                ListEmptyComponent={
+                    !loading && !loadingRefresh && 
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
                            Nenhuma publicação ainda!

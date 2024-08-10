@@ -10,6 +10,8 @@ import { Avatar, Icon } from "react-native-paper";
 import { defaultColors, gerarCorPorString, imageUrl } from "../../utils";
 import CustomButton from "../../components/CustomButton";
 import CardPublicacao from "../../components/CardPublicacao";
+import CardObraSkeleton from "../../components/CardObraSkeleton";
+import Skeleton from "../../components/Skeleton";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -65,6 +67,7 @@ export default function PerfilPage({ route }){
 
     useEffect(() =>{
         setIsLoading(true)
+        setIsLoadingMe(true)
         getStatusList()
         getUser()
     },[])
@@ -192,7 +195,6 @@ export default function PerfilPage({ route }){
     const [ user, setUser] = useState(null)
     const [ isLoadingMe, setIsLoadingMe] = useState(false)
     const getUser = async () => {
-        setIsLoadingMe(true)
         try{
             const response = await api.get(`usuarios/${id || 'me'}`)
             setUser(response.data)
@@ -246,16 +248,24 @@ export default function PerfilPage({ route }){
                     <View style={{width: '100%'}}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',   gap: 20, padding: 10}}> 
                             <View>
-                                <Text style={styles.me_nome}>
-                                    { user?.nome }
-                                </Text>
                                 {
-                                    !!user?.nick &&
-                                    <Text style={styles.nick}>
-                                        @{ user?.nick }
+                                    isLoadingMe  ? <Skeleton style={{ width: 200 , height: 16}}/> :
+                                    <Text style={styles.me_nome}>
+                                        { user?.nome }
                                     </Text>
                                 }
+                                {
+                                    isLoadingMe ? <Skeleton style={{ width: 80 , height: 18}}/> :
+                                    (
+                                        !!user?.nick &&
+                                        <Text style={styles.nick}>
+                                            @{ user?.nick }
+                                        </Text>
+                                    )
+                                }
                                 <View style={{flexDirection: 'row' , gap: 10}}>
+                                {
+                                    isLoadingMe ? <Skeleton style={{ width: 70 , height: 15}}/> :
                                     <TouchableOpacity
                                         onPress={() => {
                                             navigation.navigate('seguidores', { id: id || usuario.id })
@@ -265,6 +275,9 @@ export default function PerfilPage({ route }){
                                             { user?.total_seguidores || 0 } seguidores
                                         </Text>
                                     </TouchableOpacity>
+                                }
+                                 {
+                                    isLoadingMe ? <Skeleton style={{ width: 70 , height: 15}}/> :
                                     <TouchableOpacity
                                         onPress={() => {
                                             navigation.navigate('seguidores', { id: id || usuario.id, seguindo: true })
@@ -274,30 +287,35 @@ export default function PerfilPage({ route }){
                                             { user?.total_seguindo || 0 } seguindo
                                         </Text>
                                     </TouchableOpacity>
+                                }
                                 </View>
                                
                                    
                             </View>
                             {
-                                user?.imagem && !imageError ?
-                                <View style={styles.imageContainer}>
-                                    <Image
-                                        style={styles.imagem}
-                                        source={{ uri : imagePath }}
-                                        onError={(error) => {
-                                            setImageError(true)
+                                 isLoadingMe ? <Skeleton style={{ width: 60 , height: 60, borderRadius: 200 }}/>:
+                                 (
+                                    user?.imagem && !imageError ?
+                                    <View style={styles.imageContainer}>
+                                        <Image
+                                            style={styles.imagem}
+                                            source={{ uri : imagePath }}
+                                            onError={(error) => {
+                                                setImageError(true)
+                                            }}
+                                        />
+                                    </View>
+                                    :
+                                   
+                                    <Avatar.Text 
+                                        size={60} 
+                                        style={{
+                                            backgroundColor: user?.nome ? gerarCorPorString(user?.nome) : defaultColors.activeColor
                                         }}
+                                        label={ user?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
                                     />
-                                </View>
-                                :
+                                 )
                                 
-                                <Avatar.Text 
-                                    size={60} 
-                                    style={{
-                                        backgroundColor: user?.nome ? gerarCorPorString(user?.nome) : defaultColors.activeColor
-                                    }}
-                                    label={ user?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
-                                />
                             }
                             
                         </View>
@@ -323,19 +341,23 @@ export default function PerfilPage({ route }){
                                 </Text>
                             </Chip>
                             :
-                            <Chip
-                                label={"Editar perfil"}
-                                style={{
-                                    width: '50%',
-                                    paddingVertical: 8,
-                                    marginBottom: 40,
-                                }}
-                                onPress={() => {
-                                    navigation.navigate('editar-perfil')
-                                }}
-                                isLoading={isLoadingMe}
-                                isSelected={false}
-                            />
+                            (
+                                isLoadingMe ? <Skeleton style={{ width: 170 , height: 30}}/>:
+                                <Chip
+                                    label={"Editar perfil"}
+                                    style={{
+                                        width: '50%',
+                                        paddingVertical: 8,
+                                        marginBottom: 40,
+                                    }}
+                                    onPress={() => {
+                                        navigation.navigate('editar-perfil')
+                                    }}
+                                    isLoading={isLoadingMe}
+                                    isSelected={false}
+                                />
+                            )
+                           
                         }
 
                         <View style={styles.containerTab}>
@@ -399,6 +421,15 @@ export default function PerfilPage({ route }){
                                     ))
                                 }
                             </View> 
+                        }
+                         {
+                            loading && listMode == "obras" && (
+                                <>
+                                    <CardObraSkeleton/>
+                                    <CardObraSkeleton/>
+                                    <CardObraSkeleton/>
+                                </>
+                            )
                         }
                         
                     </View>

@@ -16,6 +16,7 @@ import {
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
 import { useFiltrar } from "../../routes/stacks/homeStack";
+import CardObraSkeleton from "../../components/CardObraSkeleton";
 
 
 const { height, width }  = Dimensions.get('screen');
@@ -36,9 +37,11 @@ export default function HomePage({ route }){
         tags:[],
         site: "",
         string: '',
+        formato: "",
         ...route?.params?.filtros
     })
-    const isFiltrado = Object.entries(filtros).filter(([key, val]) => key != "string").some(([key,val]) => !!val && val.length > 0)
+    const previousFilters = useRef(filtros);
+    const isFiltrado = Object.entries(filtros).filter(([key, val]) => key != "string").some(([key,val]) =>  Array.isArray(val) ? val.length > 0 : !!val )
 
     const handleChange = (dado) => {
       setFiltros((prevFiltros) => ({...prevFiltros, ...dado}))
@@ -67,57 +70,22 @@ export default function HomePage({ route }){
 
     useEffect(() =>{
         setIsLoading(true)
-        getObras()
-        
+        getObras() 
     },[])
 
+  
     useEffect(() => {
-        navigation.setOptions({
-            headerRight:  () =>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Chip 
-                        onPress={() => {
-                            navigation.push('filtrar', { filtros })
-                        }}
-                        style={{
-                            height: 60,
-                            borderWidth:0,
-                            position: 'relative'
-                        }}
-                    >
-                        {
-                            isFiltrado && 
-                            <View 
-                                style={{ 
-                                    position: 'absolute', 
-                                    top: 8, 
-                                    right: 18,
-                                    zIndex: 2, 
-                                    width: 10, 
-                                    height: 10, 
-                                    backgroundColor: 'red',
-                                    borderRadius: 10
-                                }} 
-                                size={14} 
-                            />
-                        }
-                        
-                        <Icon source="filter" size={24}/>
-                    </Chip>
-                </View>
-           
-        })
-    },[isFiltrado])
+        console.log(route?.params?.filtros)
+        const filtrosDiferentes = (prev, current) => {
+            return JSON.stringify(prev) !== JSON.stringify(current);
+        };
+        const novosFiltros = { ...filtros, ...route?.params?.filtros };
+        if (filtrosDiferentes(previousFilters.current, novosFiltros)) {
+            setFiltros(novosFiltros)
+            getObras(1 ,novosFiltros)
+        }
+    },[isFocused])
 
-    useEffect(() =>{
-        setIsLoading(true)
-        getObras(1 ,filtros)
-    },[filtros])
-
-    useEffect(() => {
-        console.log({...filtros,  ...route?.params?.filtros})
-        setFiltros({...filtros,  ...route?.params?.filtros})
-     },[isFocused])
 
 
     const getObras = async (pag = 1, filtros = {}) => {
@@ -132,7 +100,6 @@ export default function HomePage({ route }){
                     temCapitulo :true
                 }
             })
-            console.log(response.data?.length)
             if(response.data?.length < limite){
                 setEnReached(true)
             }
@@ -176,17 +143,59 @@ export default function HomePage({ route }){
                     />
                   }
                 ListHeaderComponent={(
-                    <View >
-                        <InputText
-                            placeholder="Pesquisar"
-                            value={filtros.string}
-                            onStopType={(string) => {
-                                handleChange({string})
-                            }}
-                            containerStyle={styles.textInput}
-                            height={45}
-                            leftElement={<Icon source={"magnify"} size={18} color="#666"/>}
-                        />
+                    <View>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <InputText
+                                placeholder="Pesquisar"
+                                value={filtros.string}
+                                onStopType={(string) => {
+                                    handleChange({string})
+                                    getObras(1 ,{...filtros, string })
+                                }}
+                                containerStyle={styles.textInput}
+                                height={45}
+                                leftElement={<Icon source={"magnify"} size={18} color="#666"/>}
+                            />
+                            <Chip 
+                                onPress={() => {
+                                    navigation.push('filtrar', { filtros })
+                                }}
+                                style={{
+                                    height: 60,
+                                    borderWidth:0,
+                                    position: 'relative',
+                                    marginBottom: 30
+                                }}
+                            >
+                                {
+                                    isFiltrado && 
+                                    <View 
+                                        style={{ 
+                                            position: 'absolute', 
+                                            top: 8, 
+                                            right: 18,
+                                            zIndex: 2, 
+                                            width: 10, 
+                                            height: 10, 
+                                            backgroundColor: 'red',
+                                            borderRadius: 10
+                                        }} 
+                                        size={14} 
+                                    />
+                                }
+                                
+                                <Icon source="filter" size={24}/>
+                            </Chip>
+                        </View>
+                        {
+                            loading && (
+                                <>
+                                    <CardObraSkeleton/>
+                                    <CardObraSkeleton/>
+                                    <CardObraSkeleton/>
+                                </>
+                            )
+                        }
                     </View>
                 )}
                 showsVerticalScrollIndicator={false}
@@ -202,7 +211,7 @@ export default function HomePage({ route }){
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            { filtros.string.length > 0 || filtros.tags.length > 0 ?  'Nenhum obra encontrada!' : 'Nenhum obra publicada!'  }
+                            { isFiltrado ?  'Nenhum obra encontrada!' : 'Nenhum obra publicada!'  }
                         </Text>
                     </View>
                 }
@@ -278,6 +287,8 @@ const styles = StyleSheet.create({
     textInput:{
         backgroundColor: '#191919',
         borderWidth: 0,
+        width: width - 80,
+        marginBottom: 0 
     },
     container: {
         flex: 1,

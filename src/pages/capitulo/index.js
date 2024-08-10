@@ -10,6 +10,8 @@ import FastImage from 'react-native-fast-image';
 import Snackbar from "react-native-snackbar";
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CardComentario from "../../components/CardComentario";
+import InputText from "../../components/InputText";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -188,6 +190,82 @@ export default function CapituloPage({ route }){
         getCapitulo(capituloId) 
     }
 
+    const [ comentarios , setComentarios] = useState([])
+
+    const downButtonHandler = () => {
+        capitulosRef?.current?.scrollToEnd({ 
+          animated: true 
+        });
+    };
+
+    useEffect(() =>{
+        setIsLoadingComentarios(true)
+        getComentarios()
+    },[capituloId])
+
+    const [isLoadingComentarios, setIsLoadingComentarios] = useState(false)
+    const getComentarios = async (pag = 1, ) => {
+        if(isLoadingComentarios) return
+        try{
+            const response = await api.get(`comentarios`, {
+                params: {
+                    capitulo: capituloId
+                }
+            })
+
+        setComentarios([])
+        setComentarios([...response.data])
+
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoadingComentarios(false)
+        }
+    }
+
+    const [comentario, setComentario] = useState("")
+    const [isLoadingComentando, setIsLoadingComentando] = useState(false)
+    
+    const handleComentar = async () => {
+        setIsLoadingComentando(true)
+        try{
+            await api.post(`comentarios`,{
+                capitulo: capituloId,
+                comentario: comentario
+            })
+            getComentarios()
+            setComentario("")
+            Snackbar.show({
+                text: "Comentário publicado!",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+            setTimeout(() => {
+                downButtonHandler()
+            }, 1000);
+           
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoadingComentando(false)
+        }
+    }
+
+    const handleExcluir = async (id) => {
+        try{
+            await api.delete(`comentarios/${id}`)
+            getComentarios()
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoadingComentando(false)
+        }
+    }
+
 
     if(isLoading) return (
         <View style={{ paddingVertical: 100, alignItems: 'center', justifyContent: 'center' }}>
@@ -210,6 +288,7 @@ export default function CapituloPage({ route }){
                     />
                 }
                 renderItem={({item, index}) => {
+                // return null
                 return (
                     <CustomImage 
                         imagem={item}
@@ -227,66 +306,95 @@ export default function CapituloPage({ route }){
                     </View>
                 }
                 ListFooterComponent={
-                    <View style={{ flexDirection: 'row', marginTop: 20 }}>
-                        {
-                            capitulo?.cap_anterior &&
-                            <CustomButton 
-                                mode="outlined"
-                                style={styles.buttonNext}
-                                onPress={() => {
-                                    setCapituloId(capitulo?.cap_anterior)
-                                }}
-                            >
-            
-                                Capitulo anterior
-                            </CustomButton>
-                        }
-                        {
-                            capitulo?.prox_cap &&
-                            <CustomButton 
-                                mode="outlined"
-                                style={styles.buttonNext}
-                                onPress={() => {
-                                    setCapituloId(capitulo?.prox_cap)
-                                }}
-                            >
-            
-                                Próximo capitulo
-                            </CustomButton>
-                        }
+                    <View style={{ marginHorizontal: 20,   marginBottom: 100,}}>
+                        <View style={{ flexDirection: 'row', gap: 5, marginTop: 20,   marginBottom: 50 }}>
+                            {
+                                capitulo?.cap_anterior &&
+                                <CustomButton 
+                                    mode="outlined"
+                                    style={styles.buttonNext}
+                                    onPress={() => {
+                                        setCapituloId(capitulo?.cap_anterior)
+                                    }}
+                                >
+                
+                                    Capitulo anterior
+                                </CustomButton>
+                            }
+                            {
+                                capitulo?.prox_cap &&
+                                <CustomButton 
+                                    mode="outlined"
+                                    style={styles.buttonNext}
+                                    onPress={() => {
+                                        setCapituloId(capitulo?.prox_cap)
+                                    }}
+                                >
+                
+                                    Próximo capitulo
+                                </CustomButton>
+                            }
+                        </View>
+                        <View
+                            style={{
+                                borderBottomWidth: 0.2,
+                                borderBottomColor: '#262626',
+                                paddingVertical: 20
+                            }}
+                        >
+                            <Text style={{ color: defaultColors.gray }}>{comentarios.length} { comentarios.length == 1 ? "comentário" : "comentários"}</Text>
+                        </View>
+                        <View>
+                            {
+                                comentarios.map((comentario) => (
+                                    <CardComentario
+                                        key={comentario.id}
+                                        comentario={comentario}
+                                        handleExcluir={() => handleExcluir(comentario.id)}
+                                    />
+                                ))
+                            }
+                        </View>
                     </View>
+                    
                 
                 }
                 keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
                 onEndReached={() => {
+                    setShowIrTopo(true)
                     if(!lido) {
                         setLido(true)
                         handleCapituloLido()
                     }
                 }}
             />
-            {
-                showIrTopo ? 
-                <CustomButton
-                    style={{
-                        position: 'absolute',
-                        zIndex: 10,
-                        bottom: 10,
-                        right: 10,
-                        borderColor: '#312E2E',
-                        borderWidth: 1,
-                        paddingHorizontal: 20,
-                        flexDirection: 'row',
-                        backgroundColor: defaultColors.primary,
-                        alignItems: 'center',
-                        gap: 10
-                    }}
-                    onPress={upButtonHandler}
-                >
-                    Ir para o topo
-                </CustomButton>
-                : null
-            } 
+           {
+            showIrTopo && (
+                <View style={styles.containerComment}>
+                    <InputText
+                        placeholder="Faça um comentário"
+                        containerStyle={styles.input}
+                        mb={0}
+                        maxWidth={width - 130}
+                        value={comentario}
+                        onChange={(comentario) => {
+                            setComentario(comentario)
+                        }}
+                        tipo="area"
+                        maxLength={190}
+                    />
+                    <CustomButton 
+                        style={styles.button}
+                        onPress={handleComentar}
+                        isLoading={isLoadingComentando}
+                        disabled={isLoadingComentando || comentario.length < 1}
+                    >
+                        Publicar
+                    </CustomButton>
+                </View>
+            )
+           }
+           
         </>
     )
 }
@@ -321,14 +429,12 @@ const styles = StyleSheet.create({
     },
     buttonNext:{
         flex: 1,
-        height: 51,
+        height: 45,
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row',
-        marginBottom: 100,
         borderColor: '#312E2E',
         borderRadius: 5,
-        marginHorizontal: 10
     },
     viewCard:{
         marginTop: 40,
@@ -386,5 +492,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: defaultColors.activeColor,
         marginRight: 20
-    }
+    },
+   
 });

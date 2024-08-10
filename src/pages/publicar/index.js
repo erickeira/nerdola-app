@@ -1,6 +1,6 @@
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Avatar, Icon } from "react-native-paper";
-import { defaultColors } from "../../utils";
+import { defaultColors, gerarCorPorString, imageUrl } from "../../utils";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useEffect, useRef, useState } from "react";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
@@ -82,6 +82,9 @@ export default function PublicarPage({ route }){
     const imagePath =  `data:image/jpeg;base64,${publicacao?.imagem}`;
     const [imageError, setImageError] = useState(false)
 
+    const imagePathUsuario = `${imageUrl}usuarios/${usuario?.id}/${usuario?.imagem}`;
+    const [imageErrorUsuario, setImageErrorUsuario] = useState(false)
+
     return(
         <View 
             style={{height: '100%',padding : 5, }}
@@ -96,7 +99,27 @@ export default function PublicarPage({ route }){
                     }}    
                 >
                     <View>
-                        <Avatar.Text size={30} label={ usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } />
+                        {
+                            usuario?.imagem && !imageError ?
+                            <View style={styles.imageContainerUsuario}>
+                                <Image
+                                    style={styles.imagemUsuario}
+                                    source={{ uri : imagePathUsuario }}
+                                    onError={(error) => {
+                                        setImageErrorUsuario(true)
+                                    }}
+                                />
+                            </View>
+                            :
+                            
+                            <Avatar.Text 
+                                size={30} 
+                                style={{
+                                    backgroundColor: usuario?.nome ? gerarCorPorString(usuario?.nome) : defaultColors.activeColor
+                                }}
+                                label={ usuario?.nome?.split(' ')?.slice(0 , 2)?.map(t => t[0])?.join('') } 
+                            />
+                        }
                     </View>
                     <View style={{width: '95%'}}>
                         <View style={styles.head}>
@@ -276,5 +299,20 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         objectFit: 'contain'
+    },
+    imageContainerUsuario:{
+        width: 30,
+        height: 30,
+        borderColor: '#312E2E',
+        borderWidth: 1,
+        marginBottom: 5,
+        borderRadius: 100,
+        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    imagemUsuario:{
+        width: '100%',
+        height: '100%'
     },
 });
