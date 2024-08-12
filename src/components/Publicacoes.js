@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl, BackHandler } from "react-native";
 import InputText from "./InputText";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
@@ -12,6 +12,16 @@ import CustomButton from "./CustomButton";
 import CardPublicacao from "./CardPublicacao";
 import Snackbar from "react-native-snackbar";
 import CardPublicacaoSkeleton from "./CardPublicacaoSkeleton";
+
+
+import {
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetModalProvider,
+    BottomSheetFlatList 
+  } from '@gorhom/bottom-sheet';
+import CardComentario from "./CardComentario";
+import CardComentarioSkeleton from "./CardComentarioSkeleton";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -30,6 +40,7 @@ export default function Publicacoes({ route }){
     const [ showIrTopo, setShowIrTopo] = useState(false)
     const [ filtros , setFiltros] = useState({
     })
+    const [ idAction , setIdAction] = useState(null)
     const [listRef, setListRef] = useState(null)
     const upButtonHandler = () => {
       listRef?.scrollToOffset({ 
@@ -129,6 +140,97 @@ export default function Publicacoes({ route }){
         }
     }
 
+     // ref
+     const bottomSheetModalRef = useRef(null);
+
+     // variables
+     const snapPoints = useMemo(() => ['80%', '95%'], []);
+ 
+     // callbacks
+     const handlePresentModalPress = useCallback(() => {
+         bottomSheetModalRef.current?.present();
+     }, []);
+ 
+     const handleSheetChanges = useCallback((index) => {
+         // console.log('handleSheetChanges', index);
+     }, []);
+ 
+     const handleBackPress = () => {
+         if (bottomSheetModalRef.current) {
+             bottomSheetModalRef.current.dismiss();
+             return true; 
+         }
+         return false;
+     };
+ 
+     useEffect(() => {
+         BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+         return () => {
+             BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+         };
+     }, []);
+
+     const [ isLoadingComentarios , setIsLoadingComentarios] = useState(false)
+     const [ comentarios , setComentarios] = useState([])
+     
+     const getComentarios = async (publicacao) => {
+        if(isLoadingComentarios) return
+        setIsLoadingComentarios(true)
+        try{
+            const response = await api.get(`comentarios`, {
+                params: {
+                    publicacao
+                }
+            })
+            setComentarios([])
+            setComentarios([...response.data])
+            setPagina(pag)
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoadingComentarios(false)
+        }
+    }
+
+    const renderItem =  ({ item }) => (
+       <CardComentario comentario={item} handleExcluir={() => handleExcluirComentario(item.id)}/>
+    )
+
+    const [comentario, setComentario] = useState("")
+    const [isLoadingComentando, setIsLoadingComentando] = useState(false)
+    
+    const handleComentar = async () => {
+        setIsLoadingComentando(true)
+        try{
+            await api.post(`comentarios`,{
+                publicacao: publicacao?.id,
+                capitulo: capitulo?.id,
+                comentario: comentario
+            })
+            getComentarios()
+            setComentario("")
+            setTimeout(() => {
+                downButtonHandler()
+            }, 1000);
+           
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoadingComentando(false)
+        }
+    }
+
+    const handleExcluirComentario = async (id) => {
+        try{
+            await api.delete(`comentarios/${id}`)
+            getComentarios()
+        }catch(error){
+            console.log(error)
+        } finally{
+            setIsLoadingComentando(false)
+        }
+    }
+
     return(
         <>
             <FlatList
@@ -149,7 +251,12 @@ export default function Publicacoes({ route }){
                 renderItem={({item, index}) => {
                     return ( 
                         <CardPublicacao 
-                            handleExcluir={() => handleExcluir(item.id)}    
+                            handleExcluir={() => handleExcluir(item.id)}   
+                            handleComentarios={() => {
+                                getComentarios(item.id)
+                                setIdAction(item.id)
+                                handlePresentModalPress()
+                            }} 
                             publicacao={item} 
                         />
                     ) 
@@ -185,6 +292,71 @@ export default function Publicacoes({ route }){
                     return null
                 }}
             />
+            <BottomSheetModal
+                ref={bottomSheetModalRef}
+                index={1}
+                snapPoints={snapPoints}
+                onChange={handleSheetChanges}
+                backgroundStyle={[styles.modalContainer]}
+                handleIndicatorStyle={{
+                    backgroundColor: defaultColors.gray
+                }}
+            >
+                {
+                    isLoadingComentarios ? 
+                    <>
+                        <CardComentarioSkeleton/>
+                        <CardComentarioSkeleton/>
+                        <CardComentarioSkeleton/>
+                        <CardComentarioSkeleton/>
+                        <CardComentarioSkeleton/>
+                    </>
+                    
+                    :
+                    <>
+                        <BottomSheetFlatList
+                            data={comentarios}
+                            keyExtractor={(i) => i.id}
+                            renderItem={renderItem}
+                            contentContainerStyle={styles.contentContainer}
+                            ListEmptyComponent={
+                                <View >
+                                    <Text style={{ textAlign: 'center',color: defaultColors.gray, marginTop: 100}}>
+                                        Nenhum comentário ainda!
+                                    </Text>
+                                </View>
+                            }
+                        />
+                         <View style={styles.containerComment}>
+                            <InputText
+                                placeholder="Faça um comentário"
+                                containerStyle={styles.input}
+                                mb={0}
+                                maxWidth={width - 130}
+                                value={comentario}
+                                onChange={(comentario) => {
+                                    setComentario(comentario)
+                                }}
+                                tipo="area"
+                                maxLength={190}
+                            />
+                            <CustomButton 
+                                style={styles.button}
+                                onPress={handleComentar}
+                                isLoading={isLoadingComentando}
+                                disabled={isLoadingComentando || comentario.length < 1}
+                            >
+                                <Text style={{color: '#fff'}}>
+                                    Publicar
+                                </Text>
+                                
+                            </CustomButton>
+                        </View>
+                    </>
+                    
+                }
+                
+            </BottomSheetModal>
             {
                 showIrTopo ? 
                 <CustomButton
@@ -241,5 +413,28 @@ const styles = StyleSheet.create({
     textInput:{
         backgroundColor: '#191919',
         borderWidth: 0
+    },
+    modalContainer:{
+        backgroundColor: '#191919'
+    },
+    selected:{
+        width: '93%',
+        color: '#fff' 
+    },
+    containerComment:{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    input: {
+        borderWidth: 0,
+    },
+    button:{
+        width: 100,
+        height: 40,
+        justifyContent: 'center',
+        backgroundColor: defaultColors.activeColor,
+        marginRight: 20,
+        color: '#fff'
     }
 });

@@ -20,6 +20,7 @@ dayjs.locale("pt-br");
 const { height, width }  = Dimensions.get('screen');
 export default function CardPublicacao({ 
     publicacao : oldPublicacao,
+    handleComentarios,
     handleExcluir
 }){
     const { usuario } = useAuth()
@@ -50,9 +51,10 @@ export default function CardPublicacao({
         navigation.navigate('capitulo', { id: capitulo?.id, obra })
     }
 
-    const handleComentarios = async () => {
-        navigation.navigate('comentarios', { publicacao })
-    }
+    // const handleComentarios = async () => {
+    //     navigation.navigate('comentarios', { publicacao })
+    // }
+    
     const imagePath = `${imageUrl}usuarios/${publicacao?.usuario?.id}/${publicacao?.usuario?.imagem}`;
     const [imageError, setImageError] = useState(false)
 
