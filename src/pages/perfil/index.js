@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl, BackHandler } from "react-native";
 import InputText from "../../components/InputText";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../context/AuthContext";
@@ -11,7 +11,9 @@ import { defaultColors, gerarCorPorString, imageUrl } from "../../utils";
 import CustomButton from "../../components/CustomButton";
 import CardPublicacao from "../../components/CardPublicacao";
 import CardObraSkeleton from "../../components/CardObraSkeleton";
+import CardLista from "../../components/CardLista";
 import Skeleton from "../../components/Skeleton";
+
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -169,6 +171,8 @@ export default function PerfilPage({ route }){
         setPaginaPublicacoes(1)
         setPublicacoes([])
         getPublicacoes(1)
+        setListas([])
+        getListas()
     }
     
     useEffect(() => {
@@ -200,6 +204,7 @@ export default function PerfilPage({ route }){
             setUser(response.data)
             getPublicacoes(1, response.data.id)
             getObras(1,filtros, id || response.data.id)
+            getListas()
             setImageError(false)
         }catch(error){
         } finally {
@@ -228,12 +233,28 @@ export default function PerfilPage({ route }){
         }
     }
 
+    const [ listas, setListas] = useState([])
+    const getListas = async (usuario) => {
+        try{
+            const response = await api.get(`listas`,{
+                params:{
+                    usuario
+                }
+            })
+            setListas(response.data)
+        }catch(error){
+        } finally {
+        }
+    }
     
-
     return(
         <>
             <FlatList
-                data={listMode == "obras" ? obras : publicacoes }
+                data={{
+                   obras, 
+                   publicacoes,
+                   listas
+                }[listMode]}
                 ref={(ref) => {setListRef(ref)}}
                 onScroll={scrollHandler}
                 style={styles.view}
@@ -373,7 +394,7 @@ export default function PerfilPage({ route }){
                                 <Text 
                                     style={{ color: listMode == 'obras' ? '#fff' : defaultColors.gray}}
                                 >
-                                   { id ?  "Leituras" : "Minhas leituras" }
+                                  Leituras
                                 </Text>
                             </Chip>
                             <Chip
@@ -388,6 +409,19 @@ export default function PerfilPage({ route }){
                                 <Text 
                                     style={{ color: listMode == 'publicacoes' ? '#fff' : defaultColors.gray}}
                                 >Publicações</Text>
+                            </Chip>
+                            <Chip
+                                label="Listas"
+                                style={[styles.tab,{
+                                    borderColor: listMode == 'listas' ? "#fff" : "#666"
+                                }]}
+                                onPress={() => {
+                                    setListMode('listas')
+                                }}
+                            >
+                                <Text 
+                                    style={{ color: listMode == 'listas' ? '#fff' : defaultColors.gray}}
+                                >Listas</Text>
                             </Chip>
                         </View>
                         {
@@ -422,7 +456,7 @@ export default function PerfilPage({ route }){
                                 }
                             </View> 
                         }
-                         {
+                        {
                             loading && listMode == "obras" && (
                                 <>
                                     <CardObraSkeleton/>
@@ -431,15 +465,15 @@ export default function PerfilPage({ route }){
                                 </>
                             )
                         }
-                        
                     </View>
                 )}
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 renderItem={({item, index}) => {
                     delete item.total_usuarios_lendo
-                    if(listMode == "obras") return ( <CardObra obra={item} />) 
-                    return ( <CardPublicacao publicacao={item} />) 
+                    if(listMode == "obras") return ( <CardObra obra={item} />)
+                    else if(listMode == "listas") return ( <CardLista lista={item} />) 
+                    else return ( <CardPublicacao publicacao={item} />) 
                 }}
                 ListEmptyComponent={
                     loading ? 
@@ -447,9 +481,15 @@ export default function PerfilPage({ route }){
                         <ActivityIndicator color="#fff" size={30}/>
                     </View>
                     :
-                    <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ paddingVertical: 140, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            {  listMode == "obras" ?  'Nenhum leitura ainda!' : 'Nenhum publicação ainda!'  }
+                            {  
+                                ({
+                                    "obras" :  'Nenhum leitura ainda!',
+                                    "publicacoes" : 'Nenhum publicação ainda!',
+                                    "listas" : "Crie uma lista para categorizar suas leituras!"
+                                }[listMode]) 
+                             }
                         </Text>
                     </View>
                 }
@@ -466,11 +506,27 @@ export default function PerfilPage({ route }){
                     }
                 }}
                 ListFooterComponent={() => {
-                    if(!enReached && obras.length > 0) return (
-                        <></>
-                        // <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
+                    // if(!enReached && obras.length > 0) return (
+                    //     <></>
+                    //     <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
+                    // )
+                    
+                    return (
+                        <>
+                          {
+                                listMode == "listas" &&
+                                <CustomButton
+                                    onPress={() =>{
+                                        setListas(prevListas => ([...prevListas, { new:true }]))
+                                    }}
+                                >
+                                    <Text>
+                                        Criar nova lista
+                                    </Text>
+                                </CustomButton>
+                            }
+                        </>
                     )
-                    return null
                 }}
             />
             {
@@ -495,7 +551,7 @@ export default function PerfilPage({ route }){
                 </CustomButton>
                 : null
 
-            } 
+            }
         </>
     )
 }
@@ -571,5 +627,8 @@ const styles = StyleSheet.create({
         marginHorizontal: 0,
         paddingHorizontal: 0,
         marginRight: 0 
-    }
+    },
+    modalContainer:{
+        backgroundColor: '#191919'
+    },
 });
