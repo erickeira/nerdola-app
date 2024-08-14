@@ -156,7 +156,7 @@ export default function ObraPage({ route }){
     const handlePressCapitulo = async (capitulo, marcarLido = true) => {
         setIsLoadingCapitulo(capitulo)
         try{
-            await api.post(`capitulos/${capitulo}/marcar-como-lido`)
+            // await api.post(`capitulos/${capitulo}/marcar-como-lido`)
 
             if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3 && [2,4].includes(obra.status)){
                 await api.patch(`usuario-leitura/${leitura.id}`, {
@@ -204,8 +204,15 @@ export default function ObraPage({ route }){
         }
     }
 
+    console.log(obra.ultimo_lido)
+
     const [ordem, setOrdem] = useState("ascending")
 
+    if(isLoading) return(
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <ActivityIndicator color={defaultColors.activeColor} size={25}/>
+        </View>
+    )
     return(
             <SafeAreaView style={styles.view}>
             <FlatList
@@ -362,7 +369,22 @@ export default function ObraPage({ route }){
 
                         )
                     }
-                    
+                    {
+                        obra.ultimo_lido && (
+                            <CustomButton 
+                                style={{paddingVertical: 15, borderRadius: 0}}
+                                onPress={() => {
+                                    navigation.navigate("capitulo", { 
+                                        id: obra.ultimo_lido?.capitulo_id ,
+                                        leitura,
+                                        obra
+                                    })
+                                }}
+                            >
+                                Voltar onde parou
+                            </CustomButton>
+                        )
+                    }    
                 
                     <Text style={styles.capitulos}>
                         { ondeLer?  'Onde ler' :'Capitulos' }

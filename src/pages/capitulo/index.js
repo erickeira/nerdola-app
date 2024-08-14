@@ -131,7 +131,7 @@ export default function CapituloPage({ route }){
             setTimeout(async () => {
                 const posicaoAnterior = await AsyncStorage.getItem(`posicao-${response.data.id}`)
                 console.log('posicaoAnterior', posicaoAnterior)
-                if (posicaoAnterior) {
+                if (posicaoAnterior && posicaoAnterior > posicaoNaTela) {
                     capitulosRef?.current?.scrollToOffset({ 
                         offset: parseInt(posicaoAnterior), 
                         animated: true 

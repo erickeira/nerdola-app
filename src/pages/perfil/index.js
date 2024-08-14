@@ -462,7 +462,7 @@ export default function PerfilPage({ route }){
                                     style={{ color: listMode == 'publicacoes' ? '#fff' : defaultColors.gray}}
                                 >Publicações</Text>
                             </Chip>
-                            <Chip
+                            {/* <Chip
                                 label="Listas"
                                 style={[styles.tab,{
                                     borderColor: listMode == 'listas' ? "#fff" : "#666"
@@ -474,7 +474,7 @@ export default function PerfilPage({ route }){
                                 <Text 
                                     style={{ color: listMode == 'listas' ? '#fff' : defaultColors.gray}}
                                 >Listas</Text>
-                            </Chip>
+                            </Chip> */}
                         </View>
                         {
                             listMode == "obras" && 
