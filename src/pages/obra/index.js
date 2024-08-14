@@ -204,8 +204,6 @@ export default function ObraPage({ route }){
         }
     }
 
-    console.log(obra.ultimo_lido)
-
     const [ordem, setOrdem] = useState("ascending")
 
     if(isLoading) return(
@@ -370,12 +368,12 @@ export default function ObraPage({ route }){
                         )
                     }
                     {
-                        obra.ultimo_lido && (
+                        obra.ultimo_lido?.prox_capitulo && (
                             <CustomButton 
                                 style={{paddingVertical: 15, borderRadius: 0}}
                                 onPress={() => {
                                     navigation.navigate("capitulo", { 
-                                        id: obra.ultimo_lido?.capitulo_id ,
+                                        id: obra.ultimo_lido?.prox_capitulo ,
                                         leitura,
                                         obra
                                     })

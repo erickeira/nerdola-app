@@ -17,6 +17,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import { useFiltrar } from "../../routes/stacks/homeStack";
 import CardObraSkeleton from "../../components/CardObraSkeleton";
+import CardObraLendo from "../../components/CardObraLendo";
 
 
 const { height, width }  = Dimensions.get('screen');
@@ -25,6 +26,7 @@ export default function HomePage({ route }){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
     const [ obras , setObras] = useState([])
+    const [ obrasLendo , setObrasLendo ] = useState([])
     const [pagina, setPagina] = useState(1)
     const [limite, setLimite] = useState(20)
     const [loading, setIsLoading] = useState(false)
@@ -75,7 +77,6 @@ export default function HomePage({ route }){
 
   
     useEffect(() => {
-        console.log(route?.params?.filtros)
         const filtrosDiferentes = (prev, current) => {
             return JSON.stringify(prev) !== JSON.stringify(current);
         };
@@ -84,9 +85,8 @@ export default function HomePage({ route }){
             setFiltros(novosFiltros)
             getObras(1 ,novosFiltros)
         }
+        getObrasLendo()
     },[isFocused])
-
-
 
     const getObras = async (pag = 1, filtros = {}) => {
         if(loading || loadingRefresh || loadingMore) return
@@ -118,6 +118,23 @@ export default function HomePage({ route }){
             setIsLoading(false)
             setLoadingMore(false)
             setIsLoadingRefresh(false)
+        }
+    }
+
+    const getObrasLendo = async () => {
+        try{
+            const response = await api.get(`obras`, {
+                params: {
+                    pagina: "1",
+                    limite: "1000",
+                    ultimos_lidos: true,
+                    statusleitura: [2]
+                }
+            })
+            setObrasLendo(response.data)
+
+        }catch(error){
+        } finally{
         }
     }
     
@@ -196,6 +213,17 @@ export default function HomePage({ route }){
                                 </>
                             )
                         }
+                        <Text style={{marginBottom: 10}}>
+                            Continuar lendo
+                        </Text>
+                        <ScrollView horizontal style={{gap: 5}}>
+                            {
+                                obrasLendo?.map((obra,index) => (
+                                    <CardObraLendo obra={obra} key={index}/>
+                                )) 
+                            }
+                        </ScrollView>
+                        
                     </View>
                 )}
                 showsVerticalScrollIndicator={false}
