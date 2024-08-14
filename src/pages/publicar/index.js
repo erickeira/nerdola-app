@@ -27,8 +27,9 @@ export default function PublicarPage({ route }){
     const isFocused = useIsFocused()
 
     useEffect(() => {
-        setFocus(isFocused)
-    },[isFocused])
+       if(inputRef && isFocused) inputRef.current?.focus();
+       else  if(inputRef && !isFocused) inputRef.current?.blur();
+    },[isFocused, inputRef])
 
     const handleChange = (dado) => {
         setPublicacao({...publicacao, ...dado})
@@ -95,7 +96,7 @@ export default function PublicarPage({ route }){
                 <View 
                     style={styles.view}
                     onPress={() => {
-                        setFocus(true)
+                        inputRef?.current?.focus()
                     }}    
                 >
                     <View>
@@ -138,7 +139,7 @@ export default function PublicarPage({ route }){
                                     textAlignVertical : 'top',
                                     minHeight: 80
                                 }}
-                                focus={focus}
+                                ref={inputRef}
                                 tipo="area"
                                 numberOfLines={20}
                                 value={publicacao.conteudo}

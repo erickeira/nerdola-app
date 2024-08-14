@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState,forwardRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MaskInput, { Masks, createNumberMask } from 'react-native-mask-input';
 import { Icon } from 'react-native-paper';
 
-const InputText = ({
+const InputText = forwardRef(({
     label,
     placeholder,
     value,
@@ -22,10 +22,10 @@ const InputText = ({
     leftElement,
     rghtElement,
     maxWidth,
-    focus,
     numberOfLines,
-    maxLength
-}, ...others) => {
+    maxLength,
+    ...others
+}, ref) => {
   const [text, setText] = useState({ semMascara : value || "" });
   const [mostrarSenha, setMostrarSenha] = useState( tipo == `senha`)
   const textoRef = useRef();
@@ -33,15 +33,6 @@ const InputText = ({
   useEffect(() => {
     if(value != text) setText({ semMascara : value || "" })
   },[value])
-
-  useEffect(() => {
-    if(focus){
-      textoRef.current?.focus()
-      console.log(textoRef)
-    }else{
-      textoRef.current?.blur()
-    }
-  },[focus])
 
 
   const handleChange = (comMascara, semMascara) => {
@@ -122,7 +113,7 @@ const InputText = ({
                     if(onPressIn) onPressIn()
                 }}
                 mask={mascara[tipo?.toLowerCase()]}
-                ref={others.hasOwnProperty('ref') ? ref :textoRef}
+                ref={ref || textoRef}
                 onChangeText={(comMascara, semMascara) => handleChange(comMascara, semMascara)}
                 value={text.semMascara}
                 placeholderTextColor='#666'
@@ -174,7 +165,7 @@ const InputText = ({
         }
     </View>
   );
-};
+});
 
 export default InputText;
 

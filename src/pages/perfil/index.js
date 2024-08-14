@@ -13,6 +13,7 @@ import CardPublicacao from "../../components/CardPublicacao";
 import CardObraSkeleton from "../../components/CardObraSkeleton";
 import CardLista from "../../components/CardLista";
 import Skeleton from "../../components/Skeleton";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 
 const { height, width }  = Dimensions.get('screen');
@@ -246,7 +247,58 @@ export default function PerfilPage({ route }){
         } finally {
         }
     }
+
+    // ref
+    const bottomSheetModalRef = useRef(null);
+
     
+    const [nomeLista, setNomeLista] = useState("");
+    const textoListaRef = useRef();
+    const snapPoints = useMemo(() => ['50%', '55%'], []);
+
+
+    // callbacks
+    const handlePresentModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+    }, []);
+
+    const handleSheetChanges = useCallback((index) => {
+        if(index> 0){
+            textoListaRef.current.focus()
+        }
+        // console.log('handleSheetChanges', index);
+    }, []);
+
+    const handleBackPress = () => {
+        if (bottomSheetModalRef.current) {
+            bottomSheetModalRef.current.dismiss();
+            return true; 
+        }
+        return false;
+    };
+
+    const [ criandoLista, setCriandoLista] = useState(false)
+    const [erroNome, setErrorNome] = useState(false)
+    const criarLista = async (nome) => {
+        
+        if(!nomeLista){
+            setErrorNome(true)
+            return
+        }
+        setCriandoLista(true)
+        try{
+            const response = await api.post(`listas`,{
+                nome
+            })
+            getListas(response.data)
+            setNomeLista("")
+            handleBackPress()
+        }catch(error){
+        } finally {
+            setCriandoLista(false)
+        }
+    }
+
     return(
         <>
             <FlatList
@@ -517,12 +569,12 @@ export default function PerfilPage({ route }){
                                 listMode == "listas" &&
                                 <CustomButton
                                     onPress={() =>{
-                                        setListas(prevListas => ([...prevListas, { new:true }]))
+                                        handlePresentModalPress()
                                     }}
+                                    style={styles.buttonNovaLista}
+                                    mode="outlined"
                                 >
-                                    <Text>
-                                        Criar nova lista
-                                    </Text>
+                                    Nova lista
                                 </CustomButton>
                             }
                         </>
@@ -552,6 +604,43 @@ export default function PerfilPage({ route }){
                 : null
 
             }
+            <BottomSheetModal
+                ref={bottomSheetModalRef}
+                index={1}
+                snapPoints={snapPoints}
+                onChange={handleSheetChanges}
+                backgroundStyle={[styles.modalContainer]}
+                handleIndicatorStyle={{
+                    backgroundColor: defaultColors.gray
+                }}
+            >
+                <View style={{ padding: 20 }}>
+                    <InputText
+                        height={60}
+                        placeholder="Nome da lista"
+                        containerStyle={{ marginBottom: 50}}
+                        ref={textoListaRef}
+                        value={nomeLista}
+                        onChange={(nome) => {
+                            setNomeLista(nome)
+                            setErrorNome(false)
+                        }}
+                        error={erroNome}
+                        errorText="Insira o nome da lista"
+                    />
+                    <CustomButton 
+                        isLoading={criandoLista}
+                        onPress={() => {
+                            criarLista(nomeLista)
+                        }}
+                        style={styles.buttonNovaLista}
+                        
+                    >
+                        Criar lista
+                    </CustomButton>
+                </View>
+                
+            </BottomSheetModal>
         </>
     )
 }
@@ -629,6 +718,13 @@ const styles = StyleSheet.create({
         marginRight: 0 
     },
     modalContainer:{
-        backgroundColor: '#191919'
+        backgroundColor: '#191919',
+        padding: 30
+    },
+    buttonNovaLista:{
+        height: 51,
+        justifyContent: 'center',
+        marginTop: 50,
+        borderColor: '#312E2E'
     },
 });
