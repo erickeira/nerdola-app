@@ -128,7 +128,8 @@ export default function HomePage({ route }){
                     pagina: "1",
                     limite: "1000",
                     ultimos_lidos: true,
-                    statusleitura: [2]
+                    statusleitura: [2],
+                    temPaginas: true
                 }
             })
             setObrasLendo(response.data)
@@ -213,17 +214,23 @@ export default function HomePage({ route }){
                                 </>
                             )
                         }
-                        <Text style={{marginBottom: 10}}>
-                            Continuar lendo
-                        </Text>
-                        <ScrollView horizontal style={{gap: 5}}>
-                            {
-                                obrasLendo?.map((obra,index) => (
-                                    <CardObraLendo obra={obra} key={index}/>
-                                )) 
-                            }
-                        </ScrollView>
-                        
+                        {
+                            obrasLendo?.length > 0 && (
+                                <>
+                                    <Text style={{marginBottom: 10, color: defaultColors.gray, fontSize: 12}}>
+                                        Continue lendo
+                                    </Text>
+                                    <ScrollView horizontal style={{gap: 5, paddingLeft: 5, marginBottom: 10}} showsHorizontalScrollIndicator={false}>
+                                        {
+                                            obrasLendo?.map((obra,index) => (
+                                                <CardObraLendo obra={obra} key={index}/>
+                                            )) 
+                                        }
+                                    </ScrollView>
+                                    
+                                </>
+                            )
+                        }
                     </View>
                 )}
                 showsVerticalScrollIndicator={false}

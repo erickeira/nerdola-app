@@ -1,12 +1,12 @@
 import { ActivityIndicator, Dimensions, Image, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { defaultColors, imageUrl, proporcaoCard } from "../utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { Icon, ProgressBar, Checkbox  } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import Snackbar from "react-native-snackbar";
 const { height, width }  = Dimensions.get('screen');
 
-export default function CardCapitulo({
+const CardCapitulo = memo(({
     obra,
     capitulo,
     onPress,
@@ -14,7 +14,7 @@ export default function CardCapitulo({
     leitura,
     isLoading,
     obraNome
-}){
+}) => {
     const{
         id,
         imagem,
@@ -105,7 +105,8 @@ export default function CardCapitulo({
  
         </TouchableOpacity>
     )
-}
+})
+
 const styles = StyleSheet.create({
     view: {
       padding: 10,
@@ -145,3 +146,5 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
 });
+
+export default CardCapitulo;

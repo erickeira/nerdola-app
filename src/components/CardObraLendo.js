@@ -26,7 +26,8 @@ export default function CardObraLendo({
         total_capitulos,
         status,
         total_usuarios_lendo,
-        capitulos_importados
+        capitulos_importados,
+        ultimo_lido
     } = obra
 
     const navigation = useNavigation()
@@ -42,12 +43,15 @@ export default function CardObraLendo({
 
     const handleClick = () => {
         navigation.navigate('obra', { id })
+        navigation.navigate('capitulo', { id : ultimo_lido.prox_capitulo, obra })
     }
 
     return(
         <>
-            <TouchableOpacity onPress={handleClick}>
-   
+            <TouchableOpacity 
+                onPress={handleClick}
+                style={styles.view}    
+            >
                     <View style={[styles.imageContainer,{
                         width:  100,
                         height: ((100) * (4.3 / 3)),   
@@ -68,25 +72,22 @@ export default function CardObraLendo({
                                 size={30}
                             />
                         }
-                        {
-                            leitura?.status?.id == 3  && 
-                            <>
-                                <ProgressBar 
-                                    progress={1} 
-                                    color={leituraColors[leitura?.status?.id]} 
-                                    style={{
-                                        height: 2,
-                                        marginTop: 10, 
-                                        backgroundColor: '#312E2E'
-                                    }}
-                                />
-                                <Text style={{color: '#fff'}}>
-                                    100.00 %
-                                </Text>
-                            </>
-                            
-                        }
                     </View>
+                    {
+                        leitura?.status?.id == 2  && 
+                        <View style={{paddingHorizontal: 0, justifyContent: 'center'}}>
+                            <ProgressBar 
+                                progress={progresso} 
+                                color={leituraColors[leitura?.status?.id]} 
+                                style={{
+                                    height: 2,
+                                    marginTop: 3, 
+                                    backgroundColor: '#312E2E',
+                                }}
+                            />
+                        </View>
+                        
+                    }
     
             </TouchableOpacity>
         </>
@@ -94,21 +95,17 @@ export default function CardObraLendo({
 }
 const styles = StyleSheet.create({
     view: {
-        width: '100%',
-        padding: 10,
-        flexDirection: 'row',
-        overflow: 'hidden',
-        gap: 10
+        width: 100,
+        marginRight: 10
     },
     imageContainer:{
         borderColor: '#312E2E',
         borderWidth: 1,
-        marginBottom: 5,
+        marginBottom: 1,
         borderRadius: 5,
         overflow: 'hidden',
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: 5
     },
     imagem:{
         width: '100%',

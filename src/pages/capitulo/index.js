@@ -20,7 +20,7 @@ const CustomImage = ( { imagem, obra, capitulo }) => {
     const [imageError, setImageError] = useState(false)
     const [imageHeight, setImageHeight] = useState(0);
     const [loading, setLoading] = useState(true);
-
+    console.log(imagePath)
     useEffect(() => {
         if (imagem) {
             Image.getSize(imagePath, (width, height) => {

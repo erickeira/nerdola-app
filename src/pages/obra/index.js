@@ -35,6 +35,7 @@ export default function ObraPage({ route }){
     const imagePath = `${imageUrl}obras/${id}/${imagem}`;
     const [imageError, setImageError] = useState(false)
     const [ondeLer, setOndeLer] = useState(false)
+    const [ capitulos, setCapitulos] = useState([])
 
     useEffect(() => {
         setImageError(false)
@@ -63,10 +64,9 @@ export default function ObraPage({ route }){
             const response = await api.get(`obras/${id}`)
             setObra({ 
                 ...obra, 
-                ...response.data,
-                capitulos: ordenaCapitulos(response.data.capitulos)
+                ...response.data
             })
-
+            setCapitulos(ordenaCapitulos(response.data.capitulos))
         }catch(error){
 
         } finally{
@@ -87,7 +87,6 @@ export default function ObraPage({ route }){
 
     useEffect(() => {
         setIsLoading(true)
-        getObra()
         getStatusList()
     },[])
 
@@ -156,7 +155,7 @@ export default function ObraPage({ route }){
     const handlePressCapitulo = async (capitulo, marcarLido = true) => {
         setIsLoadingCapitulo(capitulo)
         try{
-            // await api.post(`capitulos/${capitulo}/marcar-como-lido`)
+            await api.post(`capitulos/${capitulo}/marcar-como-lido`)
 
             if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3 && [2,4].includes(obra.status)){
                 await api.patch(`usuario-leitura/${leitura.id}`, {
@@ -215,7 +214,7 @@ export default function ObraPage({ route }){
             <SafeAreaView style={styles.view}>
             <FlatList
                 extraData={leitura}
-                data={ ondeLer ? links : (ordem == "ascending" ? obra?.capitulos : obra?.capitulos.reverse())} 
+                data={ ondeLer ? links : capitulos } 
                 ref={ref => setCapitulosRef(ref)}
                 onScroll={scrollHandler}
                 ListHeaderComponent={(
@@ -355,6 +354,7 @@ export default function ObraPage({ route }){
                                     onPress={(id) => {
                                         if(ordem == "ascending") setOrdem("descending")
                                         else setOrdem("ascending")
+                                        setCapitulos(capitulos.reverse())
                                     }}
                                     style={{ width: 100}}
                                 >
