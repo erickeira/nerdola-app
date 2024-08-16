@@ -604,7 +604,7 @@ export default function PerfilPage({ route }){
                 : null
 
             }
-            <BottomSheetModal
+            {/* <BottomSheetModal
                 ref={bottomSheetModalRef}
                 index={1}
                 snapPoints={snapPoints}
@@ -640,7 +640,7 @@ export default function PerfilPage({ route }){
                     </CustomButton>
                 </View>
                 
-            </BottomSheetModal>
+            </BottomSheetModal> */}
         </>
     )
 }

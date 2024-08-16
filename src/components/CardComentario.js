@@ -108,7 +108,7 @@ export default function CardComentario({
                             { dayjs(dayjs(comentario.criado_em)).fromNow() }
                         </Text>
                         {
-                            (comentario.usuario.id == usuario.id || usuario.id == 1) &&
+                            (comentario?.usuario?.id == usuario?.id || usuario?.id == 1) &&
                             <Menu
                                 visible={visible}
                                 onDismiss={closeMenu}

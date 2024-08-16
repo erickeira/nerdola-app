@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { TouchableOpacity, StatusBar, Linking, Image } from 'react-native';
+import { TouchableOpacity, StatusBar, Linking, Image, View, Text} from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 
@@ -11,6 +11,7 @@ import { defaultStyles } from '../../utils';
 import HomePage from '../../pages/home';
 import FiltrarPage from '../../pages/filtrar';
 import { useRoute } from '@react-navigation/native';
+import { Icon } from 'react-native-paper';
 
 
 export const useFiltrar = () => useContext(FiltrarContext);
@@ -37,7 +38,23 @@ const HomeStack = ({ navigation }) => {
             headerShown: true, 
             // headerTransparent: true,
             headerStyle: defaultStyles.defaultHeaderStyles,
-            headerTintColor: '#fff'      
+            headerTintColor: '#fff',
+            headerRight: ()  =>  (
+              <View style={{flexDirection: 'row' , alignItems: 'center', gap: 20, marginRight: 30}}>
+                <TouchableOpacity 
+                    onPress={async () => {
+                      await Linking.openURL("https://storage.nerdola.com.br/apks/nerdola.apk");
+                    }} 
+                    hitSlop={{left: 20, bottom: 20}} 
+                >
+                    <Icon
+                      source="download"
+                      size={24}
+                    />
+                </TouchableOpacity>
+              </View>
+             
+            ),      
           }}
         />
         <Stack.Screen 

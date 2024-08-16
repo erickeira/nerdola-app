@@ -1,5 +1,5 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { ActivityIndicator, Dimensions, FlatList, Image, Linking, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../utils/api";
 import { defaultColors, imageUrl, proporcaoCard } from "../../utils";
@@ -13,14 +13,22 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardComentario from "../../components/CardComentario";
 import InputText from "../../components/InputText";
 
+
+import {
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetModalProvider,
+    BottomSheetFlatList 
+  } from '@gorhom/bottom-sheet';
+
 const { height, width }  = Dimensions.get('screen');
 
-const CustomImage = ( { imagem, obra, capitulo }) => {
+const CustomImage = ( { imagem, obra, capitulo, onPress }) => {
     const imagePath = `${imageUrl}obras/${obra?.id}/capitulos/${capitulo?.numero}/${imagem?.src}`;
     const [imageError, setImageError] = useState(false)
     const [imageHeight, setImageHeight] = useState(0);
     const [loading, setLoading] = useState(true);
-    console.log(imagePath)
+    
     useEffect(() => {
         if (imagem) {
             Image.getSize(imagePath, (width, height) => {
@@ -57,6 +65,8 @@ const CustomImage = ( { imagem, obra, capitulo }) => {
                         }}
                         resizeMode={FastImage.resizeMode.contain}
                         onError={() => setImageError(true)}
+                        onPress={onPress}
+                        onTouchEnd={onPress}
                     />
                 ) : (
                     <Icon
@@ -130,7 +140,6 @@ export default function CapituloPage({ route }){
             setLido(response.data.lido)
             setTimeout(async () => {
                 const posicaoAnterior = await AsyncStorage.getItem(`posicao-${response.data.id}`)
-                console.log('posicaoAnterior', posicaoAnterior)
                 if (posicaoAnterior && posicaoAnterior > posicaoNaTela) {
                     capitulosRef?.current?.scrollToOffset({ 
                         offset: parseInt(posicaoAnterior), 
@@ -266,6 +275,33 @@ export default function CapituloPage({ route }){
         }
     }
 
+    const bottomSheetModalRef = useRef(null);
+    const snapPoints = useMemo(() => ['70%', '90%'], []);
+
+    const handlePresentModalComentariosPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+    }, []);
+
+    const handleSheetChanges = useCallback((index) => {
+        // console.log('handleSheetChanges', index);
+    }, []);
+
+    const handleBackPress = () => {
+        if (bottomSheetModalRef.current) {
+            bottomSheetModalRef.current.dismiss();
+            return true; 
+        }
+        return false;
+    };
+
+    const renderItem =  ({ item }) => (
+        <CardComentario
+            key={item.id}
+            comentario={item}
+            handleExcluir={() => handleExcluir(item.id)}
+        />
+    )
+
 
     if(isLoading) return (
         <View style={{ paddingVertical: 100, alignItems: 'center', justifyContent: 'center' }}>
@@ -274,127 +310,171 @@ export default function CapituloPage({ route }){
     )
     return(
         <>
-          
+          <BottomSheetModalProvider>
             <FlatList
-                data={capitulo.paginas} 
-                // ref={ref => setCapitulosRef(ref)}
-                ref={capitulosRef}
-                onScroll={scrollHandler}
-                refreshControl={
-                    <RefreshControl 
-                        refreshing={loadingRefresh} 
-                        tintColor={`#666`}
-                        onRefresh={refresh}
-                    />
-                }
-                renderItem={({item, index}) => {
-                // return null
-                return (
-                    <CustomImage 
-                        imagem={item}
-                        obra={obra}
-                        capitulo={capitulo}
-                        key={index}
-                    />
-                )
-                }}
-                ListEmptyComponent={
-                    <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            Nenhuma página ainda!
-                        </Text>
-                    </View>
-                }
-                ListFooterComponent={
-                    <View style={{ marginHorizontal: 20,   marginBottom: 100,}}>
-                        <View style={{ flexDirection: 'row', gap: 5, marginTop: 20,   marginBottom: 50 }}>
-                            {
-                                capitulo?.cap_anterior &&
-                                <CustomButton 
-                                    mode="outlined"
-                                    style={styles.buttonNext}
-                                    onPress={() => {
-                                        setCapituloId(capitulo?.cap_anterior)
-                                    }}
-                                >
-                
-                                    Capitulo anterior
-                                </CustomButton>
-                            }
-                            {
-                                capitulo?.prox_cap &&
-                                <CustomButton 
-                                    mode="outlined"
-                                    style={styles.buttonNext}
-                                    onPress={() => {
-                                        setCapituloId(capitulo?.prox_cap)
-                                    }}
-                                >
-                
-                                    Próximo capitulo
-                                </CustomButton>
-                            }
-                        </View>
-                        <View
-                            style={{
-                                borderBottomWidth: 0.2,
-                                borderBottomColor: '#262626',
-                                paddingVertical: 20
-                            }}
-                        >
-                            <Text style={{ color: defaultColors.gray }}>{comentarios.length} { comentarios.length == 1 ? "comentário" : "comentários"}</Text>
-                        </View>
-                        <View>
-                            {
-                                comentarios.map((comentario) => (
-                                    <CardComentario
-                                        key={comentario.id}
-                                        comentario={comentario}
-                                        handleExcluir={() => handleExcluir(comentario.id)}
-                                    />
-                                ))
-                            }
-                        </View>
-                    </View>
-                    
-                
-                }
-                keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
-                onEndReached={() => {
-                    setShowIrTopo(true)
-                    if(!lido) {
-                        setLido(true)
-                        handleCapituloLido()
+                    data={capitulo.paginas} 
+                    // ref={ref => setCapitulosRef(ref)}
+                    ref={capitulosRef}
+                    onScroll={scrollHandler}
+                    refreshControl={
+                        <RefreshControl 
+                            refreshing={loadingRefresh} 
+                            tintColor={`#666`}
+                            onRefresh={refresh}
+                        />
                     }
-                }}
-            />
-           {
-            showIrTopo && (
-                <View style={styles.containerComment}>
-                    <InputText
-                        placeholder="Faça um comentário"
-                        containerStyle={styles.input}
-                        mb={0}
-                        maxWidth={width - 130}
-                        value={comentario}
-                        onChange={(comentario) => {
-                            setComentario(comentario)
-                        }}
-                        tipo="area"
-                        maxLength={190}
+                    renderItem={({item, index}) => {
+                    // return null
+                    return (
+                        <CustomImage 
+                            imagem={item}
+                            obra={obra}
+                            capitulo={capitulo}
+                            key={index}
+                            onPress={() => {
+                                setShowIrTopo(true)
+                            }}
+                        />
+                    )
+                    }}
+                    ListEmptyComponent={
+                        <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
+                                Nenhuma página ainda!
+                            </Text>
+                        </View>
+                    }
+                    ListFooterComponent={
+                        <View style={{ marginHorizontal: 20,   marginBottom: 100,}}>
+                            <View style={{ flexDirection: 'row', gap: 5, marginTop: 20,   marginBottom: 50 }}>
+                                {
+                                    capitulo?.cap_anterior &&
+                                    <CustomButton 
+                                        mode="outlined"
+                                        style={styles.buttonNext}
+                                        onPress={() => {
+                                            setCapituloId(capitulo?.cap_anterior)
+                                        }}
+                                    >
+                    
+                                        Capitulo anterior
+                                    </CustomButton>
+                                }
+                                {
+                                    capitulo?.prox_cap &&
+                                    <CustomButton 
+                                        mode="outlined"
+                                        style={styles.buttonNext}
+                                        onPress={() => {
+                                            setCapituloId(capitulo?.prox_cap)
+                                        }}
+                                    >
+                    
+                                        Próximo capitulo
+                                    </CustomButton>
+                                }
+                            </View>
+                            <View
+                                style={{
+                                    borderBottomWidth: 0.2,
+                                    borderBottomColor: '#262626',
+                                    paddingVertical: 20
+                                }}
+                            >
+                                <Text style={{ color: defaultColors.gray }}>{comentarios.length} { comentarios.length == 1 ? "comentário" : "comentários"}</Text>
+                            </View>
+                        </View>
+                        
+                    
+                    }
+                    keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
+                    onEndReached={() => {
+                        setShowIrTopo(true)
+                        if(!lido) {
+                            setLido(true)
+                            handleCapituloLido()
+                        }
+                    }}
+                />
+            {
+                (showIrTopo) && (
+                    <View style={styles.containerBotoes}>
+                        <IconButton
+                            icon="heart-outline"
+                            size={25}
+                            iconColor="#fff"
+                            onPress={() => console.log(1)}
+                            style={{paddingVertical: 0}}
+                            disabled={true}
+                        />
+                        <IconButton
+                            icon="chat-outline"
+                            size={25}
+                            iconColor="#fff"
+                            onPress={handlePresentModalComentariosPress}
+                            style={{paddingVertical: 0}}
+                        />
+                        <IconButton
+                            icon="share"
+                            size={25}
+                            iconColor="#fff"
+                            onPress={() => console.log(1)}
+                            style={{paddingVertical: 0}}
+                            disabled={true}
+                        />
+                        
+                    </View>
+                )
+            }
+            
+                <BottomSheetModal
+                    ref={bottomSheetModalRef}
+                    index={1}
+                    snapPoints={snapPoints}
+                    onChange={handleSheetChanges}
+                    backgroundStyle={[styles.modalContainer]}
+                    handleIndicatorStyle={{
+                        backgroundColor: defaultColors.gray
+                    }}
+                >
+                    <BottomSheetFlatList
+                        data={comentarios || []}
+                        keyExtractor={(i) => i.id}
+                        renderItem={renderItem}
+                        contentContainerStyle={styles.contentContainer}
+                        ListEmptyComponent={
+                            <View style={{flex: 1 , justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={{color: defaultColors.gray, marginTop: 50}}>Nenhum comentário ainda</Text>
+                            </View>
+                        }
                     />
-                    <CustomButton 
-                        style={styles.button}
-                        onPress={handleComentar}
-                        isLoading={isLoadingComentando}
-                        disabled={isLoadingComentando || comentario.length < 1}
-                    >
-                        Publicar
-                    </CustomButton>
-                </View>
-            )
-           }
-           
+                    <View style={styles.containerComment}>
+                        <InputText
+                            placeholder="Faça um comentário"
+                            containerStyle={styles.input}
+                            mb={0}
+                            maxWidth={width - 130}
+                            value={comentario}
+                            onChange={(comentario) => {
+                                setComentario(comentario)
+                            }}
+                            tipo="area"
+                            maxLength={190}
+                        />
+                        <CustomButton 
+                            style={styles.button}
+                            onPress={handleComentar}
+                            isLoading={isLoadingComentando}
+                            disabled={isLoadingComentando || comentario.length < 1}
+                        >
+                            Publicar
+                        </CustomButton>
+                    </View>
+                   
+                </BottomSheetModal>
+            
+          </BottomSheetModalProvider>
+            
         </>
     )
 }
@@ -493,5 +573,16 @@ const styles = StyleSheet.create({
         backgroundColor: defaultColors.activeColor,
         marginRight: 20
     },
-   
+    modalContainer:{
+        backgroundColor: '#191919',
+        padding: 30
+    },
+    containerBotoes: {
+        position: 'absolute',
+        right: 20,
+        bottom: "25%",
+        backgroundColor: "rgba(0,0,0,0.5)",
+        borderRadius: 8,
+        gap: 8
+    }
 });
