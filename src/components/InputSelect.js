@@ -26,7 +26,8 @@ export default function InputSelect({
     checkStyle,
     modalStyle,
     containerStyle,
-    snap
+    snap,
+    variant = "solid"
 }){
     const [inputValue, setInputValue] = useState(value)
 
@@ -141,7 +142,10 @@ export default function InputSelect({
                     {label}
                 </Text>
             }
-            <TouchableOpacity onPress={handlePresentModalPress} style={[styles.input,inputStyle]} >
+            <TouchableOpacity onPress={handlePresentModalPress} style={[styles.input,inputStyle,{
+                borderWidth : variant == "outline" ? 1 : 0,
+                borderColor: "#312E2E"
+            }]} >
                 <View style={styles.inputItems}>
                     {
                         ( isMulti ? !inputValue?.length > 0  : !inputValue) ?

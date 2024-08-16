@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState,forwardRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MaskInput, { Masks, createNumberMask } from 'react-native-mask-input';
 import { Icon } from 'react-native-paper';
+import { defaultColors } from '../utils';
 
 const InputText = forwardRef(({
     label,
@@ -117,11 +118,11 @@ const InputText = forwardRef(({
                 onChangeText={(comMascara, semMascara) => handleChange(comMascara, semMascara)}
                 value={text.semMascara}
                 placeholderTextColor='#666'
-                style={{...styles.campoTexto,...style, ...{
+                style={[styles.campoTexto, style, {
                     height : tipo != 'area' ?  height : null,
-                    minHeight:tipo == 'area' ? 80 : '40',
+                    minHeight: height || (tipo == 'area' ? 80 : '40'),
                     // maxHeight: 130
-                }}}
+                }]}
                 secureTextEntry={mostrarSenha}
                 // autoCorrect={false}
                 autoCapitalize={capitalize || ( tipo == `area` ? `sentences` : `none`)}
@@ -180,7 +181,9 @@ const styles = StyleSheet.create({
         gap: 5
     },
     label:{
-        marginBottom: 5
+      fontSize: 13,
+      color: defaultColors.gray,
+      marginBottom: 8
     },
     campoTexto: {
       width: '100%',

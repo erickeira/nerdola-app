@@ -1,8 +1,23 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { ActivityIndicator, Dimensions, FlatList, Image, Linking, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { 
+    ActivityIndicator, 
+    Dimensions, 
+    FlatList, 
+    Image, 
+    Linking, 
+    RefreshControl, 
+    SafeAreaView, 
+    StyleSheet, 
+    Text, 
+    TouchableOpacity, 
+    View ,
+    BackHandler, 
+    Animated,
+    Easing
+} from "react-native";
 import api from "../../utils/api";
-import { defaultColors, imageUrl, proporcaoCard } from "../../utils";
+import { botUrl, defaultColors, imageUrl, proporcaoCard } from "../../utils";
 import { Icon, IconButton,  Menu, Divider, PaperProvider, Checkbox  } from "react-native-paper";
 import CustomButton from "../../components/CustomButton";
 import AutoHeightImage from "react-native-auto-height-image";
@@ -20,10 +35,12 @@ import {
     BottomSheetModalProvider,
     BottomSheetFlatList 
   } from '@gorhom/bottom-sheet';
+import InputSelect from "../../components/InputSelect";
+import axios from "axios";
 
 const { height, width }  = Dimensions.get('screen');
 
-const CustomImage = ( { imagem, obra, capitulo, onPress }) => {
+const CustomImage = ({ imagem, obra, capitulo, onPress }) => {
     const imagePath = `${imageUrl}obras/${obra?.id}/capitulos/${capitulo?.numero}/${imagem?.src}`;
     const [imageError, setImageError] = useState(false)
     const [imageHeight, setImageHeight] = useState(0);
@@ -101,6 +118,20 @@ export default function CapituloPage({ route }){
         descricao,
         links
     } = capitulo
+
+
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        
+        Animated.timing(fadeAnim, {
+            toValue: showIrTopo ? 1 : 0,
+            duration: 500,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+        }).start();
+    }, [showIrTopo]);
+
     
     const upButtonHandler = () => {
         capitulosRef?.current?.scrollToOffset({ 
@@ -280,10 +311,23 @@ export default function CapituloPage({ route }){
 
     const handlePresentModalComentariosPress = useCallback(() => {
         bottomSheetModalRef.current?.present();
+        BackHandler.addEventListener("hardwareBackPress", handleBackPress);
     }, []);
 
     const handleSheetChanges = useCallback((index) => {
+        if(index < 0){
+            BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+        }
         // console.log('handleSheetChanges', index);
+    }, []);
+
+
+    const bottomSheetModalReportarRef = useRef(null);
+    const snapPointsReportar = useMemo(() => ['40%', '50%'], []);
+
+    const handlePresentModalReportarPress = useCallback(() => {
+        bottomSheetModalReportarRef.current?.present();
+        BackHandler.addEventListener("hardwareBackPress", handleBackPress);
     }, []);
 
     const handleBackPress = () => {
@@ -291,8 +335,15 @@ export default function CapituloPage({ route }){
             bottomSheetModalRef.current.dismiss();
             return true; 
         }
+        if (bottomSheetModalReportarRef.current) {
+            bottomSheetModalReportarRef.current.dismiss();
+            return true; 
+        }
         return false;
     };
+
+
+
 
     const renderItem =  ({ item }) => (
         <CardComentario
@@ -301,6 +352,60 @@ export default function CapituloPage({ route }){
             handleExcluir={() => handleExcluir(item.id)}
         />
     )
+
+    const bugs = [
+        { id: "paginas-faltando", nome: "Páginas faltando" },
+        { id: "nao-carrega", nome: "Páginas não carregam" },
+    ]
+    const [ bug, setBug ] = useState("")
+    const [ outroBug, setOutroBug ] = useState("")
+    const imagePathReportar = `${imageUrl}obras/${obra.id}/${obra.imagem}`;
+
+    const [isLoadingReportar, setIsLoadingReportar] = useState(false)
+    const handleReportar = async () => {
+        setIsLoadingReportar(true)
+        try{
+            await axios.post(botUrl,{
+                content: "Bug reportado!\n_ _",
+                embeds: [ {
+                    "title":  `${obra.nome} - ${capitulo.nome}`,
+                    "description": `${bugs.find(b => b.id == bug)?.nome ||  "Outro" } - ${outroBug}`, 
+                    "color": 5814783,
+                    "thumbnail": {
+                      "url": imagePathReportar
+                    }
+                }],
+                attachments: []
+            })
+            setBug("")
+            setOutroBug("")
+            Snackbar.show({
+                text: "Obrigado por reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+            if (bottomSheetModalReportarRef.current) {
+                bottomSheetModalReportarRef.current.dismiss();
+                return true; 
+            }
+        }catch(err){
+            Snackbar.show({
+                text: "Erro ao reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        } finally {
+            setIsLoadingReportar(false)
+        }
+    }
 
 
     if(isLoading) return (
@@ -374,15 +479,6 @@ export default function CapituloPage({ route }){
                                     </CustomButton>
                                 }
                             </View>
-                            <View
-                                style={{
-                                    borderBottomWidth: 0.2,
-                                    borderBottomColor: '#262626',
-                                    paddingVertical: 20
-                                }}
-                            >
-                                <Text style={{ color: defaultColors.gray }}>{comentarios.length} { comentarios.length == 1 ? "comentário" : "comentários"}</Text>
-                            </View>
                         </View>
                         
                     
@@ -398,15 +494,14 @@ export default function CapituloPage({ route }){
                 />
             {
                 (showIrTopo) && (
-                    <View style={styles.containerBotoes}>
-                        <IconButton
-                            icon="heart-outline"
-                            size={25}
-                            iconColor="#fff"
-                            onPress={() => console.log(1)}
-                            style={{paddingVertical: 0}}
-                            disabled={true}
-                        />
+                    <Animated.View 
+                        style={[
+                            styles.containerBotoes,
+                            {
+                                opacity: fadeAnim,
+                            },
+                        ]}
+                    >
                         <IconButton
                             icon="chat-outline"
                             size={25}
@@ -422,8 +517,15 @@ export default function CapituloPage({ route }){
                             style={{paddingVertical: 0}}
                             disabled={true}
                         />
+                        <IconButton
+                            icon="bug-outline"
+                            size={25}
+                            iconColor="#fff"
+                            onPress={handlePresentModalReportarPress}
+                            style={{paddingVertical: 0}}
+                        />
                         
-                    </View>
+                    </Animated.View>
                 )
             }
             
@@ -437,6 +539,20 @@ export default function CapituloPage({ route }){
                         backgroundColor: defaultColors.gray
                     }}
                 >
+                    {
+                        comentarios.length > 0 && (
+                            <View
+                                style={{
+                                    borderBottomWidth: 0.2,
+                                    borderBottomColor: '#262626',
+                                    paddingVertical: 10
+                                }}
+                            >
+                                <Text style={{ color: defaultColors.gray, textAlign: 'center' }}>{comentarios.length} { comentarios.length == 1 ? "comentário" : "comentários"}</Text>
+                            </View>
+                        )
+                    }
+                    
                     <BottomSheetFlatList
                         data={comentarios || []}
                         keyExtractor={(i) => i.id}
@@ -451,7 +567,8 @@ export default function CapituloPage({ route }){
                     <View style={styles.containerComment}>
                         <InputText
                             placeholder="Faça um comentário"
-                            containerStyle={styles.input}
+                            containerStyle={styles.textInput}
+                            height={45}
                             mb={0}
                             maxWidth={width - 130}
                             value={comentario}
@@ -467,7 +584,66 @@ export default function CapituloPage({ route }){
                             isLoading={isLoadingComentando}
                             disabled={isLoadingComentando || comentario.length < 1}
                         >
-                            Publicar
+                           <Icon
+                                source="send"
+                                color="#fff"
+                                size={20}
+                           />
+                        </CustomButton>
+                    </View>
+                   
+                </BottomSheetModal>
+
+                <BottomSheetModal
+                    ref={bottomSheetModalReportarRef}
+                    index={1}
+                    snapPoints={snapPointsReportar}
+                    onChange={handleSheetChanges}
+                    backgroundStyle={[styles.modalContainer]}
+                    handleIndicatorStyle={{
+                        backgroundColor: defaultColors.gray
+                    }}
+                >
+                    <View
+                        style={{
+                            borderBottomWidth: 0.2,
+                            borderBottomColor: '#262626',
+                            paddingVertical: 10
+                        }}
+                    >
+                        <Text style={{ color: defaultColors.gray, textAlign: 'center' }}>
+                            Reportar bug
+                        </Text>
+                    </View>
+                    <View style={{padding: 20}}>
+                        <InputSelect
+                            label={"Qual erro"}
+                            placeholder="Selecione"
+                            options={bugs}
+                            value={bug}
+                            onChange={setBug}
+                            containerStyle={{
+                                marginBottom: 25,
+                            }}
+                            snap="40%"
+                            variant="outline"
+                        />
+                        <InputText
+                            label="Outro?"
+                            placeholder="Descreva"
+                            value={outroBug}
+                            onStopType={setOutroBug}
+                            containerStyle={styles.textInput}
+                            height={80}
+                            tipo="area"
+                        />
+                        <CustomButton 
+                            mode="contained"
+                            style={{marginTop: 10}}
+                            onPress={handleReportar}
+                            isLoading={isLoadingReportar}
+                        >
+                            Reportar
                         </CustomButton>
                     </View>
                    
@@ -562,12 +738,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        paddingHorizontal: 10,
+        paddingBottom: 10
     },
     input: {
+        backgroundColor: '#A0A0A0',
         borderWidth: 0,
+        width: width - 80,
+        marginBottom: 0 
     },
     button:{
-        width: 100,
+        width: 60,
         height: 40,
         justifyContent: 'center',
         backgroundColor: defaultColors.activeColor,
