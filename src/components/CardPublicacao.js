@@ -33,7 +33,8 @@ import CustomButton from "./CustomButton";
 const { height, width }  = Dimensions.get('screen');
 export default function CardPublicacao({ 
     publicacao : oldPublicacao,
-    handleExcluir
+    handleExcluir,
+    handleReportar
 }){
     const { usuario } = useAuth()
     const [publicacao, setPublicacao] = useState(oldPublicacao)
@@ -74,7 +75,7 @@ export default function CardPublicacao({
 
 
     const bottomSheetModalRef = useRef(null);
-    const snapPoints = useMemo(() => ['20%', '25%'], []);
+    const snapPoints = useMemo(() => ['34%', '35%'], []);
 
     const handlePresentModalPress = useCallback(() => {
         bottomSheetModalRef.current?.present();
@@ -150,18 +151,16 @@ export default function CardPublicacao({
                         <Text style={styles.criada_em}>
                             { dayjs(dayjs(publicacao.criada_em)).fromNow() }
                         </Text>
-                        {
-                            (publicacao?.usuario?.id == usuario?.id || usuario?.id == 1) &&
-                            <TouchableOpacity 
-                                onPress={handlePresentModalPress}
-                                hitSlop={{
-                                    left: 15,
-                                    bottom: 15
-                                }}
-                            >
-                                <Icon source="dots-horizontal" size={17} color="#fff"/>
-                            </TouchableOpacity>
-                        }
+                       
+                        <TouchableOpacity 
+                            onPress={handlePresentModalPress}
+                            hitSlop={{
+                                left: 15,
+                                bottom: 15
+                            }}
+                        >
+                            <Icon source="dots-horizontal" size={17} color="#fff"/>
+                        </TouchableOpacity>
                     </View>
                     
                 </View>
@@ -264,14 +263,30 @@ export default function CardPublicacao({
                 <View style={{flex: 1, justifyContent: 'flex-end', padding: 20, gap: 5}}>
                     <CustomButton
                         style={[styles.buttonModal, ]}
-                        labelStyle={{ color: "#DB4C4C"}}
+                        labelStyle={{ color: "#fff"}}
                         onPress={() => {
-                            handleExcluir()
+                            handleReportar()
                             handleBackPress()
                         }}
+                        icon="alert-octagon"
                     >
-                        Remover
+                        Reportar
                     </CustomButton>
+                    {
+                        (publicacao?.usuario?.id == usuario?.id || usuario?.id == 1) &&
+                        <CustomButton
+                            style={[styles.buttonModal, ]}
+                            labelStyle={{ color: "#DB4C4C"}}
+                            onPress={() => {
+                                handleExcluir()
+                                handleBackPress()
+                            }}
+                            icon="delete"
+                        >
+                            Remover
+                        </CustomButton>
+                    }
+                    
                     <Divider style={{marginVertical: 8}}/>
                     <CustomButton
                         style={[styles.buttonModal, ]}
@@ -279,6 +294,7 @@ export default function CardPublicacao({
                         onPress={() => {
                             handleBackPress()
                         }}
+                        icon="close"
                     >
                         Cancelar
                     </CustomButton>
@@ -348,10 +364,10 @@ const styles = StyleSheet.create({
         marginTop: 20
     },
     modalContainer:{
-        backgroundColor: 'rgba(0,0,0,0.9)',
+        backgroundColor: 'rgba(0,0,0,1)',
     },
     buttonModal:{
-        backgroundColor: '#191919',
+        alignItems: 'flex-start',
         paddingVertical: 6,
     }
 });

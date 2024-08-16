@@ -42,7 +42,8 @@ const { height, width }  = Dimensions.get('screen');
 export default function CardComentario({
     comentario: oldComentario,
     handleExcluir,
-    handleResponder
+    handleResponder,
+    handleReportar
 }){
     const { usuario } = useAuth()
     const [comentario, setComentario] = useState(oldComentario)
@@ -77,7 +78,7 @@ export default function CardComentario({
     const [imageError, setImageError] = useState(false)
 
     const bottomSheetModalRef = useRef(null);
-    const snapPoints = useMemo(() => ['20%', '25%'], []);
+    const snapPoints = useMemo(() => ['34%', '35%'], []);
 
     const handlePresentModalPress = useCallback(() => {
         bottomSheetModalRef.current?.present();
@@ -155,18 +156,16 @@ export default function CardComentario({
                         <Text style={styles.criado_em}>
                             { dayjs(dayjs(comentario.criado_em)).fromNow() }
                         </Text>
-                        {
-                            (comentario?.usuario?.id == usuario?.id || usuario?.id == 1) &&
-                            <TouchableOpacity 
-                                onPress={handlePresentModalPress}
-                                hitSlop={{
-                                    left: 15,
-                                    bottom: 15
-                                }}
-                            >
-                                <Icon source="dots-horizontal" size={17} color="#fff"/>
-                            </TouchableOpacity>
-                        }
+                       
+                        <TouchableOpacity 
+                            onPress={handlePresentModalPress}
+                            hitSlop={{
+                                left: 15,
+                                bottom: 15
+                            }}
+                        >
+                            <Icon source="dots-horizontal" size={17} color="#fff"/>
+                        </TouchableOpacity>
                     </View>
                     
                     
@@ -281,14 +280,31 @@ export default function CardComentario({
                 <View style={{flex: 1, justifyContent: 'flex-end', padding: 20, gap: 5}}>
                     <CustomButton
                         style={[styles.buttonModal, ]}
-                        labelStyle={{ color: "#DB4C4C"}}
+                        labelStyle={{ color: "#fff"}}
                         onPress={() => {
-                            handleExcluir()
+                            handleReportar()
                             handleBackPress()
                         }}
+                        icon="alert-octagon"
                     >
-                        Remover
+                        Reportar
                     </CustomButton>
+                    {
+                        (comentario?.usuario?.id == usuario?.id || usuario?.id == 1) &&
+
+                        <CustomButton
+                            style={[styles.buttonModal, ]}
+                            labelStyle={{ color: "#DB4C4C"}}
+                            onPress={() => {
+                                handleExcluir()
+                                handleBackPress()
+                            }}
+                            icon="delete"
+                        >
+                            Remover
+                        </CustomButton>
+                    }
+                    
                     <Divider style={{marginVertical: 8}}/>
                     <CustomButton
                         style={[styles.buttonModal, ]}
@@ -296,6 +312,7 @@ export default function CardComentario({
                         onPress={() => {
                             handleBackPress()
                         }}
+                        icon="close"
                     >
                         Cancelar
                     </CustomButton>
@@ -362,10 +379,10 @@ const styles = StyleSheet.create({
         fontSize: 11
     },
     modalContainer:{
-        backgroundColor: 'rgba(0,0,0,0.9)',
+        backgroundColor: 'rgba(0,0,0,1)',
     },
     buttonModal:{
-        backgroundColor: '#191919',
+        alignItems: 'flex-start',
         paddingVertical: 6,
     }
 });

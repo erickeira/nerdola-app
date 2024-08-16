@@ -7,11 +7,12 @@ import api from "../utils/api";
 import Chip from "./Chip";
 import CardObra from "./CardObra";
 import { Icon } from "react-native-paper";
-import { defaultColors } from "../utils";
+import { botUrl, defaultColors } from "../utils";
 import CustomButton from "./CustomButton";
 import CardPublicacao from "./CardPublicacao";
 import Snackbar from "react-native-snackbar";
 import CardPublicacaoSkeleton from "./CardPublicacaoSkeleton";
+import axios from "axios";
 
 
 const { height, width }  = Dimensions.get('screen');
@@ -130,6 +131,40 @@ export default function Publicacoes({ route }){
         }
     }
 
+    const handleReportar = async (publicacao) => {
+        try{
+            await axios.post(botUrl,{
+                content: "Publicação reportada!\n_ _",
+                embeds: [ {
+                    "title":  `ID :${publicacao.id} - ${publicacao?.usuario?.nome}`,
+                    "description": publicacao.publicacao, 
+                    "color": 5814783,
+                }],
+                attachments: []
+            })
+            Snackbar.show({
+                text: "Obrigado por reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        }catch(err){
+            Snackbar.show({
+                text: "Erro ao reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        } finally {
+        }
+    }
+
     return(
         <>
             <FlatList
@@ -152,6 +187,7 @@ export default function Publicacoes({ route }){
                         <CardPublicacao 
                             handleExcluir={() => handleExcluir(item.id)}    
                             publicacao={item} 
+                            handleReportar={handleReportar}
                         />
                     ) 
                 }}

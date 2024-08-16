@@ -7,7 +7,7 @@ import { navigationRef } from '../../App';
 import { CommonActions } from '@react-navigation/native';
 import * as Sentry from "@sentry/react-native";
 
-const apiUrl = production ? "https://api.nerdola.com.br/" : "http://192.168.1.140:3000/"
+const apiUrl = production ? "https://api.nerdola.com.br/" : "http://192.168.1.100:3000/"
 // const apiUrl = production ? "https://api.nerdola.com.br/" : "http://192.168.1.100:3000/"
 
 const api = axios.create({

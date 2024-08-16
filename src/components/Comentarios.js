@@ -7,11 +7,13 @@ import api from "../utils/api";
 import Chip from "./Chip";
 import CardObra from "./CardObra";
 import { Icon, IconButton } from "react-native-paper";
-import { defaultColors } from "../utils";
+import { botUrl, defaultColors } from "../utils";
 import CustomButton from "./CustomButton";
 import CardPublicacao from "./CardPublicacao";
 import CardComentario from "./CardComentario";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import axios from "axios";
+import Snackbar from "react-native-snackbar";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -150,6 +152,75 @@ export default function Comentarios({ capitulo, publicacao }){
         }
     }
 
+    const handleReportar = async (comentario) => {
+        try{
+            await axios.post(botUrl,{
+                content: "Comentário reportado!\n_ _",
+                embeds: [ {
+                    "title":  `ID :${comentario.id} - ${comentario?.usuario?.nome}`,
+                    "description": comentario.comentario, 
+                    "color": 5814783,
+                }],
+                attachments: []
+            })
+            Snackbar.show({
+                text: "Obrigado por reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        }catch(err){
+            Snackbar.show({
+                text: "Erro ao reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        } finally {
+        }
+    }
+
+    const handleReportarPublicacao = async (publicacao) => {
+        console.log(publicacao)
+        try{
+            await axios.post(botUrl,{
+                content: "Publicação reportada!\n_ _",
+                embeds: [ {
+                    "title":  `ID :${publicacao.id} - ${publicacao?.usuario?.nome}`,
+                    "description": publicacao.conteudo, 
+                    "color": 5814783,
+                }],
+                attachments: []
+            })
+            Snackbar.show({
+                text: "Obrigado por reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        }catch(err){
+            Snackbar.show({
+                text: "Erro ao reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        } finally {
+        }
+    }
+
     
 
     return(
@@ -172,7 +243,10 @@ export default function Comentarios({ capitulo, publicacao }){
                 ListHeaderComponent={ 
                     publicacao &&
                     <>
-                        <CardPublicacao publicacao={publicacao}/>
+                        <CardPublicacao 
+                            publicacao={publicacao}
+                            handleReportar={() => handleReportarPublicacao(publicacao)}
+                        />
                         <View
                             style={{
                                 borderBottomWidth: 0.2,
@@ -193,6 +267,9 @@ export default function Comentarios({ capitulo, publicacao }){
                             handleResponder={() => {
                                 setRespondendo(item.id)
                                 inputRef?.current?.focus()
+                            }}
+                            handleReportar={() => {
+                                handleReportar(item)
                             }}
                         />
                     ) 
