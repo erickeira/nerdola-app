@@ -1,15 +1,39 @@
-import { ActivityIndicator, Dimensions, Image, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { 
+    ActivityIndicator, 
+    BackHandler, 
+    Dimensions, 
+    Image, 
+    StyleSheet, 
+    Text,
+    TouchableOpacity, 
+    TouchableWithoutFeedback, 
+    View,
+} from "react-native";
 import { defaultColors, gerarCorPorString, imageUrl, proporcaoCard } from "../utils";
-import { useEffect, useState } from "react";
+import { 
+    useEffect, 
+    useState,
+    useMemo,
+    useCallback,
+    useRef
+} from "react";
 import { Icon, ProgressBar, Checkbox, Avatar, Menu, Divider  } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import Snackbar from "react-native-snackbar";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 
+import {
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetModalProvider,
+    BottomSheetFlatList 
+} from '@gorhom/bottom-sheet';
+
 import  dayjs from 'dayjs'
 import 'dayjs/locale/pt-br';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import CustomButton from "./CustomButton";
 dayjs.extend(relativeTime);
 dayjs.locale("pt-br");
 
@@ -17,16 +41,15 @@ const { height, width }  = Dimensions.get('screen');
 
 export default function CardComentario({
     comentario: oldComentario,
-    handleExcluir
+    handleExcluir,
+    handleResponder
 }){
     const { usuario } = useAuth()
     const [comentario, setComentario] = useState(oldComentario)
     const navigation = useNavigation()
     const [ curtido, setCurtido] = useState(comentario.curtido);
 
-    const [visible, setVisible] = useState(false);
-    const openMenu = () => setVisible(true);
-    const closeMenu = () => setVisible(false);
+    const [ showFilhos, setShowFilhos] = useState(false)
 
     useEffect(() => {
         setComentario(oldComentario)
@@ -53,9 +76,34 @@ export default function CardComentario({
     const imagePath = `${imageUrl}usuarios/${comentario?.usuario?.id}/${comentario?.usuario?.imagem}`;
     const [imageError, setImageError] = useState(false)
 
+    const bottomSheetModalRef = useRef(null);
+    const snapPoints = useMemo(() => ['20%', '25%'], []);
+
+    const handlePresentModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+        BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    }, []);
+
+    const handleSheetChanges = useCallback((index) => {
+        if(index < 0){
+            BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+        }
+        // console.log('handleSheetChanges', index);
+    }, []);
+
+    const handleBackPress = () => {
+        if (bottomSheetModalRef.current) {
+            bottomSheetModalRef.current.dismiss();
+            return true; 
+        }
+        return false;
+    };
+
 
     return(
-        <View style={styles.view}>
+        <View style={[styles.view, {
+            width: "92%"
+        }]}>
             <TouchableOpacity
                 onPress={() => {
                     navigation.navigate('verperfil', { id : comentario?.usuario?.id })
@@ -109,30 +157,15 @@ export default function CardComentario({
                         </Text>
                         {
                             (comentario?.usuario?.id == usuario?.id || usuario?.id == 1) &&
-                            <Menu
-                                visible={visible}
-                                onDismiss={closeMenu}
-                                anchor={
-                                    <TouchableOpacity 
-                                        onPress={openMenu}
-                                        hitSlop={{
-                                            left: 15,
-                                            bottom: 15
-                                        }}
-                                    >
-                                        <Icon source="dots-horizontal" size={17} color="#fff"/>
-                                    </TouchableOpacity>
-                                }
-                                contentStyle={{
-                                    backgroundColor: defaultColors.primary,
+                            <TouchableOpacity 
+                                onPress={handlePresentModalPress}
+                                hitSlop={{
+                                    left: 15,
+                                    bottom: 15
                                 }}
                             >
-                                <Menu.Item 
-                                    onPress={handleExcluir} 
-                                    title="Excluir"  
-                                    titleStyle={{ color: '#DB4C4C'}}
-                                />
-                            </Menu>
+                                <Icon source="dots-horizontal" size={17} color="#fff"/>
+                            </TouchableOpacity>
                         }
                     </View>
                     
@@ -168,31 +201,106 @@ export default function CardComentario({
                         { comentario.total_curtidas } 
                         </Text>
                     </TouchableOpacity>
-                    {/* <TouchableOpacity 
-                        onPress={handleComentarios}
-                        hitSlop={{
-                            left: 5,
-                            right: 5,
-                            top: 5,
-                            bottom: 5
-                        }}
-                        style={{
-                            flexDirection: 'row',
-                            gap: 3
+                    {
+                        (comentario.publicacaoId || comentario.capituloId) && 
+                        <TouchableOpacity 
+                            onPress={handleResponder}
+                            hitSlop={{
+                                left: 5,
+                                right: 5,
+                                top: 5,
+                                bottom: 5
+                            }}
+                            style={{
+                                flexDirection: 'row',
+                                gap: 3
+                            }}
+                        >
+                            <Text>
+                                Responder
+                            </Text>
+                        </TouchableOpacity>
+                    }
+                   
+                </View >
+                {
+                    comentario?.filhos?.length > 0 &&(
+                        showFilhos ? 
+                        <>
+                            <Divider style={{marginTop: 20}}/>
+                            {
+                                comentario?.filhos.map((com, i) => (
+                                    <CardComentario key={i} comentario={com}/>
+                                ))
+                            }
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setShowFilhos(false)
+                                }}
+                                style={{
+                                    paddingTop: 15
+                                }}
+                            >
+                                <Text style={{fontSize: 12}}>
+                                    Ocultar respostas
+                                </Text>
+                            </TouchableOpacity>
+                        </>
+                        :
+                        <>
+                            <Divider style={{marginTop: 20}}/>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setShowFilhos(true)
+                                }}
+                                style={{
+                                    paddingTop: 15
+                                }}
+                            >
+                                <Text style={{fontSize: 12}}>
+                                    Mostrar {comentario?.filhos?.length} respostas
+                                </Text>
+                            </TouchableOpacity>
+                        </>
+                       
+                    )
+                }
+            </View>
+            
+            <BottomSheetModal
+                ref={bottomSheetModalRef}
+                index={1}
+                snapPoints={snapPoints}
+                onChange={handleSheetChanges}
+                backgroundStyle={[styles.modalContainer]}
+                handleIndicatorStyle={{
+                    backgroundColor: defaultColors.gray
+                }}
+                contentHeight={200}
+            >
+                <View style={{flex: 1, justifyContent: 'flex-end', padding: 20, gap: 5}}>
+                    <CustomButton
+                        style={[styles.buttonModal, ]}
+                        labelStyle={{ color: "#DB4C4C"}}
+                        onPress={() => {
+                            handleExcluir()
+                            handleBackPress()
                         }}
                     >
-                        <Icon 
-                            source={ "reply"} 
-                            size={20} 
-                            color={ "#fff"}
-                        />
-                        <Text>
-                        { comentario.total_comentarios }
-                        </Text>
-                    </TouchableOpacity> */}
-                </View >
-            </View>
-        
+                        Remover
+                    </CustomButton>
+                    <Divider style={{marginVertical: 8}}/>
+                    <CustomButton
+                        style={[styles.buttonModal, ]}
+                        labelStyle={{ color: defaultColors.gray}}
+                        onPress={() => {
+                            handleBackPress()
+                        }}
+                    >
+                        Cancelar
+                    </CustomButton>
+                </View>
+            </BottomSheetModal>
         </View>
  
     )
@@ -204,7 +312,7 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         gap: 10,
         flexDirection: 'row',
-        width: '100%',
+        
         borderBottomWidth: 0.2,
         borderBottomColor: '#262626'
     },
@@ -212,7 +320,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '94%',
+        flex: 1,
         marginBottom: 5
     },
     nome:{
@@ -226,7 +334,7 @@ const styles = StyleSheet.create({
     conteudo:{
         fontSize: 13,
         fontWeight: '400',
-        width: '90%',
+        // width: '90%',
         color: '#fff'
     },
     buttons:{
@@ -253,4 +361,11 @@ const styles = StyleSheet.create({
         color: defaultColors.gray,
         fontSize: 11
     },
+    modalContainer:{
+        backgroundColor: 'rgba(0,0,0,0.9)',
+    },
+    buttonModal:{
+        backgroundColor: '#191919',
+        paddingVertical: 6,
+    }
 });

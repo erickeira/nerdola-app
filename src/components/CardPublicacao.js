@@ -1,7 +1,13 @@
-import { StyleSheet, Text, View , TouchableOpacity, Image, Dimensions} from "react-native";
+import { StyleSheet,BackHandler, Text, View , TouchableOpacity, Image, Dimensions} from "react-native";
 import { Avatar, Icon } from "react-native-paper";
 import { defaultColors, gerarCorAleatoriaRGBA, gerarCorPorString, imageUrl } from "../utils";
-import { useState } from "react";
+import { 
+    useEffect, 
+    useState,
+    useMemo,
+    useCallback,
+    useRef
+ } from "react";
 import CardCapituloPublicacao from "./CardCapituloPublicacao";
 import { useNavigation } from "@react-navigation/native";
 import { Button, Menu, Divider, PaperProvider } from 'react-native-paper';
@@ -16,6 +22,13 @@ import CardObra from "./CardObra";
 dayjs.extend(relativeTime);
 dayjs.locale("pt-br");
 
+import {
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetModalProvider,
+    BottomSheetFlatList 
+} from '@gorhom/bottom-sheet';
+import CustomButton from "./CustomButton";
 
 const { height, width }  = Dimensions.get('screen');
 export default function CardPublicacao({ 
@@ -58,6 +71,30 @@ export default function CardPublicacao({
 
     const imagePathPublicacao = `${imageUrl}publicacoes/${publicacao?.id}/${publicacao.imagem}`;
     const [imageErrorPublicacao, setImageErrorPublicacao] = useState(false)
+
+
+    const bottomSheetModalRef = useRef(null);
+    const snapPoints = useMemo(() => ['20%', '25%'], []);
+
+    const handlePresentModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+        BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    }, []);
+
+    const handleSheetChanges = useCallback((index) => {
+        if(index < 0){
+            BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+        }
+        // console.log('handleSheetChanges', index);
+    }, []);
+
+    const handleBackPress = () => {
+        if (bottomSheetModalRef.current) {
+            bottomSheetModalRef.current.dismiss();
+            return true; 
+        }
+        return false;
+    };
 
     return(
         <View style={styles.view}>
@@ -115,30 +152,15 @@ export default function CardPublicacao({
                         </Text>
                         {
                             (publicacao?.usuario?.id == usuario?.id || usuario?.id == 1) &&
-                            <Menu
-                                visible={visible}
-                                onDismiss={closeMenu}
-                                anchor={
-                                    <TouchableOpacity 
-                                        onPress={openMenu}
-                                        hitSlop={{
-                                            left: 15,
-                                            bottom: 15
-                                        }}
-                                    >
-                                        <Icon source="dots-horizontal" size={17} color="#fff"/>
-                                    </TouchableOpacity>
-                                }
-                                contentStyle={{
-                                    backgroundColor: defaultColors.primary,
+                            <TouchableOpacity 
+                                onPress={handlePresentModalPress}
+                                hitSlop={{
+                                    left: 15,
+                                    bottom: 15
                                 }}
                             >
-                                <Menu.Item 
-                                    onPress={handleExcluir} 
-                                    title="Excluir"  
-                                    titleStyle={{ color: '#DB4C4C'}}
-                                />
-                            </Menu>
+                                <Icon source="dots-horizontal" size={17} color="#fff"/>
+                            </TouchableOpacity>
                         }
                     </View>
                     
@@ -228,7 +250,40 @@ export default function CardPublicacao({
                     </TouchableOpacity>
                 </View >
             </View>
-            
+            <BottomSheetModal
+                ref={bottomSheetModalRef}
+                index={1}
+                snapPoints={snapPoints}
+                onChange={handleSheetChanges}
+                backgroundStyle={[styles.modalContainer]}
+                handleIndicatorStyle={{
+                    backgroundColor: defaultColors.gray
+                }}
+                contentHeight={200}
+            >
+                <View style={{flex: 1, justifyContent: 'flex-end', padding: 20, gap: 5}}>
+                    <CustomButton
+                        style={[styles.buttonModal, ]}
+                        labelStyle={{ color: "#DB4C4C"}}
+                        onPress={() => {
+                            handleExcluir()
+                            handleBackPress()
+                        }}
+                    >
+                        Remover
+                    </CustomButton>
+                    <Divider style={{marginVertical: 8}}/>
+                    <CustomButton
+                        style={[styles.buttonModal, ]}
+                        labelStyle={{ color: defaultColors.gray}}
+                        onPress={() => {
+                            handleBackPress()
+                        }}
+                    >
+                        Cancelar
+                    </CustomButton>
+                </View>
+            </BottomSheetModal>
         </View>
         
     )
@@ -292,4 +347,11 @@ const styles = StyleSheet.create({
     imagemPublicacao:{
         marginTop: 20
     },
+    modalContainer:{
+        backgroundColor: 'rgba(0,0,0,0.9)',
+    },
+    buttonModal:{
+        backgroundColor: '#191919',
+        paddingVertical: 6,
+    }
 });

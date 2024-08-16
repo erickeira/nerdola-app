@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl } from "react-native";
 import InputText from "./InputText";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
@@ -6,11 +6,12 @@ import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
 import Chip from "./Chip";
 import CardObra from "./CardObra";
-import { Icon } from "react-native-paper";
+import { Icon, IconButton } from "react-native-paper";
 import { defaultColors } from "../utils";
 import CustomButton from "./CustomButton";
 import CardPublicacao from "./CardPublicacao";
 import CardComentario from "./CardComentario";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -29,6 +30,8 @@ export default function Comentarios({ capitulo, publicacao }){
     const [ filtros , setFiltros] = useState({
     })
     const [listRef, setListRef] = useState(null)
+
+    const inputRef = useRef()
     const upButtonHandler = () => {
       listRef?.scrollToOffset({ 
         offset: 0, 
@@ -55,6 +58,7 @@ export default function Comentarios({ capitulo, publicacao }){
   
 
     useEffect(() =>{
+        inputRef?.current?.blur()
         setIsLoading(true)
         getComentarios()
     },[])
@@ -69,8 +73,6 @@ export default function Comentarios({ capitulo, publicacao }){
             getComentarios(pagina, filtros)
         }
     },[isFocused])
-
-
       
 
     const getComentarios = async (pag = 1, filtros = {}) => {
@@ -111,18 +113,21 @@ export default function Comentarios({ capitulo, publicacao }){
     }
 
     const [comentario, setComentario] = useState("")
+    const [respondendo, setRespondendo] = useState(null)
     const [isLoadingComentando, setIsLoadingComentando] = useState(false)
     
     const handleComentar = async () => {
         setIsLoadingComentando(true)
         try{
             await api.post(`comentarios`,{
-                publicacao: publicacao?.id,
-                capitulo: capitulo?.id,
-                comentario: comentario
+                publicacao: respondendo ? null : publicacao?.id,
+                capitulo: respondendo ? null : capitulo?.id,
+                comentario: comentario,
+                parente: respondendo
             })
             getComentarios()
             setComentario("")
+            setRespondendo("")
             setTimeout(() => {
                 downButtonHandler()
             }, 1000);
@@ -145,8 +150,10 @@ export default function Comentarios({ capitulo, publicacao }){
         }
     }
 
+    
+
     return(
-        <>
+        <BottomSheetModalProvider>
             <FlatList
                 data={comentarios}
                 ref={(ref) => {setListRef(ref)}}
@@ -183,6 +190,10 @@ export default function Comentarios({ capitulo, publicacao }){
                         <CardComentario 
                             comentario={item} 
                             handleExcluir={() => handleExcluir(item.id)}
+                            handleResponder={() => {
+                                setRespondendo(item.id)
+                                inputRef?.current?.focus()
+                            }}
                         />
                     ) 
                 }}
@@ -213,10 +224,38 @@ export default function Comentarios({ capitulo, publicacao }){
                     return null
                 }}
             />
+            {
+                !!respondendo && (
+                    <View 
+                        style={{
+                            backgroundColor: "#141414",
+                            paddingHorizontal: 20,
+                            paddingVertical: 12,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                        }}
+                    >
+                        <Text>
+                            Respondendo: {comentarios.find(com => com.id == respondendo)?.usuario?.nome}
+                        </Text>
+                        <IconButton
+                            icon="close"
+                            size={20}
+                            iconColor="#fff"
+                            onPress={() => setRespondendo(null)}
+                            style={{paddingVertical: 0, height: 20}}
+                        />
+                    </View>
+                )
+            }
+            
             <View style={styles.containerComment}>
                 <InputText
                     placeholder="Faça um comentário"
                     containerStyle={styles.input}
+                    ref={inputRef}
+                    height={45}
                     mb={0}
                     maxWidth={width - 130}
                     value={comentario}
@@ -232,10 +271,14 @@ export default function Comentarios({ capitulo, publicacao }){
                     isLoading={isLoadingComentando}
                     disabled={isLoadingComentando || comentario.length < 1}
                 >
-                    Publicar
+                    <Icon
+                        source="send"
+                        color="#fff"
+                        size={20}
+                    />
                 </CustomButton>
             </View>
-        </>
+        </BottomSheetModalProvider>
     )
 }
 const styles = StyleSheet.create({
@@ -270,12 +313,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        paddingHorizontal: 10,
+        paddingBottom: 10
     },
     input: {
         borderWidth: 0,
     },
     button:{
-        width: 100,
+        width: 60,
         height: 40,
         justifyContent: 'center',
         backgroundColor: defaultColors.activeColor,

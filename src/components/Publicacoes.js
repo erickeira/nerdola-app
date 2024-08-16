@@ -13,6 +13,7 @@ import CardPublicacao from "./CardPublicacao";
 import Snackbar from "react-native-snackbar";
 import CardPublicacaoSkeleton from "./CardPublicacaoSkeleton";
 
+
 const { height, width }  = Dimensions.get('screen');
 
 export default function Publicacoes({ route }){
