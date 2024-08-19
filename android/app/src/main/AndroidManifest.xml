@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nerdola">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -33,6 +33,7 @@
             <data android:pathPrefix="/obra"/>
             <data android:pathPrefix="/perfil"/>
             <data android:pathPrefix="/capitulo"/>
+            <data android:pathPrefix="/lista"/>
         </intent-filter>
       </activity>
      

@@ -146,20 +146,6 @@ export default function LoginPage(){
                     Criar conta
                 </CustomButton>
 
-                <Text style={{ color : defaultColors.gray, fontSize: 12, marginBottom: 5, textAlign: 'center' }}>
-                    Caso tenha problemas atualize a versão	do app
-                </Text>
-                <CustomButton 
-                    mode="outlined"
-                    style={styles.buttonDownload}
-                    onPress={() => {
-                        Linking.openURL('https://storage.nerdola.com.br/apks/nerdola.apk')
-                    }}
-                >
-                    <Text style={{ color : defaultColors.primary }}>
-                        Baixar versão atualizada
-                    </Text>
-                </CustomButton>
             </View>
         </ScrollView>
     )

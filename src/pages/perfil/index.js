@@ -537,8 +537,8 @@ export default function PerfilPage({ route }){
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
                             {  
                                 ({
-                                    "obras" :  'Nenhum leitura ainda!',
-                                    "publicacoes" : 'Nenhum publicação ainda!',
+                                    "obras" :  'Nenhuma leitura ainda!',
+                                    "publicacoes" : 'Nenhuma publicação ainda!',
                                     "listas" : "Crie uma lista para categorizar suas leituras!"
                                 }[listMode]) 
                              }

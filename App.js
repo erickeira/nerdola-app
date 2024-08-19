@@ -108,7 +108,6 @@ Sentry.init({
     },
 });
   
-
 // export default App;
 export default Sentry.wrap(codePush(codePushOptions)(App));
 
