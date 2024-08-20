@@ -17,7 +17,7 @@ import Snackbar from "react-native-snackbar";
 
 const { height, width }  = Dimensions.get('screen');
 
-export default function Comentarios({ capitulo, publicacao }){
+export default function Comentarios({  publicacao, ...props }){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
     const [ comentarios , setComentarios] = useState([])
@@ -31,11 +31,11 @@ export default function Comentarios({ capitulo, publicacao }){
     const [ showIrTopo, setShowIrTopo] = useState(false)
     const [ filtros , setFiltros] = useState({
     })
-    const [listRef, setListRef] = useState(null)
+    const listRef = useRef(null)
 
     const inputRef = useRef()
     const upButtonHandler = () => {
-      listRef?.scrollToOffset({ 
+        listRef?.current?.scrollToOffset({ 
         offset: 0, 
         animated: true 
       });
@@ -43,7 +43,7 @@ export default function Comentarios({ capitulo, publicacao }){
     };
 
     const downButtonHandler = () => {
-        listRef?.scrollToEnd({ 
+        listRef?.current?.scrollToEnd({ 
           animated: true 
         });
       };
@@ -75,7 +75,6 @@ export default function Comentarios({ capitulo, publicacao }){
             getComentarios(pagina, filtros)
         }
     },[isFocused])
-      
 
     const getComentarios = async (pag = 1, filtros = {}) => {
         if(loading || loadingRefresh || loadingMore) return
@@ -83,10 +82,8 @@ export default function Comentarios({ capitulo, publicacao }){
             const response = await api.get(`comentarios`, {
                 params: {
                     publicacao: publicacao?.id,
-                    capitulo: capitulo?.id
                 }
             })
-
             setEnReached(true)
             if(pag == 1){
                 setComentarios([])
@@ -98,6 +95,7 @@ export default function Comentarios({ capitulo, publicacao }){
                 setComentarios([...oldComentario, ...response.data]);
             }
             setPagina(pag)
+           
         }catch(error){
             console.log(error)
         } finally{
@@ -106,7 +104,6 @@ export default function Comentarios({ capitulo, publicacao }){
             setIsLoadingRefresh(false)
         }
     }
-
 
     function refresh(){
         setIsLoadingRefresh(true)
@@ -123,7 +120,6 @@ export default function Comentarios({ capitulo, publicacao }){
         try{
             await api.post(`comentarios`,{
                 publicacao: respondendo ? null : publicacao?.id,
-                capitulo: respondendo ? null : capitulo?.id,
                 comentario: comentario,
                 parente: respondendo
             })
@@ -186,48 +182,12 @@ export default function Comentarios({ capitulo, publicacao }){
         }
     }
 
-    const handleReportarPublicacao = async (publicacao) => {
-        console.log(publicacao)
-        try{
-            await axios.post(botUrl,{
-                content: "Publicação reportada!\n_ _",
-                embeds: [ {
-                    "title":  `ID :${publicacao.id} - ${publicacao?.usuario?.nome}`,
-                    "description": publicacao.conteudo, 
-                    "color": 5814783,
-                }],
-                attachments: []
-            })
-            Snackbar.show({
-                text: "Obrigado por reportar",
-                duration: 2000,
-                action: {
-                    text: 'OK',
-                    textColor: 'green',
-                    onPress: () => { /* Do something. */ },
-                },
-            });
-        }catch(err){
-            Snackbar.show({
-                text: "Erro ao reportar",
-                duration: 2000,
-                action: {
-                    text: 'OK',
-                    textColor: 'green',
-                    onPress: () => { /* Do something. */ },
-                },
-            });
-        } finally {
-        }
-    }
-
-    
 
     return(
         <BottomSheetModalProvider>
             <FlatList
                 data={comentarios}
-                ref={(ref) => {setListRef(ref)}}
+                ref={listRef}
                 onScroll={scrollHandler}
                 style={styles.view}
                 refreshControl={
@@ -240,25 +200,6 @@ export default function Comentarios({ capitulo, publicacao }){
                 
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
-                ListHeaderComponent={ 
-                    publicacao &&
-                    <>
-                        <CardPublicacao 
-                            publicacao={publicacao}
-                            handleReportar={() => handleReportarPublicacao(publicacao)}
-                        />
-                        <View
-                            style={{
-                                borderBottomWidth: 0.2,
-                                borderBottomColor: '#262626',
-                                paddingVertical: 20
-                            }}
-                        >
-                            <Text style={{ color: defaultColors.gray }}>Comentários</Text>
-                        </View>
-                    </>
-                    
-                }
                 renderItem={({item, index}) => {
                     return ( 
                         <CardComentario 
@@ -286,7 +227,7 @@ export default function Comentarios({ capitulo, publicacao }){
                         </Text>
                     </View>
                 }
-                keyExtractor={(item, index) => {  return `${item.numero}-${index}` }}
+                keyExtractor={(item, index) => {  return `${item.id}-${index}` }}
                 onEndReached={() => {
                     if(!loadingMore && !enReached && !loading && !loadingRefresh){
                         setTimeout(() => {

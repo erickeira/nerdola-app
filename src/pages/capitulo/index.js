@@ -262,19 +262,22 @@ export default function CapituloPage({ route }){
             setIsLoadingComentarios(false)
         }
     }
-
+    const inputRef = useRef()
     const [comentario, setComentario] = useState("")
+    const [respondendo, setRespondendo] = useState(null)
     const [isLoadingComentando, setIsLoadingComentando] = useState(false)
     
     const handleComentar = async () => {
         setIsLoadingComentando(true)
         try{
             await api.post(`comentarios`,{
-                capitulo: capituloId,
-                comentario: comentario
+                capitulo: respondendo ? null : capituloId,
+                comentario: comentario,
+                parente: respondendo
             })
             getComentarios()
             setComentario("")
+            setRespondendo("")
             Snackbar.show({
                 text: "Comentário publicado!",
                 duration: 2000,
@@ -343,13 +346,17 @@ export default function CapituloPage({ route }){
     };
 
 
-
-
     const renderItem =  ({ item }) => (
-        <CardComentario
-            key={item.id}
-            comentario={item}
+        <CardComentario 
+            comentario={item} 
             handleExcluir={() => handleExcluir(item.id)}
+            handleResponder={() => {
+                setRespondendo(item.id)
+                inputRef?.current?.focus()
+            }}
+            handleReportar={() => {
+                handleReportarComentario(item)
+            }}
         />
     )
 
@@ -404,6 +411,40 @@ export default function CapituloPage({ route }){
             });
         } finally {
             setIsLoadingReportar(false)
+        }
+    }
+
+    const handleReportarComentario = async (comentario) => {
+        try{
+            await axios.post(botUrl,{
+                content: "Comentário reportado!\n_ _",
+                embeds: [ {
+                    "title":  `ID :${comentario.id} - ${comentario?.usuario?.nome}`,
+                    "description": comentario.comentario, 
+                    "color": 5814783,
+                }],
+                attachments: []
+            })
+            Snackbar.show({
+                text: "Obrigado por reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        }catch(err){
+            Snackbar.show({
+                text: "Erro ao reportar",
+                duration: 2000,
+                action: {
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
+                },
+            });
+        } finally {
         }
     }
 
@@ -564,8 +605,34 @@ export default function CapituloPage({ route }){
                             </View>
                         }
                     />
+                    {
+                        !!respondendo && (
+                            <View 
+                                style={{
+                                    backgroundColor: "#141414",
+                                    paddingHorizontal: 20,
+                                    paddingVertical: 12,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between'
+                                }}
+                            >
+                                <Text>
+                                    Respondendo: {comentarios.find(com => com.id == respondendo)?.usuario?.nome}
+                                </Text>
+                                <IconButton
+                                    icon="close"
+                                    size={20}
+                                    iconColor="#fff"
+                                    onPress={() => setRespondendo(null)}
+                                    style={{paddingVertical: 0, height: 20}}
+                                />
+                            </View>
+                        )
+                    }
                     <View style={styles.containerComment}>
                         <InputText
+                            ref={inputRef}
                             placeholder="Faça um comentário"
                             containerStyle={styles.textInput}
                             height={45}

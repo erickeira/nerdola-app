@@ -368,6 +368,6 @@ const styles = StyleSheet.create({
     },
     buttonModal:{
         alignItems: 'flex-start',
-        paddingVertical: 6,
+        paddingVertical: 6
     }
 });

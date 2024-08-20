@@ -10,7 +10,7 @@ export default function ComentariosPage({ route }){
     useEffect(() => {
         if(route?.params?.publicacao){
             navigation.setOptions({
-                headerTitle: 'Publicação'
+                headerTitle: 'Comentários'
             })
         }
     },[])
@@ -20,6 +20,7 @@ export default function ComentariosPage({ route }){
             <Comentarios 
                 publicacao={route?.params?.publicacao}
                 capitulo={route?.params?.capitulo}
+                comentario={route?.params?.comentario}
             />
         </>
     )
