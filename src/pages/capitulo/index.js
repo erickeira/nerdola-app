@@ -103,8 +103,11 @@ export default function CapituloPage({ route }){
     const isFocused = useIsFocused()
     const [ isLoading, setIsLoading ] = useState(false)
     const [loadingRefresh, setIsLoadingRefresh] = useState(false)
-    const [ capituloId, setCapituloId] = useState(route.params?.id)
     const [ capitulo, setCapitulo] = useState({})
+    
+    const [proximoCapitulo, setProximoCapitulo] = useState({});
+    const [capituloAnterior, setCapituloAnterior] = useState({});
+
     const capitulosRef = useRef()
     // const [ capitulosRef, setCapitulosRef ] = useState(null)
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
@@ -123,7 +126,6 @@ export default function CapituloPage({ route }){
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        
         Animated.timing(fadeAnim, {
             toValue: showIrTopo ? 1 : 0,
             duration: 500,
@@ -150,13 +152,13 @@ export default function CapituloPage({ route }){
         }
         setPosicaoNaTela(offsetY)
         if(!isLoading){
-            AsyncStorage.setItem(`posicao-${capituloId}`, offsetY.toString())
+            AsyncStorage.setItem(`posicao-${capitulo.id}`, offsetY.toString())
         }
     };
 
     useEffect(() =>{
-        if(capituloId) getCapitulo(capituloId)
-    },[capituloId])
+        getCapitulo(route.params?.id)
+    },[])
 
     const getCapitulo = async (id) => {
         if(isLoading) return
@@ -168,10 +170,12 @@ export default function CapituloPage({ route }){
             navigation.setOptions({
                 headerTitle: response.data?.nome
             })
+            preloadNextChapter(response.data?.prox_cap);
+            preloadPrevChapter(response.data?.cap_anterior);
             setLido(response.data.lido)
             setTimeout(async () => {
                 const posicaoAnterior = await AsyncStorage.getItem(`posicao-${response.data.id}`)
-                if (posicaoAnterior && posicaoAnterior > posicaoNaTela) {
+                if (posicaoAnterior && posicaoAnterior > posicaoNaTela && posicaoAnterior > height) {
                     capitulosRef?.current?.scrollToOffset({ 
                         offset: parseInt(posicaoAnterior), 
                         animated: true 
@@ -197,11 +201,77 @@ export default function CapituloPage({ route }){
             setIsLoadingRefresh(false)
         }
     }
+    
+
+    const preloadNextChapter = async (nextCapId) => {
+        if (!nextCapId) return;
+        try {
+            const response = await api.get(`capitulos/${nextCapId}`);
+            setProximoCapitulo(response.data);
+        } catch (error) {
+            console.log('Erro ao carregar próximo capítulo', error);
+        }
+    };
+
+    const preloadPrevChapter = async (prevCapId) => {
+        if (!prevCapId) return;
+        try {
+            const response = await api.get(`capitulos/${prevCapId}`);
+            setCapituloAnterior(response.data);
+        } catch (error) {
+            console.log('Erro ao carregar próximo capítulo', error);
+        }
+    };
+
+    const handleNextChapter = () => {
+        loadChapter(proximoCapitulo)
+        preloadNextChapter(proximoCapitulo?.prox_cap);
+        setCapituloAnterior(capitulo)
+    }
+    const handlePrevChapter = () => {
+        loadChapter(capituloAnterior)
+        preloadPrevChapter(capituloAnterior?.cap_anterior);
+        setProximoCapitulo(capitulo)
+    }
+
+    const loadChapter = (chapter) => {
+        if (chapter?.paginas.length > 0) {
+            upButtonHandler()
+            setCapitulo(chapter); 
+            navigation.setOptions({
+                headerTitle: chapter?.nome
+            })
+            
+            setTimeout(async () => {
+                const posicaoAnterior = await AsyncStorage.getItem(`posicao-${chapter.id}`)
+                if (posicaoAnterior && posicaoAnterior > posicaoNaTela && posicaoAnterior > height) {
+                    capitulosRef?.current?.scrollToOffset({ 
+                        offset: parseInt(posicaoAnterior), 
+                        animated: true 
+                    });
+                    setShowIrTopo(true);
+                    setTimeout(() => {
+                        Snackbar.show({
+                            text: "Voltando para onde parou",
+                            duration: 2000,
+                            action: {
+                                text: 'OK',
+                                textColor: 'green',
+                                onPress: () => { /* Do something. */ },
+                            },
+                        });
+                    })
+                }
+            },1000)
+        } 
+        
+    }
+
 
     const handleCapituloLido = async () => {
         if(isLoading) return
         try{
-            await api.post(`capitulos/${capituloId}/marcar-como-lido`)
+            await api.post(`capitulos/${capitulo.id}/marcar-como-lido`)
 
             Snackbar.show({
                 text: "Marcado como lido!",
@@ -212,7 +282,7 @@ export default function CapituloPage({ route }){
                     onPress: () => { /* Do something. */ },
                 },
             });
-            AsyncStorage.removeItem(`posicao-${capituloId}`)
+            AsyncStorage.removeItem(`posicao-${capitulo.id}`)
             if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3 && [2,4].includes(obra.status)){
                 await api.patch(`usuario-leitura/${leitura.id}`, {
                     status : 3
@@ -227,7 +297,7 @@ export default function CapituloPage({ route }){
     function refresh(){
         setIsLoadingRefresh(true)
         setCapitulo([])
-        getCapitulo(capituloId) 
+        getCapitulo(capitulo.id) 
     }
 
     const [ comentarios , setComentarios] = useState([])
@@ -241,7 +311,7 @@ export default function CapituloPage({ route }){
     useEffect(() =>{
         setIsLoadingComentarios(true)
         getComentarios()
-    },[capituloId])
+    },[capitulo.id])
 
     const [isLoadingComentarios, setIsLoadingComentarios] = useState(false)
     const getComentarios = async (pag = 1, ) => {
@@ -249,7 +319,7 @@ export default function CapituloPage({ route }){
         try{
             const response = await api.get(`comentarios`, {
                 params: {
-                    capitulo: capituloId
+                    capitulo: capitulo.id
                 }
             })
 
@@ -271,7 +341,7 @@ export default function CapituloPage({ route }){
         setIsLoadingComentando(true)
         try{
             await api.post(`comentarios`,{
-                capitulo: respondendo ? null : capituloId,
+                capitulo: respondendo ? null : capitulo.id,
                 comentario: comentario,
                 parente: respondendo
             })
@@ -490,40 +560,6 @@ export default function CapituloPage({ route }){
                             </Text>
                         </View>
                     }
-                    ListFooterComponent={
-                        <View style={{ marginHorizontal: 20,   marginBottom: 100,}}>
-                            <View style={{ flexDirection: 'row', gap: 5, marginTop: 20,   marginBottom: 50 }}>
-                                {
-                                    capitulo?.cap_anterior &&
-                                    <CustomButton 
-                                        mode="outlined"
-                                        style={styles.buttonNext}
-                                        onPress={() => {
-                                            setCapituloId(capitulo?.cap_anterior)
-                                        }}
-                                    >
-                    
-                                        Capitulo anterior
-                                    </CustomButton>
-                                }
-                                {
-                                    capitulo?.prox_cap &&
-                                    <CustomButton 
-                                        mode="outlined"
-                                        style={styles.buttonNext}
-                                        onPress={() => {
-                                            setCapituloId(capitulo?.prox_cap)
-                                        }}
-                                    >
-                    
-                                        Próximo capitulo
-                                    </CustomButton>
-                                }
-                            </View>
-                        </View>
-                        
-                    
-                    }
                     keyExtractor={(item, index) => {  return `${item.src}-${index}` }}
                     onEndReached={() => {
                         setShowIrTopo(true)
@@ -567,6 +603,42 @@ export default function CapituloPage({ route }){
                         />
                         
                     </Animated.View>
+                )
+            }
+            {
+                (showIrTopo || true) && (
+                    <Animated.View 
+                        style={[
+                            styles.containerBotoesCapitulo,
+                            {
+                                opacity: fadeAnim,
+                            },
+                        ]}
+                    >
+                        <View style={{ flexDirection: 'row', gap: 5, marginTop: 20,   marginBottom: 50 }}>
+                            {
+                                capitulo?.cap_anterior &&
+                                <CustomButton 
+                                    mode="outlined"
+                                    style={styles.buttonNext}
+                                    onPress={handlePrevChapter}
+                                >
+                                    Capitulo anterior
+                                </CustomButton>
+                            }
+                            {
+                                capitulo?.prox_cap &&
+                                <CustomButton 
+                                    mode="outlined"
+                                    style={styles.buttonNext}
+                                    onPress={handleNextChapter}
+                                >
+                
+                                    Próximo capitulo
+                                </CustomButton>
+                            }
+                        </View>
+                    </Animated.View >
                 )
             }
             
@@ -756,7 +828,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row',
-        borderColor: '#312E2E',
+        borderColor: 'rgba(255,255,255,0.1)',
+        color: "#fff",
         borderRadius: 5,
     },
     viewCard:{
@@ -829,8 +902,16 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 20,
         bottom: "25%",
-        backgroundColor: "rgba(0,0,0,0.5)",
+        backgroundColor: "rgba(0,0,0,0.7)",
         borderRadius: 8,
+        gap: 8
+    },
+    containerBotoesCapitulo: {
+        position: 'absolute',
+        width: "100%",
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.7)",
+        paddingHorizontal: 10,
         gap: 8
     }
 });

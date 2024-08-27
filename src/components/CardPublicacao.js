@@ -1,5 +1,5 @@
-import { StyleSheet,BackHandler, Text, View , TouchableOpacity, Image, Dimensions} from "react-native";
-import { Avatar, Icon } from "react-native-paper";
+import { StyleSheet,BackHandler, Text, View , TouchableOpacity, Image, Dimensions, Modal, Pressable, ActivityIndicator} from "react-native";
+import { Avatar, Icon, IconButton } from "react-native-paper";
 import { defaultColors, gerarCorAleatoriaRGBA, gerarCorPorString, imageUrl } from "../utils";
 import { 
     useEffect, 
@@ -29,8 +29,68 @@ import {
     BottomSheetFlatList 
 } from '@gorhom/bottom-sheet';
 import CustomButton from "./CustomButton";
+import FastImage from "react-native-fast-image";
 
 const { height, width }  = Dimensions.get('screen');
+
+const CustomImage = ({ imagem, publicacao, onPress, exibir, maxHeight = 250 }) => {
+    const imagePath = `${imageUrl}publicacoes/${publicacao?.id}/${publicacao.imagem}`;
+    const [imageError, setImageError] = useState(false)
+    const [imageWidth, setImageWidth] = useState(0);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        if (publicacao.imagem) {
+            Image.getSize(imagePath, (width, height) => {
+                const scaleFactor = height / maxHeight;
+                const imageWidth = width / scaleFactor;
+                setImageWidth(imageWidth);
+                setLoading(false);
+                setImageError(false);
+            }, (error) => {
+                setImageError(true);
+                setLoading(false);
+            });
+        }
+    }, [imagePath]);
+
+    useEffect(() => {
+        setImageError(false);
+    },[publicacao])
+
+    return(
+         <View style={{minWidth: 50, width: imageWidth, height: maxHeight,maxHeight, marginVertical: 20 }}>
+            {loading ? (
+                <View style={{ width : 250, height: 250, flexDirection: 'row' , alignItems: 'center', justifyContent: 'center'}}>
+                    <ActivityIndicator color={defaultColors.activeColor} />
+                </View>
+                
+            ) : (
+                publicacao.imagem && !imageError ? (
+                    <FastImage
+                        style={{ width: imageWidth, height: maxHeight }}
+                        source={{
+                            uri: imagePath,
+                            priority: FastImage.priority.high,
+                        }}
+                        resizeMode={FastImage.resizeMode.contain}
+                        onError={() => setImageError(true)}
+                        onPress={onPress}
+                        onTouchEnd={onPress}
+                    />
+                ) : (
+                    <Icon
+                        name="image-off-outline"
+                        type="material-community"
+                        color="#312E2E"
+                        size={30}
+                    />
+                )
+            )}
+        </View>
+    )
+}
+
 export default function CardPublicacao({ 
     publicacao : oldPublicacao,
     handleExcluir,
@@ -40,10 +100,8 @@ export default function CardPublicacao({
     const [publicacao, setPublicacao] = useState(oldPublicacao)
     const navigation = useNavigation()
     const [ curtido, setCurtido] = useState(publicacao.curtido);
-    const [visible, setVisible] = useState(false);
-    const openMenu = () => setVisible(true);
-    const closeMenu = () => setVisible(false);
-  
+    const [modalVisible, setModalVisible] = useState(false);
+    
 
     const handleCurtir = async () => {
         
@@ -70,10 +128,6 @@ export default function CardPublicacao({
     const imagePath = `${imageUrl}usuarios/${publicacao?.usuario?.id}/${publicacao?.usuario?.imagem}`;
     const [imageError, setImageError] = useState(false)
 
-    const imagePathPublicacao = `${imageUrl}publicacoes/${publicacao?.id}/${publicacao.imagem}`;
-    const [imageErrorPublicacao, setImageErrorPublicacao] = useState(false)
-
-
     const bottomSheetModalRef = useRef(null);
     const snapPoints = useMemo(() => ['34%', '35%'], []);
 
@@ -96,6 +150,7 @@ export default function CardPublicacao({
         }
         return false;
     };
+    
 
     return(
         <View style={styles.view}>
@@ -190,14 +245,17 @@ export default function CardPublicacao({
                 }
                 {
                     !!publicacao?.imagem && (
-                        <AutoHeightImage
-                            style={styles.imagemPublicacao}
-                            width={width - 100}
-                            source={{ uri : imagePathPublicacao }}
-                            onError={(error) => {
-                                setImageErrorPublicacao(true)
-                            }}
-                        />
+                        <TouchableOpacity 
+                            onPress={() => setModalVisible(true)}
+                        >
+                             <CustomImage
+                                style={styles.imagemPublicacao}
+                                publicacao={publicacao}
+                                height={"100%"}
+                                imagePath={imagePath}
+                            />
+                        </TouchableOpacity>
+                       
                     )
                 }
 
@@ -300,6 +358,35 @@ export default function CardPublicacao({
                     </CustomButton>
                 </View>
             </BottomSheetModal>
+            <Modal
+                // animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                    <View style={styles.centeredView}>
+                        <IconButton
+                            icon="close"
+                            iconColor="#fff"
+                            onPress={() => setModalVisible(!modalVisible)}
+                            style={{
+                                position: 'absolute',
+                                top: 20,
+                                right: 20,
+                                zIndex: 2
+                            }}
+                        />
+                        <CustomImage
+                            style={styles.imagemPublicacao}
+                            publicacao={publicacao}
+                            imagePath={imagePath}
+                            maxHeight={height - 200}
+                        />
+                    </View>
+                
+            </Modal>
         </View>
         
     )
@@ -361,7 +448,8 @@ const styles = StyleSheet.create({
         height: '100%'
     },
     imagemPublicacao:{
-        marginTop: 20
+        marginTop: 20,
+        objectFit: 'contain'
     },
     modalContainer:{
         backgroundColor: 'rgba(0,0,0,1)',
@@ -369,5 +457,15 @@ const styles = StyleSheet.create({
     buttonModal:{
         alignItems: 'flex-start',
         paddingVertical: 6
-    }
+    },
+    centeredView: {
+        flex: 1,
+        height,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        padding: 20
+    },
+    
 });

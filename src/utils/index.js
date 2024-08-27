@@ -2,7 +2,7 @@ import { Dimensions, StyleSheet } from 'react-native';
 
 const { height, width }  = Dimensions.get('screen');
 // const production = !__DEV__
-const production = false
+const production = true
 const imageUrl =  "https://storage.nerdola.com.br/";
 // const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://192.168.1.140:3001/';
 // const imageUrl = production ? 'https://storage.nerdola.com.br/' : 'http://192.168.1.100:3001/';
