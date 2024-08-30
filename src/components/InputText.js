@@ -25,6 +25,7 @@ const InputText = forwardRef(({
     maxWidth,
     numberOfLines,
     maxLength,
+    clearEnable,
     ...others
 }, ref) => {
   const [text, setText] = useState({ semMascara : value || "" });
@@ -132,6 +133,30 @@ const InputText = forwardRef(({
                 maxLength={maxLength}
             />
             {rghtElement}
+            {
+              clearEnable && text?.semMascara?.length> 0 && 
+              <TouchableOpacity 
+                    onPress={() => onStopType("")} 
+                    style={{
+                        position: 'absolute', 
+                        height: '100%',
+                        justifyContent:'center',
+                        right: 25,
+                    }}
+                    hitSlop={{
+                        left: 10,
+                        right: 10,
+                        top: 10,
+                        bottom: 10
+                    }}
+                >
+                    <Icon
+                        source= { 'close'}
+                        color={"#fff"}
+                        size={20}
+                    />
+                </TouchableOpacity>
+            }
             {
                 tipo == `senha` && 
                 <TouchableOpacity 

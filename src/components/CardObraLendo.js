@@ -37,7 +37,9 @@ export default function CardObraLendo({
     const leituraColors = {
         1: '#59A0F1',
         2: '#DBD54C',
-        3 : '#3CAF1F'
+        3: '#3CAF1F',
+        4: '#9E3939',
+        5: '#72D8D2'
     }
     const progresso = parseFloat((total_lidos / total_capitulos).toFixed(2)) || 0 
 

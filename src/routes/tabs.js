@@ -13,7 +13,6 @@ import { Image, StyleSheet, View } from 'react-native';
 
 import PerfilStack from './stacks/perfilStack';
 import HomeStack from './stacks/homeStack';
-import PedidosStack from './stacks/pedidosStack';
 import { Icon } from 'react-native-paper';
 import PublicacoesStack from './stacks/publicacoesStack';
 import { navigationRef } from '../../App';
@@ -25,6 +24,7 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
 } from '@gorhom/bottom-sheet';
+import LeiturasStack from './stacks/leiturasStack';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -81,7 +81,7 @@ const TabNavigation = ({ navigation }) =>{
                   tabBarBadge: false,
                   tabBarIcon: ({focused, color}) => (  
                     <Icon 
-                      source={"book"} 
+                      source={"book-search"} 
                       size={25} 
                       color={focused? defaultColors.activeColor : "#666"}
                     />
@@ -108,18 +108,18 @@ const TabNavigation = ({ navigation }) =>{
                 }}  
               />
               <Tab.Screen 
-                name="Pedidos"  
-                component={ PedidosStack }   
+                name="LeiturasTab"  
+                component={ LeiturasStack }   
                 options={{ 
                   headerTitleStyle: { opacity: 0 }, 
                   headerShown: true, 
                   headerTransparent: true,
-                  tabBarLabel: 'Pedidos',
+                  tabBarLabel: 'Leituras',
                   tabBarBadge: false,
                   tabBarIcon: ({focused, color}) => (  
                     <Icon 
-                      source={"inbox"} 
-                      size={25} 
+                      source={"bookshelf"} 
+                      size={26} 
                       color={focused? defaultColors.activeColor : "#666"}
                     />
                   ),
@@ -137,7 +137,7 @@ const TabNavigation = ({ navigation }) =>{
                   tabBarIcon: ({focused, color}) => (  
                     <Icon 
                       source={"account"} 
-                      size={25} 
+                      size={26} 
                       color={focused? defaultColors.activeColor : "#666"}
                     />
                   ),

@@ -26,7 +26,6 @@ export default function HomePage({ route }){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
     const [ obras , setObras] = useState([])
-    const [ obrasLendo , setObrasLendo ] = useState([])
     const [pagina, setPagina] = useState(1)
     const [limite, setLimite] = useState(20)
     const [loading, setIsLoading] = useState(false)
@@ -85,7 +84,6 @@ export default function HomePage({ route }){
             setFiltros(novosFiltros)
             getObras(1 ,novosFiltros)
         }
-        getObrasLendo()
     },[isFocused])
 
     const getObras = async (pag = 1, filtros = {}) => {
@@ -121,24 +119,6 @@ export default function HomePage({ route }){
         }
     }
 
-    const getObrasLendo = async () => {
-        try{
-            const response = await api.get(`obras`, {
-                params: {
-                    pagina: "1",
-                    limite: "1000",
-                    ultimos_lidos: true,
-                    statusleitura: [2],
-                    temPaginas: true
-                }
-            })
-            setObrasLendo(response.data)
-
-        }catch(error){
-        } finally{
-        }
-    }
-    
 
     function refresh(){
         setIsLoadingRefresh(true)
@@ -173,6 +153,7 @@ export default function HomePage({ route }){
                                 containerStyle={styles.textInput}
                                 height={45}
                                 leftElement={<Icon source={"magnify"} size={18} color="#666"/>}
+                                clearEnable
                             />
                             <Chip 
                                 onPress={() => {
@@ -211,23 +192,6 @@ export default function HomePage({ route }){
                                     <CardObraSkeleton/>
                                     <CardObraSkeleton/>
                                     <CardObraSkeleton/>
-                                </>
-                            )
-                        }
-                        {
-                            obrasLendo?.length > 0 && (
-                                <>
-                                    <Text style={{marginBottom: 10, color: defaultColors.gray, fontSize: 12}}>
-                                        Continue lendo
-                                    </Text>
-                                    <ScrollView horizontal style={{gap: 5, paddingLeft: 5, marginBottom: 10}} showsHorizontalScrollIndicator={false}>
-                                        {
-                                            obrasLendo?.map((obra,index) => (
-                                                <CardObraLendo obra={obra} key={index}/>
-                                            )) 
-                                        }
-                                    </ScrollView>
-                                    
                                 </>
                             )
                         }

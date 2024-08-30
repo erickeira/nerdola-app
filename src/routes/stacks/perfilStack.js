@@ -11,6 +11,7 @@ import { useRoute } from '@react-navigation/native';
 import PerfilPage from '../../pages/perfil';
 import EditarPerfilPage from '../../pages/editar-perfil';
 import SeguidoresPage from '../../pages/seguidores';
+import MeuPerfilPage from '../../pages/meu-perfil';
 
 const PerfilStack = ({ navigation }) => {
   const currentRouteName = navigationRef?.current?.getCurrentRoute().name;
@@ -25,8 +26,8 @@ const PerfilStack = ({ navigation }) => {
   return ( 
   <Stack.Navigator >
       <Stack.Screen 
-        name="perfil" 
-        component={PerfilPage} 
+        name="meuperfil" 
+        component={MeuPerfilPage} 
         options={{
           headerTitle:  "Perfil",
           headerTitleAlign: 'left',

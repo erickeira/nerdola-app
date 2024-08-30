@@ -14,31 +14,27 @@ import CardObraSkeleton from "../../components/CardObraSkeleton";
 import CardLista from "../../components/CardLista";
 import Skeleton from "../../components/Skeleton";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import CardPublicacaoSkeleton from "../../components/CardPublicacaoSkeleton";
 
 
 const { height, width }  = Dimensions.get('screen');
 
 
-export default function PerfilPage({ route }){
+export default function MeuPerfilPage({ route }){
     const id = route?.params?.id 
     const navigation = useNavigation()
     const { usuario, handleLogout } = useAuth()
     const isFocused = useIsFocused()
-    const [ obras , setObras] = useState([])
     const [ publicacoes , setPublicacoes] = useState([])
-    const [pagina, setPagina] = useState(0)
     const [paginaPublicacoes, setPaginaPublicacoes] = useState(0)
     const [limite, setLimite] = useState(20)
     const [loading, setIsLoading] = useState(false)
     const [loadingRefresh, setIsLoadingRefresh] = useState(false)
-    const [ enReached , setEnReached ] = useState(false)
     const [ enReachedPublicacoes , setEnReachedPublicacoes ] = useState(false)
-    const [loadingMore, setLoadingMore] = useState(false)
     const [loadingMorePublicacoes, setLoadingMorePublicacoes] = useState(false)
 
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
-    const [ listMode, setListMode ] = useState("obras")
     const [ filtros , setFiltros] = useState({
         string: '',
         statusleitura: []
@@ -71,60 +67,21 @@ export default function PerfilPage({ route }){
     useEffect(() =>{
         setIsLoading(true)
         setIsLoadingMe(true)
-        getStatusList()
         getUser()
     },[])
 
     useEffect(() =>{
-        if(obras.length > 0){
-            getStatusList()
-           if(!loading && user.id) getObras()
-        }
         getUser()
     },[isFocused])
 
     useEffect(() => {
         setIsLoading(true)
         if(user?.id){
-            getObras(1 , filtros, )
             getPublicacoes(1, user.id)
         }
     },[filtros])
 
-    const getObras = async (pag = 1, filtros = {}, id = id || user.id) => {
-        if(loading || loadingRefresh) return
-        const params =  {
-            ...filtros,
-            pagina: pag?.toString(),
-            limite: limite?.toString(),
-            statusleitura : (filtros.statusleitura?.length ? filtros.statusleitura : statusList.map(st => st.id)),
-            temCapitulo :true,
-            usuario: id 
-        }
-        
-        try{
-            const response = await api.get(`obras`, {  params })
-            if(response.data?.length < limite){
-                setEnReached(true)
-            }
-            if(pag == 1){
-                setObras(response.data)
-                setEnReached(false)
-            }else{
-                const existingIds = obras.map(obra => obra.id); 
-                const newObras = response.data.filter(obra => !existingIds.includes(obra.id));
-                setObras([...obras, ...newObras]);
-            }
-            
-            setPagina(pag)
-        }catch(error){
-        } finally{
-            setIsLoading(false)
-            setLoadingMore(false)
-            setIsLoadingRefresh(false)
-        }
-    }
-
+    
     const getPublicacoes = async (pag = 1, id = user.id) => {
         if(loading || loadingRefresh) return
         const params =  {
@@ -154,21 +111,10 @@ export default function PerfilPage({ route }){
         }
     }
 
-    const [ statusList, setStatusList] = useState([])
-    const getStatusList = async () => {
-        try{
-            const response = await api.get(`leitura-status`)
-            setStatusList(response.data)
-        }catch(error){
-
-        } 
-    }
 
     function refresh(){
         setIsLoadingRefresh(true)
         setPagina(1)
-        setObras([])
-        getObras(1) 
         setPaginaPublicacoes(1)
         setPublicacoes([])
         getPublicacoes(1)
@@ -213,12 +159,6 @@ export default function PerfilPage({ route }){
         }
     }
 
-    const totais = {
-        1: user?.obras?.total_interessadas,
-        2: user?.obras?.total_lendo,
-        3: user?.obras?.total_lidos
-    }
-
     const imagePath = `${imageUrl}usuarios/${user?.id}/${user?.imagem}`;
     const [imageError, setImageError] = useState(false)
 
@@ -234,31 +174,10 @@ export default function PerfilPage({ route }){
         }
     }
 
-    const [ listas, setListas] = useState([])
-    const getListas = async (usuario) => {
-        try{
-            const response = await api.get(`listas`,{
-                params:{
-                    usuario
-                }
-            })
-            setListas(response.data)
-        }catch(error){
-        } finally {
-        }
-    }
-
-    // ref
-  
-
     return(
         <>
             <FlatList
-                data={{
-                   obras, 
-                   publicacoes,
-                   listas
-                }[listMode]}
+                data={publicacoes}
                 ref={(ref) => {setListRef(ref)}}
                 onScroll={scrollHandler}
                 style={styles.view}
@@ -384,75 +303,12 @@ export default function PerfilPage({ route }){
                             )
                            
                         }
-
-                        <View style={styles.containerTab}>
-                            <Chip
-                                label="Minhas obras"
-                                style={[styles.tab,{
-                                    borderColor: listMode == 'obras' ? "#fff" : "#666"
-                                }]}
-                                onPress={() => {
-                                    setListMode('obras')
-                                }}
-                            >
-                                <Text 
-                                    style={{ color: listMode == 'obras' ? '#fff' : defaultColors.gray}}
-                                >
-                                  Leituras
-                                </Text>
-                            </Chip>
-                            <Chip
-                                label="Publicações"
-                                style={[styles.tab,{
-                                    borderColor: listMode == 'publicacoes' ? "#fff" : "#666"
-                                }]}
-                                onPress={() => {
-                                    setListMode('publicacoes')
-                                }}
-                            >
-                                <Text 
-                                    style={{ color: listMode == 'publicacoes' ? '#fff' : defaultColors.gray}}
-                                >Publicações</Text>
-                            </Chip>
-                        </View>
                         {
-                            listMode == "obras" && 
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusList}>
-                                {
-                                    statusList?.map((status, index) => (
-                                        <Chip
-                                            key={index}
-                                            value={status.id}
-                                            onPress={(status) => {
-                                                let newStatusleitura = [...filtros.statusleitura];
-                                                if (newStatusleitura.includes(status)) {
-                                                    newStatusleitura = newStatusleitura.filter(tag => tag !== status);
-                                                } else {
-                                                    newStatusleitura = [...newStatusleitura, status];
-                                                }
-                                                handleChange({ statusleitura: newStatusleitura });
-                                            }}
-                                            isSelected={filtros.statusleitura.includes(status.id)}
-                                        >
-                                            <Text
-                                                style={{
-                                                    fontSize: 12,
-                                                    color :filtros.statusleitura.includes(status.id) ? '#000' : defaultColors.gray
-                                                }}
-                                            >
-                                                {`(${totais[status.id] || 0}) ${status.nome}`}
-                                            </Text>
-                                        </Chip>
-                                    ))
-                                }
-                            </ScrollView> 
-                        }
-                        {
-                            loading && listMode == "obras" && (
+                            loading  && (
                                 <>
-                                    <CardObraSkeleton/>
-                                    <CardObraSkeleton/>
-                                    <CardObraSkeleton/>
+                                    <CardPublicacaoSkeleton/>
+                                    <CardPublicacaoSkeleton/>
+                                    <CardPublicacaoSkeleton/>
                                 </>
                             )
                         }
@@ -461,10 +317,7 @@ export default function PerfilPage({ route }){
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
                 renderItem={({item, index}) => {
-                    delete item.total_usuarios_lendo
-                    if(listMode == "obras") return ( <CardObra obra={item} />)
-                    else if(listMode == "listas") return ( <CardLista lista={item} />) 
-                    else return ( <CardPublicacao publicacao={item} />) 
+                    return ( <CardPublicacao publicacao={item} />) 
                 }}
                 ListEmptyComponent={
                     loading ? 
@@ -474,32 +327,21 @@ export default function PerfilPage({ route }){
                     :
                     <View style={{ paddingVertical: 140, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            {  
-                                ({
-                                    "obras" :  'Nenhuma leitura ainda!',
-                                    "publicacoes" : 'Nenhuma publicação ainda!'
-                                }[listMode]) 
-                             }
+                           Nenhuma publicação ainda!
                         </Text>
                     </View>
                 }
                 keyExtractor={(item, index) => {  return `${item.numero}-${index}` }}
                 onEndReached={() => {
-                    if(!loadingMore && !enReached && !loading && !loadingRefresh){
-                        if(listMode == "obras"){
+                    if(!loadingMorePublicacoes && !enReachedPublicacoes && !loading && !loadingRefresh){
                             setLoadingMorePublicacoes(true)
                             getPublicacoes(paginaPublicacoes + 1)
-                        }else if(listMode == "publicacoes"){
-                            setLoadingMore(true)
-                            getObras(pagina + 1, filtros)
-                        }
                     }
                 }}
                 ListFooterComponent={() => {
                     // if(!enReached && obras.length > 0) return (
                     //     <></>
                     //     <ActivityIndicator color={defaultColors.activeColor} size={30} style={{flex: 1, marginVertical: 15}}/>
-                    // )
                 }}
             />
             {
@@ -525,7 +367,6 @@ export default function PerfilPage({ route }){
                 : null
 
             }
-
         </>
     )
 }
@@ -548,6 +389,8 @@ const styles = StyleSheet.create({
         fontSize: 12
     },
     statusList: {
+        display: 'flex',
+        flexDirection: 'row',
         gap: 5
     },
     containerTopoCapitulos:{
@@ -600,14 +443,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: 0,
         marginRight: 0 
     },
-    modalContainer:{
-        backgroundColor: '#191919',
-        padding: 30
-    },
-    buttonNovaLista:{
-        height: 51,
-        justifyContent: 'center',
-        marginTop: 50,
-        borderColor: '#312E2E'
-    },
+   
 });

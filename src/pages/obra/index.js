@@ -1,6 +1,6 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, FlatList, Image, Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, FlatList, Image, Linking, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../utils/api";
 import { botUrl, defaultColors, imageUrl } from "../../utils";
 import { Icon, IconButton,  Menu, Divider, PaperProvider  } from "react-native-paper";
@@ -260,7 +260,7 @@ export default function ObraPage({ route }){
                                 <View style={styles.divider}/> 
                                 {
                                     !isLoading && (
-                                        <View style={styles.statusList}>
+                                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusList}>
                                             {
                                                 statusList?.map((status) => (
                                                     <Chip 
@@ -281,7 +281,7 @@ export default function ObraPage({ route }){
                                                 ))
                                             }
                                             
-                                        </View>
+                                        </ScrollView>
                                     )
                                 }
                                 
@@ -472,8 +472,8 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     statusList:{
-        paddingHorizontal: 15,
-        flexDirection: 'row',
+        marginHorizontal: 15,
+        // flexDirection: 'row',
     },
     descricao:{
         fontSize: 13,
