@@ -98,18 +98,23 @@ const codePushOptions = {
 
 Sentry.init({
     dsn: "https://097fe1e236890306110f753056ae8eee@o4507651866755072.ingest.us.sentry.io/4507651868000256",
-    // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-    // We recommend adjusting this value in production.
     tracesSampleRate: 1.0,
+    enableNative: false,
     _experiments: {
-      // profilesSampleRate is relative to tracesSampleRate.
-      // Here, we'll capture profiles for 100% of transactions.
       profilesSampleRate: 1.0,
+      replaysSessionSampleRate: 1.0,
+      replaysOnErrorSampleRate: 1.0,
     },
+    integrations: [
+      Sentry.mobileReplayIntegration({
+        maskAllText: false,
+        maskAllImages: false,
+      }),
+    ],
 });
   
-export default App;
-// export default Sentry.wrap(codePush(codePushOptions)(App));
+// export default App;
+export default codePush(codePushOptions)(Sentry.wrap(App));
 
 const theme = {
     ...DefaultTheme,

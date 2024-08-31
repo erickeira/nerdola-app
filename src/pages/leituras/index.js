@@ -169,7 +169,7 @@ export default function LeiturasPage({ route }){
         navigation.setOptions({
             headerRight: ()  =>  (
                 <View style={{flexDirection: 'row' , alignItems: 'center', gap: 20, marginRight: 30}}>
-                  <TouchableOpacity 
+                  {/* <TouchableOpacity 
                       onPress={handlePresentModalPress} 
                       hitSlop={{left: 20, bottom: 20}} 
                   >
@@ -177,7 +177,7 @@ export default function LeiturasPage({ route }){
                         source="format-list-bulleted"
                         size={24}
                       />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                   <TouchableOpacity 
                       onPress={async () => {
                        navigation.navigate("pedidos")

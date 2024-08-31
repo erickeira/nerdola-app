@@ -216,7 +216,8 @@ export default function PerfilPage({ route }){
     const totais = {
         1: user?.obras?.total_interessadas,
         2: user?.obras?.total_lendo,
-        3: user?.obras?.total_lidos
+        3: user?.obras?.total_lidos,
+        4: user?.obras?.total_dropados || 0
     }
 
     const imagePath = `${imageUrl}usuarios/${user?.id}/${user?.imagem}`;

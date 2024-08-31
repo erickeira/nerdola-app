@@ -11,7 +11,6 @@ const proporcaoCard = {
     height: (width * 0.25) * (4.3 / 3),
 }
 
-// const production = true
 
 const defaultColors = {
     primary : '#0D0D0D',

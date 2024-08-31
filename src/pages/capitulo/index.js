@@ -615,7 +615,7 @@ export default function CapituloPage({ route }){
                             },
                         ]}
                     >
-                        <View style={{ flexDirection: 'row', gap: 5, marginTop: 20,   marginBottom: 50 }}>
+                        <View style={{ flexDirection: 'row', gap: 5 }}>
                             {
                                 capitulo?.cap_anterior &&
                                 <CustomButton 
@@ -623,7 +623,7 @@ export default function CapituloPage({ route }){
                                     style={styles.buttonNext}
                                     onPress={handlePrevChapter}
                                 >
-                                    Capitulo anterior
+                                    Capítulo anterior
                                 </CustomButton>
                             }
                             {
@@ -634,7 +634,7 @@ export default function CapituloPage({ route }){
                                     onPress={handleNextChapter}
                                 >
                 
-                                    Próximo capitulo
+                                    Próximo capítulo
                                 </CustomButton>
                             }
                         </View>
@@ -824,11 +824,11 @@ const styles = StyleSheet.create({
     },
     buttonNext:{
         flex: 1,
-        height: 45,
+        height: 60,
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row',
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'transparent',
         color: "#fff",
         borderRadius: 5,
     },
