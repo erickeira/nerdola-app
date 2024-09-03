@@ -1,6 +1,6 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, FlatList, Image, Linking, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { ActivityIndicator, BackHandler, Dimensions, FlatList, Image, Linking, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../utils/api";
 import { botUrl, defaultColors, imageUrl } from "../../utils";
 import { Icon, IconButton,  Menu, Divider, PaperProvider  } from "react-native-paper";
@@ -14,11 +14,22 @@ import axios from "axios";
 import CardLink from "../../components/CardLink";
 import CardObraSkeleton from "../../components/CardObraSkeleton";
 import Skeleton from "../../components/Skeleton";
+import CardLista from "../../components/CardLista";
 const { height, width }  = Dimensions.get('screen');
+
+
+import {
+    BottomSheetModal,
+    BottomSheetView,
+    BottomSheetModalProvider,
+    BottomSheetFlatList
+  } from '@gorhom/bottom-sheet';
+import { useAuth } from "../../context/AuthContext";
 
 export default function ObraPage({ route }){
     const navigation = useNavigation()
     const isFocused = useIsFocused()
+    const { usuario } = useAuth()
     const [ isLoading, setIsLoading ] = useState(true)
     const [ obra, setObra] = useState({})
     const [ capitulosRef, setCapitulosRef ] = useState(null)
@@ -91,7 +102,10 @@ export default function ObraPage({ route }){
     },[])
 
     useEffect(() => {
-        if(isFocused) getObra()
+        if(isFocused) {
+            getObra()
+            getListas(usuario.id)
+        }
     },[isFocused])
 
     const [ statusList, setStatusList] = useState([])
@@ -205,13 +219,127 @@ export default function ObraPage({ route }){
 
     const [ordem, setOrdem] = useState("ascending")
 
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: ()  =>  (
+                <View style={{flexDirection: 'row' , alignItems: 'center', gap: 20, marginRight: 20}}>
+                  <TouchableOpacity 
+                      onPress={handlePresentModalPress} 
+                      hitSlop={{left: 20, bottom: 20}} 
+                      style={{ 
+                        padding: 8,
+                        borderRadius: 100,
+                        backgroundColor: 'rgba(0,0,0,0.3)'
+                      }}
+                  >
+                      <Icon
+                        source="bookmark-outline"
+                        size={24}
+                      />
+                  </TouchableOpacity>
+                </View>
+            
+            ),  
+        })
+    },[])
+
+    const [ listas, setListas] = useState([])
+    const getListas = async (usuario) => {
+        try{
+            const response = await api.get(`listas`,{
+                params:{
+                    usuario,
+                    obra: obra.id
+                }
+            })
+            setListas([])
+            setListas(response.data)
+        }catch(error){
+        } finally {
+        }
+    }
+ 
+    const bottomSheetModalRef = useRef(null);
+    const textoListaRef = useRef();
+    const snapPoints = useMemo(() => ['60%', '95%'], []);
+
+    // callbacks
+    const handlePresentModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+        BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    }, []);
+
+    const handleSheetChanges = useCallback((index) => {
+        if(index > 0){
+            // textoListaRef?.current?.focus()
+        }else if(index < 0){
+            BackHandler.removeEventListener('hardwareBackPress', handleBackPress)
+        }
+        // console.log('handleSheetChanges', index);
+    }, []);
+
+    useEffect(() => {
+        
+        return () => {
+            BackHandler.removeEventListener('hardwareBackPress', handleBackPress)
+        };
+    }, []);
+    
+    const handleBackPress = () => {
+        if (bottomSheetModalRef.current) {
+            bottomSheetModalRef.current.dismiss();
+            return true; 
+        }
+        return false;
+    };
+
+    const [loadingLista, setLoadingLista] = useState(null)
+    const handleAddLista = async (lista) => {
+        setLoadingLista(lista)
+        try{
+            const response = await api.post(`listas/${lista}/adicionar-remover-obra`,{
+                obra: obra.id
+            })
+            Snackbar.show({
+                text: response.data?.message,
+                duration: 2000,
+                action: {
+                  text: 'OK',
+                  textColor: 'green',
+                  onPress: () => { /* Do something. */ },
+                },
+            });
+            getListas(usuario.id)
+        }catch(error){
+        } finally {
+            setLoadingLista(null)
+        }
+    }
+
+   
+    const renderItemLista = useCallback(
+        ({ item }) => (
+          <CardLista 
+            lista={item} 
+            add
+            onAdd={() => {
+                handleAddLista(item.id)
+            }}
+            isLoading={loadingLista == item.id}
+        />
+        ),
+        [loadingLista, obra]
+    );
+
+
     if(isLoading) return(
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
             <ActivityIndicator color={defaultColors.activeColor} size={25}/>
         </View>
     )
     return(
-            <SafeAreaView style={styles.view}>
+        <SafeAreaView style={styles.view}>
+            <BottomSheetModalProvider>
             <FlatList
                 extraData={leitura}
                 data={ ondeLer ? links : capitulos } 
@@ -453,7 +581,35 @@ export default function ObraPage({ route }){
                 : null
 
             } 
-            </SafeAreaView>
+                <BottomSheetModal
+                    ref={bottomSheetModalRef}
+                    index={1}
+                    snapPoints={snapPoints}
+                    onChange={handleSheetChanges}
+                    backgroundStyle={[styles.modalContainer]}
+                    handleIndicatorStyle={{
+                        backgroundColor: defaultColors.gray
+                    }}
+                >
+                    <View
+                        style={{
+                            borderBottomWidth: 0.2,
+                            borderBottomColor: '#262626',
+                            paddingVertical: 10
+                        }}
+                    >
+                        <Text style={{ color: defaultColors.gray, textAlign: 'center' }}>{listas.length} { listas.length == 1 ? "lista" : "listas"}</Text>
+                    </View>
+                    <BottomSheetFlatList
+                        data={listas}
+                        keyExtractor={(i) => i.id}
+                        renderItem={renderItemLista}
+                        contentContainerStyle={styles.contentContainer}
+                        style={{paddingHorizontal: 10}}
+                    />
+                </BottomSheetModal>
+            </BottomSheetModalProvider>
+        </SafeAreaView>
     )
 }
 
@@ -508,5 +664,9 @@ const styles = StyleSheet.create({
         marginVertical: 20,
         width: width - 40,
         marginHorizontal: 20,
+    },
+    modalContainer:{
+        backgroundColor: '#121212',
+        padding: 30
     },
 });

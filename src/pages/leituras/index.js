@@ -96,6 +96,7 @@ export default function LeiturasPage({ route }){
     useEffect(() => {
         getObras(pagina ,filtros)
         getObrasLendo()
+        getListas(usuario.id)
     },[isFocused])
 
     const getObras = async (pag = 1, filtros = {}) => {
@@ -169,7 +170,7 @@ export default function LeiturasPage({ route }){
         navigation.setOptions({
             headerRight: ()  =>  (
                 <View style={{flexDirection: 'row' , alignItems: 'center', gap: 20, marginRight: 30}}>
-                  {/* <TouchableOpacity 
+                  <TouchableOpacity 
                       onPress={handlePresentModalPress} 
                       hitSlop={{left: 20, bottom: 20}} 
                   >
@@ -177,7 +178,7 @@ export default function LeiturasPage({ route }){
                         source="format-list-bulleted"
                         size={24}
                       />
-                  </TouchableOpacity> */}
+                  </TouchableOpacity>
                   <TouchableOpacity 
                       onPress={async () => {
                        navigation.navigate("pedidos")
@@ -226,7 +227,7 @@ export default function LeiturasPage({ route }){
 
     const handleSheetChanges = useCallback((index) => {
         if(index > 0){
-            textoListaRef?.current?.focus()
+            // textoListaRef?.current?.focus()
         }else if(index < 0){
             BackHandler.removeEventListener('hardwareBackPress', handleBackPress)
         }
@@ -379,7 +380,7 @@ export default function LeiturasPage({ route }){
                     :
                     <View style={{ paddingVertical: 60, alignItems: 'center', justifyContent: 'center' }}>
                         <Text allowFontScaling={ false } style={{ fontSize: 14, textAlign: 'center', color: '#666' }}>
-                            { isFiltrado ?  'Nenhum leitura encontrada!' : 'Nenhum leitura ainda!'  }
+                            { isFiltrado ?  'Nenhuma leitura encontrada!' : 'Nenhuma leitura ainda!'  }
                         </Text>
                     </View>
                 }
@@ -529,7 +530,7 @@ const styles = StyleSheet.create({
         gap: 5
     },
     modalContainer:{
-        backgroundColor: '#111111',
+        backgroundColor: '#121212',
         padding: 30
     },
     buttonNovaLista:{

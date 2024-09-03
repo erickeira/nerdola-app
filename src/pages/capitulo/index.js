@@ -227,6 +227,7 @@ export default function CapituloPage({ route }){
         loadChapter(proximoCapitulo)
         preloadNextChapter(proximoCapitulo?.prox_cap);
         setCapituloAnterior(capitulo)
+        handleCapituloLido(capitulo.id)
     }
     const handlePrevChapter = () => {
         loadChapter(capituloAnterior)
@@ -268,10 +269,10 @@ export default function CapituloPage({ route }){
     }
 
 
-    const handleCapituloLido = async () => {
+    const handleCapituloLido = async (id) => {
         if(isLoading) return
         try{
-            await api.post(`capitulos/${capitulo.id}/marcar-como-lido`)
+            await api.post(`capitulos/${id}/marcar-como-lido`)
 
             Snackbar.show({
                 text: "Marcado como lido!",
@@ -282,7 +283,7 @@ export default function CapituloPage({ route }){
                     onPress: () => { /* Do something. */ },
                 },
             });
-            AsyncStorage.removeItem(`posicao-${capitulo.id}`)
+            AsyncStorage.removeItem(`posicao-${id}`)
             if(obra.total_capitulos == (obra.total_lidos + 1) && leitura?.status.id != 3 && [2,4].includes(obra.status)){
                 await api.patch(`usuario-leitura/${leitura.id}`, {
                     status : 3
@@ -565,7 +566,7 @@ export default function CapituloPage({ route }){
                         setShowIrTopo(true)
                         if(!lido) {
                             setLido(true)
-                            handleCapituloLido()
+                            handleCapituloLido(capitulo.id)
                         }
                     }}
                 />
