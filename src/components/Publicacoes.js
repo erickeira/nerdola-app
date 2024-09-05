@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl } from "react-native";
+import {  Dimensions, StyleSheet, View, Text, Image, ScrollView, ActivityIndicator, FlatList, TouchableOpacity, Animated, RefreshControl, Linking } from "react-native";
 import InputText from "./InputText";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
@@ -13,7 +13,7 @@ import CardPublicacao from "./CardPublicacao";
 import Snackbar from "react-native-snackbar";
 import CardPublicacaoSkeleton from "./CardPublicacaoSkeleton";
 import axios from "axios";
-
+import BannerDiscord from '../../assets/banner_discord.png'
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -192,12 +192,31 @@ export default function Publicacoes({ route }){
                     ) 
                 }}
                 ListHeaderComponent={
-                    (loading || loadingRefresh) &&
-                    <View>
-                        <CardPublicacaoSkeleton/>
-                        <CardPublicacaoSkeleton/>
-                        <CardPublicacaoSkeleton/>
-                    </View>
+                    <>
+                        <TouchableOpacity onPress={async () => { await Linking.openURL("https://discord.gg/4ErYfkvQPD"); }} >
+                            <View style={{width: width - 20,maxHeight: 80}}>
+                                <Image
+                                    style={{width: '100%',maxHeight: 80, objectFit: 'cover'}}
+                                    source={BannerDiscord}
+                                    // source={require('../../assets/banner_discord.png')}
+                                    resizeMethod="contain"
+                                />
+                            </View>
+                        </TouchableOpacity>
+                      
+                        {
+                            (loading || loadingRefresh) && (
+                                <View>
+                                    <CardPublicacaoSkeleton/>
+                                    <CardPublicacaoSkeleton/>
+                                    <CardPublicacaoSkeleton/>
+                                </View>
+                            )
+                        }
+                      
+                    </>
+                    
+                 
                 }
                 ListEmptyComponent={
                     !loading && !loadingRefresh && 

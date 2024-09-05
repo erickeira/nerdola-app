@@ -276,7 +276,7 @@ export default function LeiturasPage({ route }){
         ),
         []
     );
-    const [exibicao, setExibicao] = useState('lista')
+    const [exibicao, setExibicao] = useState('grid')
     const [loadingExibicao, setLoadingExibicao] = useState(false)
 
     useEffect(() => {
@@ -585,7 +585,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'grey',
     },
     statusList: {
-        marginHorizontal: 15,
         gap: 5
     },
     modalContainer:{

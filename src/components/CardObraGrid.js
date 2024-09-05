@@ -95,10 +95,8 @@ export default function CardObraGrid({
                             {formato?.nome}
                         </Text>
                         <Text 
-                            style={[styles.nome,{
-                                width: largura
-                            }]}
-                            numberOfLines={3} 
+                            style={[styles.nome,{ width: largura }]}
+                            numberOfLines={2} 
                             ellipsizeMode="tail"
                         >
                             {nome}

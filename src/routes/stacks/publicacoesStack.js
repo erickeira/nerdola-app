@@ -43,9 +43,9 @@ const PublicacoesStack = ({ navigation }) => {
               >
                 <Icon source="account-search-outline" color='#fff' size={25}/>
               </TouchableOpacity>
-              <TouchableOpacity 
+              {/* <TouchableOpacity 
                   onPress={async () => {
-                  await Linking.openURL("https://discord.gg/4ErYfkvQPD");
+                    await Linking.openURL("https://discord.gg/4ErYfkvQPD");
                   }} 
                   hitSlop={{left: 20, bottom: 20}} 
               >
@@ -57,7 +57,7 @@ const PublicacoesStack = ({ navigation }) => {
                   }}
                   source={Discord}
                   />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
            
           ),

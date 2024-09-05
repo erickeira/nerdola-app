@@ -127,7 +127,7 @@ export default function HomePage({ route }){
         setObras([])
         getObras(1, filtros) 
     }
-    const [exibicao, setExibicao] = useState('lista')
+    const [exibicao, setExibicao] = useState('grid')
     const [loadingExibicao, setLoadingExibicao] = useState(false)
 
     useEffect(() => {

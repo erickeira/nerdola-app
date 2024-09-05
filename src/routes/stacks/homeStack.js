@@ -39,22 +39,21 @@ const HomeStack = ({ navigation }) => {
             // headerTransparent: true,
             headerStyle: defaultStyles.defaultHeaderStyles,
             headerTintColor: '#fff',
-            headerRight: ()  =>  (
-              <View style={{flexDirection: 'row' , alignItems: 'center', gap: 20, marginRight: 30}}>
-                <TouchableOpacity 
-                    onPress={async () => {
-                      await Linking.openURL("https://storage.nerdola.com.br/apks/nerdola.apk");
-                    }} 
-                    hitSlop={{left: 20, bottom: 20}} 
-                >
-                    <Icon
-                      source="download"
-                      size={24}
-                    />
-                </TouchableOpacity>
-              </View>
-             
-            ),      
+            // headerRight: ()  =>  (
+            //   <View style={{flexDirection: 'row' , alignItems: 'center', gap: 20, marginRight: 30}}>
+            //     <TouchableOpacity 
+            //         onPress={async () => {
+            //           await Linking.openURL("https://storage.nerdola.com.br/apks/nerdola.apk");
+            //         }} 
+            //         hitSlop={{left: 20, bottom: 20}} 
+            //     >
+            //         <Icon
+            //           source="download"
+            //           size={24}
+            //         />
+            //     </TouchableOpacity>
+            //   </View>
+            // ),      
           }}
         />
         <Stack.Screen 
