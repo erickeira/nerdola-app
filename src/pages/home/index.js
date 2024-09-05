@@ -18,6 +18,8 @@ import {
 import { useFiltrar } from "../../routes/stacks/homeStack";
 import CardObraSkeleton from "../../components/CardObraSkeleton";
 import CardObraLendo from "../../components/CardObraLendo";
+import CardObraGrid from "../../components/CardObraGrid";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const { height, width }  = Dimensions.get('screen');
@@ -125,7 +127,27 @@ export default function HomePage({ route }){
         setObras([])
         getObras(1, filtros) 
     }
+    const [exibicao, setExibicao] = useState('lista')
+    const [loadingExibicao, setLoadingExibicao] = useState(false)
 
+    useEffect(() => {
+        const getExibicao =  async () => {
+            setLoadingExibicao(true)
+            const savedExibicao = await  AsyncStorage.getItem('exibicao')
+            setExibicao(savedExibicao)
+            setTimeout(() => {
+                setLoadingExibicao(false)
+            }, 200);
+        }
+        getExibicao()
+    },[])
+
+    
+    if(loadingExibicao) return(
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <ActivityIndicator color={defaultColors.activeColor} size={25}/>
+        </View>
+    )
     return(
         <>
             <FlatList
@@ -160,10 +182,12 @@ export default function HomePage({ route }){
                                     navigation.push('filtrar', { filtros })
                                 }}
                                 style={{
-                                    height: 60,
+                                    height: 48,
+                                    marginTop: -15,
                                     borderWidth:0,
                                     position: 'relative',
-                                    marginBottom: 30
+                                    marginBottom: 0,
+
                                 }}
                             >
                                 {
@@ -186,6 +210,36 @@ export default function HomePage({ route }){
                                 <Icon source="filter" size={24}/>
                             </Chip>
                         </View>
+                        <View style={{flexDirection: 'row',justifyContent: 'space-between', alignItems: 'center'}}>
+                            <View/>
+                            <Chip 
+                                onPress={() => {
+                                    setLoadingExibicao(true)
+                                    if(exibicao == 'lista') {
+                                        setExibicao('grid')
+                                        AsyncStorage.setItem('exibicao', 'grid')
+                                    }
+                                    else {
+                                        setExibicao('lista')
+                                        AsyncStorage.setItem('exibicao', 'lista')
+                                    }
+                                    setTimeout(() => {
+                                        setLoadingExibicao(false)
+                                    }, 200);
+                                }}
+                                style={{
+                                    height: 60,
+                                    borderWidth:0,
+                                    position: 'relative',
+                                    marginVertical: 0,
+                                }}
+                            >
+                                <Icon source={ exibicao == 'grid' ? "view-list": "view-grid"} size={20} color={defaultColors.gray}/>
+                                <Text style={{ color: defaultColors.gray }}>
+                                   { exibicao == 'grid' ? "Exibir em lista" : "Exibir em grade" }
+                                </Text>
+                            </Chip>
+                        </View>
                         {
                             loading && (
                                 <>
@@ -198,9 +252,12 @@ export default function HomePage({ route }){
                     </View>
                 )}
                 showsVerticalScrollIndicator={false}
+                numColumns={exibicao == 'grid' ? 3 : 1}
+                columnWrapperStyle={exibicao == 'grid' && { gap: 8 }}
                 scrollEventThrottle={16}
                 renderItem={({item, index}) => {
-                    return ( <CardObra obra={item} showtags={false}/>) 
+                    if(exibicao == 'grid') return ( <CardObraGrid obra={item} showtags={false}/>) 
+                    else return ( <CardObra obra={item} showtags={false}/>) 
                 }}
                 ListEmptyComponent={
                     loading ? 
@@ -237,11 +294,12 @@ export default function HomePage({ route }){
                         bottom: 10,
                         right: 10,
                         borderColor: '#312E2E',
-                        borderWidth: 1,
+                        borderWidth: 0,
                         paddingHorizontal: 20,
                         flexDirection: 'row',
                         backgroundColor: defaultColors.primary,
                         alignItems: 'center',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
                         gap: 10
                     }}
                     onPress={upButtonHandler}
@@ -258,6 +316,7 @@ export default function HomePage({ route }){
 const styles = StyleSheet.create({
     view: {
       padding: 10,
+      gap: 10,
       height : height - 60
     },
     tags: {

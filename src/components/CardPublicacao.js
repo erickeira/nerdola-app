@@ -362,6 +362,7 @@ export default function CardPublicacao({
                 // animationType="slide"
                 transparent={true}
                 visible={modalVisible}
+                statusBarTranslucent={true}
                 onRequestClose={() => {
                     setModalVisible(!modalVisible);
                 }}

@@ -231,11 +231,12 @@ export default function Publicacoes({ route }){
                         bottom: 10,
                         right: 10,
                         borderColor: '#312E2E',
-                        borderWidth: 1,
+                        borderWidth: 0,
                         paddingHorizontal: 20,
                         flexDirection: 'row',
                         backgroundColor: defaultColors.primary,
                         alignItems: 'center',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
                         gap: 10
                     }}
                     onPress={upButtonHandler}

@@ -132,8 +132,8 @@ export default function CapituloPage({ route }){
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
         }).start();
+        navigation.setOptions({ headerShown: showIrTopo });
     }, [showIrTopo]);
-
     
     const upButtonHandler = () => {
         capitulosRef?.current?.scrollToOffset({ 
@@ -240,7 +240,8 @@ export default function CapituloPage({ route }){
             upButtonHandler()
             setCapitulo(chapter); 
             navigation.setOptions({
-                headerTitle: chapter?.nome
+                headerTitle: chapter?.nome,
+                headerStyle: { opacity: fadeAnim },
             })
             
             setTimeout(async () => {

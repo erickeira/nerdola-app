@@ -6,8 +6,8 @@ import { useNavigation } from "@react-navigation/native";
 import Chip from "./Chip";
 
 const { height, width }  = Dimensions.get('screen');
-
-export default function CardObra({
+const largura =  width * 0.30
+export default function CardObraGrid({
     obra,
     mostrarprogresso,
     feed,
@@ -46,29 +46,32 @@ export default function CardObra({
         navigation.navigate('obra', { id })
     }
 
+    
+
     return(
         <>
             <TouchableOpacity onPress={handleClick}>
                 <View style={[styles.view,{
                     borderColor: '#312E2E',
-                    borderWidth: feed ? 1 : 0,
+                    borderWidth:  0,
                     borderRadius: 5,
-                    width: feed ? width - 90 :'100%',
-                    marginTop: feed ? 20 : 0
+                    width: '100%',
+                    marginTop: 0
                 }]}>
                     {
                         capitulos_importados > 0 &&
-                        <Chip style={{ paddingHorizontal: 8, paddingVertical: 4, position: 'absolute', right: 0, top: 0}}>
+                        <Chip style={{ paddingHorizontal: 8, paddingVertical: 4, position: 'absolute', right: 0, top: 0, zIndex: 2, backgroundColor: 'rgba(0,0,0,0.6)'}}>
                             <Text style={styles.disponivel}>
-                            Leitura no app disponível
+                            Leitura disponível
                             </Text>
                         </Chip>
                         
                     }
                     <View style={[styles.imageContainer,{
-                        width: feed ?  80 : 100,
-                        height: feed ?  ((80) * (4.3 / 3)) : ((100) * (4.3 / 3)),   
+                        width:  largura,
+                        height:  ((largura) * (4.3 / 3)),   
                     }]}>
+                       
                         {
                             !imageError ?
                             <Image
@@ -91,7 +94,13 @@ export default function CardObra({
                         <Text style={styles.formato}>
                             {formato?.nome}
                         </Text>
-                        <Text style={styles.nome}>
+                        <Text 
+                            style={[styles.nome,{
+                                width: largura
+                            }]}
+                            numberOfLines={3} 
+                            ellipsizeMode="tail"
+                        >
                             {nome}
                         </Text>
                         <Text style={styles.total_capitulos}>
@@ -132,15 +141,15 @@ export default function CardObra({
                                         backgroundColor: '#312E2E',
                                     }}
                                 />
-                                <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '80%', alignItems: 'center', marginTop: 2}}>
-                                    <Text style={{color: '#fff', fontSize: 12}}>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-between',  alignItems: 'center', marginTop: 2}}>
+                                    <Text style={{color: '#fff', fontSize: 11}}>
                                         {(progresso * 100).toFixed(2)} %
                                     </Text>
-                                    <Text style={{color: defaultColors.gray, fontSize: 12}}>
+                                    <Text style={{color: defaultColors.gray, fontSize: 11}}>
                                         {total_lidos} / {total_capitulos}
                                     </Text>
                                 </View>
-                             
+                                
                             </>
                             
                         }
@@ -156,15 +165,15 @@ export default function CardObra({
                                         backgroundColor: '#312E2E'
                                     }}
                                 />
-                                <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '80%', alignItems: 'center', marginTop: 2}}>
-                                    <Text style={{color: '#fff', fontSize: 12}}>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2}}>
+                                    <Text style={{color: '#fff', fontSize: 11}}>
                                         100.00 %
                                     </Text>
                                     <Text style={{color: defaultColors.gray, fontSize: 12}}>
                                         {total_capitulos} / {total_capitulos}
                                     </Text>
                                 </View>
-                               
+                             
                             </>
                             
                         }
@@ -201,11 +210,11 @@ export default function CardObra({
 }
 const styles = StyleSheet.create({
     view: {
-        width: '100%',
-        padding: 10,
-        flexDirection: 'row',
+        maxWidth: largura,
         overflow: 'hidden',
-        gap: 10
+        gap: 3,
+        position: 'relative',
+        marginBottom: 10,
     },
     imageContainer:{
         borderColor: '#312E2E',
@@ -221,7 +230,7 @@ const styles = StyleSheet.create({
         height: '100%'
     },
     nome:{
-        fontSize: 18,
+        fontSize: 14,
         flexWrap: 'wrap',
         color: '#fff',
         width: "70%",

@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "Codepush:android": "npx appcenter codepush release-react -a piahumana-gmail.com/nerdola_android -d Production"
+    "Codepush:android": "npx appcenter codepush release-react -a piahumana-gmail.com/nerdola_android -d Production -t 1.0"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^4.6.4",
