@@ -13,7 +13,7 @@ import CardPublicacao from "./CardPublicacao";
 import CardComentario from "./CardComentario";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import axios from "axios";
-import Snackbar from "react-native-snackbar";
+import { useSnackbar } from "../context/SnackbarContext";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -29,9 +29,10 @@ export default function Comentarios({  publicacao, ...props }){
     const [loadingMore, setLoadingMore] = useState(false)
     const [ posicaoNaTela, setPosicaoNaTela ] = useState(0)
     const [ showIrTopo, setShowIrTopo] = useState(false)
-    const [ filtros , setFiltros] = useState({
-    })
+    const [ filtros , setFiltros] = useState({})
+    
     const listRef = useRef(null)
+    const snackbar = useSnackbar()
 
     const inputRef = useRef()
     const upButtonHandler = () => {
@@ -159,7 +160,7 @@ export default function Comentarios({  publicacao, ...props }){
                 }],
                 attachments: []
             })
-            Snackbar.show({
+            snackbar.show({
                 text: "Obrigado por reportar",
                 duration: 2000,
                 action: {
@@ -169,7 +170,7 @@ export default function Comentarios({  publicacao, ...props }){
                 },
             });
         }catch(err){
-            Snackbar.show({
+            snackbar.show({
                 text: "Erro ao reportar",
                 duration: 2000,
                 action: {

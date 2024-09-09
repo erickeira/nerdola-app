@@ -18,11 +18,10 @@ import {
 } from "react-native";
 import api from "../../utils/api";
 import { botUrl, defaultColors, imageUrl, proporcaoCard } from "../../utils";
-import { Icon, IconButton,  Menu, Divider, PaperProvider, Checkbox  } from "react-native-paper";
+import { Icon, IconButton,  Menu, Divider, PaperProvider, Checkbox } from "react-native-paper";
 import CustomButton from "../../components/CustomButton";
 import AutoHeightImage from "react-native-auto-height-image";
 import FastImage from 'react-native-fast-image';
-import Snackbar from "react-native-snackbar";
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardComentario from "../../components/CardComentario";
@@ -37,6 +36,7 @@ import {
   } from '@gorhom/bottom-sheet';
 import InputSelect from "../../components/InputSelect";
 import axios from "axios";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -45,6 +45,7 @@ const CustomImage = ({ imagem, obra, capitulo, onPress }) => {
     const [imageError, setImageError] = useState(false)
     const [imageHeight, setImageHeight] = useState(0);
     const [loading, setLoading] = useState(true);
+
     
     useEffect(() => {
         if (imagem) {
@@ -104,6 +105,7 @@ export default function CapituloPage({ route }){
     const [ isLoading, setIsLoading ] = useState(false)
     const [loadingRefresh, setIsLoadingRefresh] = useState(false)
     const [ capitulo, setCapitulo] = useState({})
+    const snackbar = useSnackbar()
     
     const [proximoCapitulo, setProximoCapitulo] = useState({});
     const [capituloAnterior, setCapituloAnterior] = useState({});
@@ -182,7 +184,7 @@ export default function CapituloPage({ route }){
                     });
                     setShowIrTopo(true);
                     setTimeout(() => {
-                        Snackbar.show({
+                        snackbar.show({
                             text: "Voltando para onde parou",
                             duration: 2000,
                             action: {
@@ -253,7 +255,7 @@ export default function CapituloPage({ route }){
                     });
                     setShowIrTopo(true);
                     setTimeout(() => {
-                        Snackbar.show({
+                        snackbar.show({
                             text: "Voltando para onde parou",
                             duration: 2000,
                             action: {
@@ -269,13 +271,12 @@ export default function CapituloPage({ route }){
         
     }
 
-
     const handleCapituloLido = async (id) => {
         if(isLoading) return
         try{
             await api.post(`capitulos/${id}/marcar-como-lido`)
 
-            Snackbar.show({
+            snackbar.show({
                 text: "Marcado como lido!",
                 duration: 2000,
                 action: {
@@ -350,7 +351,7 @@ export default function CapituloPage({ route }){
             getComentarios()
             setComentario("")
             setRespondendo("")
-            Snackbar.show({
+            snackbar.show({
                 text: "Comentário publicado!",
                 duration: 2000,
                 action: {
@@ -458,7 +459,7 @@ export default function CapituloPage({ route }){
             })
             setBug("")
             setOutroBug("")
-            Snackbar.show({
+            snackbar.show({
                 text: "Obrigado por reportar",
                 duration: 2000,
                 action: {
@@ -472,7 +473,7 @@ export default function CapituloPage({ route }){
                 return true; 
             }
         }catch(err){
-            Snackbar.show({
+            snackbar.show({
                 text: "Erro ao reportar",
                 duration: 2000,
                 action: {
@@ -497,7 +498,7 @@ export default function CapituloPage({ route }){
                 }],
                 attachments: []
             })
-            Snackbar.show({
+            snackbar.show({
                 text: "Obrigado por reportar",
                 duration: 2000,
                 action: {
@@ -507,7 +508,7 @@ export default function CapituloPage({ route }){
                 },
             });
         }catch(err){
-            Snackbar.show({
+            snackbar.show({
                 text: "Erro ao reportar",
                 duration: 2000,
                 action: {
@@ -592,9 +593,8 @@ export default function CapituloPage({ route }){
                             icon="share"
                             size={25}
                             iconColor="#fff"
-                            onPress={() => console.log(1)}
+                            onPress={() => navigation.navigate('publicar', { capitulo, obra })}
                             style={{paddingVertical: 0}}
-                            disabled={true}
                         />
                         <IconButton
                             icon="bug-outline"

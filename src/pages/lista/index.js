@@ -6,7 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../utils/api";
 import Chip from "../../components/Chip";
 import CardObra from "../../components/CardObra";
-import { Icon, Badge  } from "react-native-paper";
+import { Icon, Badge, Avatar  } from "react-native-paper";
 import { defaultColors, imageUrl } from "../../utils";
 import CustomButton from "../../components/CustomButton";
 

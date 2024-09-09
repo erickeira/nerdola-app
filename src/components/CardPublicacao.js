@@ -457,7 +457,8 @@ const styles = StyleSheet.create({
     },
     buttonModal:{
         alignItems: 'flex-start',
-        paddingVertical: 6
+        paddingVertical: 6,
+        flex: 1
     },
     centeredView: {
         flex: 1,

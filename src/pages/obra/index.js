@@ -9,7 +9,6 @@ import CardObra from "../../components/CardObra";
 import CardCapitulo from "../../components/CardCapitulo";
 import Chip from "../../components/Chip";
 import CustomButton from "../../components/CustomButton";
-import Snackbar from "react-native-snackbar";
 import axios from "axios";
 import CardLink from "../../components/CardLink";
 import CardObraSkeleton from "../../components/CardObraSkeleton";
@@ -25,6 +24,7 @@ import {
     BottomSheetFlatList
   } from '@gorhom/bottom-sheet';
 import { useAuth } from "../../context/AuthContext";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 export default function ObraPage({ route }){
     const navigation = useNavigation()
@@ -47,6 +47,7 @@ export default function ObraPage({ route }){
     const [imageError, setImageError] = useState(false)
     const [ondeLer, setOndeLer] = useState(false)
     const [ capitulos, setCapitulos] = useState([])
+    const snackbar = useSnackbar()
 
     useEffect(() => {
         setImageError(false)
@@ -202,7 +203,7 @@ export default function ObraPage({ route }){
                 attachments: []
             })
             setIsLoadingInformar(false)
-            Snackbar.show({
+            snackbar.show({
                 text: "Obrigado por nos informar",
                 duration: 2000,
                 action: {
@@ -300,7 +301,7 @@ export default function ObraPage({ route }){
             const response = await api.post(`listas/${lista}/adicionar-remover-obra`,{
                 obra: obra.id
             })
-            Snackbar.show({
+            snackbar.show({
                 text: response.data?.message,
                 duration: 2000,
                 action: {

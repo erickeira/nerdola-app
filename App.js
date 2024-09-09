@@ -9,6 +9,7 @@ import { defaultColors } from './src/utils';
 import NotificationProvider from './src/context/NotificationContext';
 import { PaperProvider } from 'react-native-paper';
 import * as Sentry from "@sentry/react-native";
+import SnackbarProvider from './src/context/SnackbarContext';
 
 const height = Dimensions.get('screen').height;
 
@@ -77,15 +78,17 @@ function App() {
                     <ActivityIndicator size={50} color={"#fff"}/>
                 </View>
                 : 
-                    <AuthProvider>
-                        <NotificationProvider>
-                            <PaperProvider>
-                                <Routes/>
-                            </PaperProvider>
-                        </NotificationProvider>
-                    </AuthProvider>
+                    <SnackbarProvider>
+                        <AuthProvider>
+                            <NotificationProvider>
+                                <PaperProvider>
+                                    <Routes/>
+                                </PaperProvider>
+                            </NotificationProvider>
+                        </AuthProvider>
+                    </SnackbarProvider>
+                 
             }
-           
         </NavigationContainer>
     )
     
@@ -113,8 +116,8 @@ Sentry.init({
     ],
 });
   
-// export default App;
-export default codePush(codePushOptions)(Sentry.wrap(App));
+export default App;
+// export default codePush(codePushOptions)(Sentry.wrap(App));
 
 const theme = {
     ...DefaultTheme,

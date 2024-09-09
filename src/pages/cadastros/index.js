@@ -6,9 +6,9 @@ import CustomButton  from "../../components/CustomButton";
 import Logo from '../../../assets/logo.png'
 import Nerd from '../../../assets/nerd.png'
 import api from "../../utils/api";
-import Snackbar from 'react-native-snackbar';
 import { useNavigation } from "@react-navigation/native";
 import { isValidEmail } from "../../utils";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -21,6 +21,7 @@ export default function CadastroPage(){
     })
     const [ errors, setErrors] = useState({})
     const [ isLoadingCadastro, setLoadingCadastro] = useState(false)
+    const snackbar = useSnackbar()
 
     const handleValidateForm = (form) => {
         const newErrors = { 
@@ -43,7 +44,7 @@ export default function CadastroPage(){
         setLoadingCadastro(true)
         try{
            const response = await api.post('usuarios', formulario )
-           Snackbar.show({
+           snackbar.show({
             text: response.data?.message,
             duration: 2000,
             action: {

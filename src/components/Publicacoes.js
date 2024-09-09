@@ -10,10 +10,10 @@ import { Icon } from "react-native-paper";
 import { botUrl, defaultColors } from "../utils";
 import CustomButton from "./CustomButton";
 import CardPublicacao from "./CardPublicacao";
-import Snackbar from "react-native-snackbar";
 import CardPublicacaoSkeleton from "./CardPublicacaoSkeleton";
 import axios from "axios";
 import BannerDiscord from '../../assets/banner_discord.png'
+import { useSnackbar } from "../context/SnackbarContext";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -33,6 +33,8 @@ export default function Publicacoes({ route }){
     const [ filtros , setFiltros] = useState({
     })
     const [listRef, setListRef] = useState(null)
+    const snackbar = useSnackbar()
+
     const upButtonHandler = () => {
       listRef?.scrollToOffset({ 
         offset: 0, 
@@ -116,7 +118,7 @@ export default function Publicacoes({ route }){
         try{
             const response = await api.delete(`publicacoes/${id}`)
             getPublicacoes(pagina , filtros)
-            Snackbar.show({
+            snackbar.show({
                 text: response.data?.message,
                 duration: 2000,
                 action: {
@@ -142,7 +144,7 @@ export default function Publicacoes({ route }){
                 }],
                 attachments: []
             })
-            Snackbar.show({
+            snackbar.show({
                 text: "Obrigado por reportar",
                 duration: 2000,
                 action: {
@@ -152,7 +154,7 @@ export default function Publicacoes({ route }){
                 },
             });
         }catch(err){
-            Snackbar.show({
+            snackbar.show({
                 text: "Erro ao reportar",
                 duration: 2000,
                 action: {

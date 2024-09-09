@@ -10,11 +10,12 @@ import InputText from "../../components/InputText";
 import CustomButton from "../../components/CustomButton";
 import api from "../../utils/api";
 import { refresh } from "@react-native-community/netinfo";
-import Snackbar from "react-native-snackbar";
 import CardCapituloPublicacao from "../../components/CardCapituloPublicacao";
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Chip from "../../components/Chip";
 import CardObra from "../../components/CardObra";
+import { useSnackbar } from "../../context/SnackbarContext";
+const snackbar = useSnackbar()
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -38,7 +39,7 @@ export default function PublicarPage({ route }){
     const [isLoadingPublicando, setIsLoadingPublicando] = useState(false)
     const handlePublicar = async () => {
         if(!publicacao.conteudo?.trim()){
-            Snackbar.show({
+            snackbar.show({
                 text: "É necessário escrever algo.",
                 duration: 2000,
                 action: {
@@ -64,7 +65,7 @@ export default function PublicarPage({ route }){
             setPublicacao({})
             navigation.navigate('PublicacoesTab')
             navigation.navigate('publicacoes', { refresh : true })
-            Snackbar.show({
+            snackbar.show({
                 text: response.data?.message,
                 duration: 2000,
                 action: {

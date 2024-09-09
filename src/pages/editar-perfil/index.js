@@ -6,12 +6,12 @@ import CustomButton  from "../../components/CustomButton";
 import Logo from '../../../assets/logo.png'
 import Nerd from '../../../assets/nerd.png'
 import api from "../../utils/api";
-import Snackbar from 'react-native-snackbar';
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { imageUrl, isValidEmail } from "../../utils";
 import Chip from "../../components/Chip";
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import { assets } from "../../../react-native.config";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -26,6 +26,7 @@ export default function EditarPerfilPage(){
     const [ errors, setErrors] = useState({})
     const [ isLoadingCadastro, setLoadingCadastro] = useState(false)
     const [oldNick, setOldNick] = useState("")
+    const snackbar = useSnackbar()
 
     const [ isLoadingMe, setIsLoadingMe] = useState(false)
     const getMe = async () => {
@@ -73,7 +74,7 @@ export default function EditarPerfilPage(){
         setLoadingCadastro(true)
         try{
            const response = await api.patch(`usuarios/me`, dadosAlterados )
-           Snackbar.show({
+           snackbar.show({
             text: response.data?.message,
             duration: 2000,
             action: {

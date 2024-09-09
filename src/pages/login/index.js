@@ -5,12 +5,12 @@ import InputText from "../../components/InputText";
 import CustomButton  from "../../components/CustomButton";
 import Logo from '../../../assets/logo.png'
 import Nerd from '../../../assets/nerd.png'
-import Snackbar from 'react-native-snackbar';
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from "../../utils/api";
 import { defaultColors } from "../../utils";
 import { useAuth } from "../../context/AuthContext";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -24,6 +24,7 @@ export default function LoginPage(){
     })
     const [ errors, setErrors] = useState({})
     const [ isLoadingLogin, setLoadingLogin] = useState(false)
+    const snackbar = useSnackbar()
 
     const handleValidateForm = (form) => {
         const newErrors = { 
@@ -44,7 +45,7 @@ export default function LoginPage(){
         setLoadingLogin(true)
         try{
            const response = await api.post('usuarios/login', formulario )
-           Snackbar.show({
+           snackbar.show({
             text: response.data?.message,
             duration: 2000,
             action: {

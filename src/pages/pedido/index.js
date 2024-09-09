@@ -6,8 +6,8 @@ import CustomButton  from "../../components/CustomButton";
 import Logo from '../../../assets/logo.png'
 import Nerd from '../../../assets/nerd.png'
 import api from "../../utils/api";
-import Snackbar from 'react-native-snackbar';
 import { useNavigation } from "@react-navigation/native";
+import { useSnackbar } from "../../context/SnackbarContext";
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -20,6 +20,7 @@ export default function PedidoPage({ route }){
     const id  = route?.params?.id
     const [ errors, setErrors] = useState({})
     const [ isLoadingPedido, setLoadingPedido] = useState(false)
+    const snackbar = useSnackbar()
 
     const handleValidateForm = (form) => {
         const newErrors = { 
@@ -45,7 +46,7 @@ export default function PedidoPage({ route }){
                 response = await api.post('pedido', formulario )
             }
            
-           Snackbar.show({
+           snackbar.show({
             text: response.data?.message,
             duration: 2000,
             action: {
