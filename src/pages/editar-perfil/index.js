@@ -26,7 +26,7 @@ export default function EditarPerfilPage(){
     const [ errors, setErrors] = useState({})
     const [ isLoadingCadastro, setLoadingCadastro] = useState(false)
     const [oldNick, setOldNick] = useState("")
-    const snackbar = useSnackbar()
+    const snackbar = useSnackbar()    
 
     const [ isLoadingMe, setIsLoadingMe] = useState(false)
     const getMe = async () => {

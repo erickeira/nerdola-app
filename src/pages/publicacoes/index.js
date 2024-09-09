@@ -9,7 +9,7 @@ export default function PublicacoesPage({ route }){
 
     return(
         <>
-          <Publicacoes route={route}/>
+          <Publicacoes route={route} refresh={route?.params?.refresh}/>
         </>
     )
 }

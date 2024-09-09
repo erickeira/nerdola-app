@@ -94,7 +94,7 @@ class MainActivity : ReactActivity() {
       appUpdateManager.completeUpdate()
     }
     snackbar.setActionTextColor(resources.getColor(android.R.color.white, null))
-    snackbar.show()
+    Snackbar.show()
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {

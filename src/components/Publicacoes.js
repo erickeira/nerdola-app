@@ -14,6 +14,7 @@ import CardPublicacaoSkeleton from "./CardPublicacaoSkeleton";
 import axios from "axios";
 import BannerDiscord from '../../assets/banner_discord.png'
 import { useSnackbar } from "../context/SnackbarContext";
+// import Snackbar from 'react-native-snackbar';
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -33,7 +34,9 @@ export default function Publicacoes({ route }){
     const [ filtros , setFiltros] = useState({
     })
     const [listRef, setListRef] = useState(null)
+
     const snackbar = useSnackbar()
+    
 
     const upButtonHandler = () => {
       listRef?.scrollToOffset({ 

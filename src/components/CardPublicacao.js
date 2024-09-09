@@ -1,4 +1,15 @@
-import { StyleSheet,BackHandler, Text, View , TouchableOpacity, Image, Dimensions, Modal, Pressable, ActivityIndicator} from "react-native";
+import { 
+    StyleSheet,
+    BackHandler, 
+    Text, 
+    View , 
+    TouchableOpacity, 
+    Image, 
+    Dimensions, 
+    Modal, 
+    Pressable, 
+    ActivityIndicator,
+} from "react-native";
 import { Avatar, Icon, IconButton } from "react-native-paper";
 import { defaultColors, gerarCorAleatoriaRGBA, gerarCorPorString, imageUrl } from "../utils";
 import { 

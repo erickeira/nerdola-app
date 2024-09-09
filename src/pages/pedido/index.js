@@ -21,6 +21,7 @@ export default function PedidoPage({ route }){
     const [ errors, setErrors] = useState({})
     const [ isLoadingPedido, setLoadingPedido] = useState(false)
     const snackbar = useSnackbar()
+    
 
     const handleValidateForm = (form) => {
         const newErrors = { 

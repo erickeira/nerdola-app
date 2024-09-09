@@ -15,7 +15,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Chip from "../../components/Chip";
 import CardObra from "../../components/CardObra";
 import { useSnackbar } from "../../context/SnackbarContext";
-const snackbar = useSnackbar()
+
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -26,6 +26,7 @@ export default function PublicarPage({ route }){
     const [ focus, setFocus] = useState(false)
     const inputRef = useRef()
     const isFocused = useIsFocused()
+    const snackbar = useSnackbar()
 
     useEffect(() => {
        if(inputRef && isFocused) inputRef.current?.focus();
@@ -63,17 +64,23 @@ export default function PublicarPage({ route }){
         try{
             const response = await api.post(`publicacoes`, body )
             setPublicacao({})
-            navigation.navigate('PublicacoesTab')
-            navigation.navigate('publicacoes', { refresh : true })
+            if(route?.params?.capitulo?.id){
+                navigation.goBack()
+            }else{
+                navigation.navigate('PublicacoesTab')
+                navigation.navigate('publicacoes', { refresh : true })
+            }
+
             snackbar.show({
                 text: response.data?.message,
                 duration: 2000,
                 action: {
-                  text: 'OK',
-                  textColor: 'green',
-                  onPress: () => { /* Do something. */ },
+                    text: 'OK',
+                    textColor: 'green',
+                    onPress: () => { /* Do something. */ },
                 },
-              });
+            });
+           
         }catch(error){
             console.log(error)
         } finally{

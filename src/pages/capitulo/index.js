@@ -105,7 +105,7 @@ export default function CapituloPage({ route }){
     const [ isLoading, setIsLoading ] = useState(false)
     const [loadingRefresh, setIsLoadingRefresh] = useState(false)
     const [ capitulo, setCapitulo] = useState({})
-    const snackbar = useSnackbar()
+    
     
     const [proximoCapitulo, setProximoCapitulo] = useState({});
     const [capituloAnterior, setCapituloAnterior] = useState({});
@@ -123,7 +123,8 @@ export default function CapituloPage({ route }){
         descricao,
         links
     } = capitulo
-
+    
+    const snackbar = useSnackbar()
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -277,7 +278,7 @@ export default function CapituloPage({ route }){
             await api.post(`capitulos/${id}/marcar-como-lido`)
 
             snackbar.show({
-                text: "Marcado como lido!",
+                text: `Marcado como lido!`,
                 duration: 2000,
                 action: {
                     text: 'OK',
@@ -572,77 +573,71 @@ export default function CapituloPage({ route }){
                         }
                     }}
                 />
-            {
-                (showIrTopo) && (
-                    <Animated.View 
-                        style={[
-                            styles.containerBotoes,
-                            {
-                                opacity: fadeAnim,
-                            },
-                        ]}
-                    >
-                        <IconButton
-                            icon="chat-outline"
-                            size={25}
-                            iconColor="#fff"
-                            onPress={handlePresentModalComentariosPress}
-                            style={{paddingVertical: 0}}
-                        />
-                        <IconButton
-                            icon="share"
-                            size={25}
-                            iconColor="#fff"
-                            onPress={() => navigation.navigate('publicar', { capitulo, obra })}
-                            style={{paddingVertical: 0}}
-                        />
-                        <IconButton
-                            icon="bug-outline"
-                            size={25}
-                            iconColor="#fff"
-                            onPress={handlePresentModalReportarPress}
-                            style={{paddingVertical: 0}}
-                        />
-                        
-                    </Animated.View>
-                )
-            }
-            {
-                (showIrTopo || true) && (
-                    <Animated.View 
-                        style={[
-                            styles.containerBotoesCapitulo,
-                            {
-                                opacity: fadeAnim,
-                            },
-                        ]}
-                    >
-                        <View style={{ flexDirection: 'row', gap: 5 }}>
-                            {
-                                capitulo?.cap_anterior &&
-                                <CustomButton 
-                                    mode="outlined"
-                                    style={styles.buttonNext}
-                                    onPress={handlePrevChapter}
-                                >
-                                    Capítulo anterior
-                                </CustomButton>
-                            }
-                            {
-                                capitulo?.prox_cap &&
-                                <CustomButton 
-                                    mode="outlined"
-                                    style={styles.buttonNext}
-                                    onPress={handleNextChapter}
-                                >
-                
-                                    Próximo capítulo
-                                </CustomButton>
-                            }
-                        </View>
-                    </Animated.View >
-                )
-            }
+                <Animated.View 
+                    style={[
+                        styles.containerBotoes,
+                        {
+                            opacity: fadeAnim,
+                            pointerEvents: showIrTopo ? 'auto' : 'none',
+                        },
+                    ]}
+                >
+                    <IconButton
+                        icon="chat-outline"
+                        size={25}
+                        iconColor="#fff"
+                        onPress={handlePresentModalComentariosPress}
+                        style={{paddingVertical: 0}}
+                    />
+                    <IconButton
+                        icon="share"
+                        size={25}
+                        iconColor="#fff"
+                        onPress={() => navigation.navigate('publicar', { capitulo, obra })}
+                        style={{paddingVertical: 0}}
+                    />
+                    <IconButton
+                        icon="bug-outline"
+                        size={25}
+                        iconColor="#fff"
+                        onPress={handlePresentModalReportarPress}
+                        style={{paddingVertical: 0}}
+                    />
+                    
+                </Animated.View>
+                <Animated.View 
+                    style={[
+                        styles.containerBotoesCapitulo,
+                        {
+                            opacity: fadeAnim,
+                            pointerEvents: showIrTopo ? 'auto' : 'none',
+                        },
+                    ]}
+                >
+                    <View style={{ flexDirection: 'row', gap: 5 }}>
+                        {
+                            capitulo?.cap_anterior &&
+                            <CustomButton 
+                                mode="outlined"
+                                style={styles.buttonNext}
+                                onPress={handlePrevChapter}
+                            >
+                                Capítulo anterior
+                            </CustomButton>
+                        }
+                        {
+                            capitulo?.prox_cap &&
+                            <CustomButton 
+                                mode="outlined"
+                                style={styles.buttonNext}
+                                onPress={handleNextChapter}
+                            >
+            
+                                Próximo capítulo
+                            </CustomButton>
+                        }
+                    </View>
+                </Animated.View >
             
                 <BottomSheetModal
                     ref={bottomSheetModalRef}

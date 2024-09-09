@@ -14,6 +14,7 @@ import CardComentario from "./CardComentario";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import axios from "axios";
 import { useSnackbar } from "../context/SnackbarContext";
+// import Snackbar from 'react-native-snackbar';
 
 const { height, width }  = Dimensions.get('screen');
 
@@ -32,7 +33,9 @@ export default function Comentarios({  publicacao, ...props }){
     const [ filtros , setFiltros] = useState({})
     
     const listRef = useRef(null)
+
     const snackbar = useSnackbar()
+    
 
     const inputRef = useRef()
     const upButtonHandler = () => {
